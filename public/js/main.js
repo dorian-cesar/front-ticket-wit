@@ -159,14 +159,19 @@ loginForm.addEventListener("submit", async function (e) {
     localStorage.removeItem("loginAttempts");
     localStorage.removeItem("lockoutTime");
 
+    // Guardar sesión
+    if (document.getElementById("rememberMe").checked) {
+      localStorage.setItem("userLoggedIn", "true"); // sesión persistente
+    } else {
+      sessionStorage.setItem("userLoggedIn", "true"); // sesión solo hasta cerrar pestaña
+    }
+
     // Éxito
     showAlert("¡Acceso autorizado! Cargando herramienta...", "success");
 
-    // Simular redirección
-    setTimeout(() => {
-      console.log("Redirigiendo al dashboard interno...");
-      // window.location.href = '/dashboard';
-    }, 2000);
+    // Redirección
+    console.log("Redirigiendo al dashboard interno...");
+    window.location.href = "/views/dashboard1.html";
   } catch (error) {
     handleLoginError(error.message);
   } finally {
@@ -213,13 +218,13 @@ function simulateLogin(email, password) {
       // Credenciales de prueba para herramienta interna
       const validCredentials = [
         {
-          email: "admin@empresa.com",
+          email: "admin@wit.com",
           password: "admin123",
           role: "Administrador",
         },
-        { email: "usuario@empresa.com", password: "user123", role: "Usuario" },
+        { email: "usuario@wit.com", password: "user123", role: "Usuario" },
         {
-          email: "soporte@empresa.com",
+          email: "soporte@wit.com",
           password: "soporte123",
           role: "Soporte",
         },
@@ -245,7 +250,7 @@ function simulateLogin(email, password) {
   });
 }
 
-// Manejar enlace de "¿Problemas para acceder?"
+// Manejar enlace de "¿Olvidaste la contraseña?"
 forgotPasswordLink.addEventListener("click", function (e) {
   e.preventDefault();
   showAlert(

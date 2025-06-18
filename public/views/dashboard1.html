@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard de Tickets</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/dashboard1.css" />
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+    ></script>
+    <script defer src="/js/dashboard1.js"></script>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <!-- Encabezado -->
+      <div class="row">
+        <div class="col-12">
+          <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container-fluid">
+              <span class="navbar-brand mb-0 h1">
+                <i class="bi bi-ticket-perforated me-2"></i>
+                Dashboard de Tickets
+              </span>
+              <div class="d-flex">
+                <span class="navbar-text me-3">
+                  <i class="bi bi-person-circle me-1"></i>
+                  Admin
+                </span>
+              </div>
+            </div>
+          </nav>
+        </div>
+      </div>
+
+      <!-- Tarjetas de Estadísticas -->
+      <div class="row mt-4">
+        <div class="col-md-4 mb-3">
+          <div class="card border-success">
+            <div class="card-body text-center">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h5 class="card-title text-success">Completados</h5>
+                  <h2 class="mb-0" id="completedCount">0</h2>
+                </div>
+                <div class="text-success">
+                  <i
+                    class="bi bi-check-circle-fill"
+                    style="font-size: 3rem"
+                  ></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <div class="card border-warning">
+            <div class="card-body text-center">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h5 class="card-title text-warning">Pendientes</h5>
+                  <h2 class="mb-0" id="pendingCount">0</h2>
+                </div>
+                <div class="text-warning">
+                  <i class="bi bi-clock-fill" style="font-size: 3rem"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <div class="card border-info">
+            <div class="card-body text-center">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h5 class="card-title text-info">Esperando Respuesta</h5>
+                  <h2 class="mb-0" id="waitingCount">0</h2>
+                </div>
+                <div class="text-info">
+                  <i class="bi bi-hourglass-split" style="font-size: 3rem"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtros y Acciones -->
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="card">
+            <div
+              class="card-header d-flex justify-content-between align-items-center"
+            >
+              <h5 class="mb-0">
+                <i class="bi bi-list-ul me-2"></i>
+                Lista de Tickets
+              </h5>
+              <button
+                class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#createTicketModal"
+              >
+                <i class="bi bi-plus-circle me-2"></i>
+                Crear Ticket
+              </button>
+            </div>
+            <div class="card-body">
+              <!-- Filtros -->
+              <div class="row mb-3">
+                <div class="col-md-4">
+                  <select class="form-select" id="statusFilter">
+                    <option value="">Todos los estados</option>
+                    <option value="pendiente">Pendientes</option>
+                    <option value="esperando">Esperando Respuesta</option>
+                    <option value="completado">Completados</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <select class="form-select" id="priorityFilter">
+                    <option value="">Todas las prioridades</option>
+                    <option value="alta">Alta</option>
+                    <option value="media">Media</option>
+                    <option value="baja">Baja</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="searchInput"
+                    placeholder="Buscar tickets..."
+                  />
+                </div>
+              </div>
+
+              <!-- Tabla de Tickets -->
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead class="table-dark">
+                    <tr>
+                      <th>ID</th>
+                      <th>Título</th>
+                      <th>Estado</th>
+                      <th>Prioridad</th>
+                      <th>Asignado a</th>
+                      <th>Fecha</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ticketsTableBody">
+                    <!-- Los tickets serán llenados con JavaScript -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal para Crear Ticket -->
+    <div class="modal fade" id="createTicketModal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              <i class="bi bi-plus-circle me-2"></i>
+              Crear Nuevo Ticket
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="createTicketForm">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="ticketTitle" class="form-label">Título *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="ticketTitle"
+                    required
+                  />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="ticketPriority" class="form-label"
+                    >Prioridad *</label
+                  >
+                  <select class="form-select" id="ticketPriority" required>
+                    <option value="">Seleccionar prioridad</option>
+                    <option value="alta">Alta</option>
+                    <option value="media">Media</option>
+                    <option value="baja">Baja</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="ticketAssignee" class="form-label"
+                    >Asignado a</label
+                  >
+                  <select class="form-select" id="ticketAssignee">
+                    <option value="">Sin asignar</option>
+                    <option value="Juan Pérez">Juan Pérez</option>
+                    <option value="María García">María García</option>
+                    <option value="Carlos López">Carlos López</option>
+                    <option value="Ana Martínez">Ana Martínez</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="ticketCategory" class="form-label"
+                    >Categoría</label
+                  >
+                  <select class="form-select" id="ticketCategory">
+                    <option value="soporte">Soporte Técnico</option>
+                    <option value="bug">Reporte de Bug</option>
+                    <option value="feature">Nueva Funcionalidad</option>
+                    <option value="consulta">Consulta General</option>
+                  </select>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="ticketDescription" class="form-label"
+                  >Descripción *</label
+                >
+                <textarea
+                  class="form-control"
+                  id="ticketDescription"
+                  rows="4"
+                  required
+                ></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancelar
+            </button>
+            <button type="button" class="btn btn-primary" id="saveTicketBtn">
+              <i class="bi bi-check-lg me-2"></i>
+              Crear Ticket
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal para Editar Ticket -->
+    <div class="modal fade" id="editTicketModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              <i class="bi bi-pencil-square me-2"></i>
+              Editar Ticket
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="editTicketForm">
+              <input type="hidden" id="editTicketId" />
+              <div class="mb-3">
+                <label for="editTicketStatus" class="form-label">Estado</label>
+                <select class="form-select" id="editTicketStatus">
+                  <option value="pendiente">Pendiente</option>
+                  <option value="esperando">Esperando Respuesta</option>
+                  <option value="completado">Completado</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="editTicketAssignee" class="form-label"
+                  >Asignado a</label
+                >
+                <select class="form-select" id="editTicketAssignee">
+                  <option value="">Sin asignar</option>
+                  <option value="Juan Pérez">Juan Pérez</option>
+                  <option value="María García">María García</option>
+                  <option value="Carlos López">Carlos López</option>
+                  <option value="Ana Martínez">Ana Martínez</option>
+                </select>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancelar
+            </button>
+            <button type="button" class="btn btn-primary" id="updateTicketBtn">
+              <i class="bi bi-check-lg me-2"></i>
+              Actualizar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botón de Acción Flotante -->
+    <button
+      class="btn btn-primary floating-btn"
+      data-bs-toggle="modal"
+      data-bs-target="#createTicketModal"
+    >
+      <i class="bi bi-plus-lg"></i>
+    </button>
+  </body>
+</html>
