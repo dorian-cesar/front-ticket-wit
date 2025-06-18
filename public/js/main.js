@@ -165,11 +165,7 @@ loginForm.addEventListener("submit", async function (e) {
       sessionStorage.setItem("userLoggedIn", "true"); // sesión solo hasta cerrar pestaña
     }
 
-    // Éxito
-    showAlert("¡Acceso autorizado! Cargando herramienta...", "success");
-
     // Redirección
-    console.log("Redirigiendo al dashboard interno...");
     window.location.href = "/views/dashboard1.html";
   } catch (error) {
     handleLoginError(error.message);
