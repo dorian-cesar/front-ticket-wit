@@ -8,7 +8,7 @@ let tickets = [
     assignee: "Juan Pérez",
     category: "bug",
     description: "Los usuarios no pueden iniciar sesión",
-    date: "2024-01-15",
+    date: "2025-01-15",
   },
   {
     id: 2,
@@ -18,7 +18,7 @@ let tickets = [
     assignee: "María García",
     category: "feature",
     description: "Implementar sistema de notificaciones",
-    date: "2024-01-14",
+    date: "2025-01-14",
   },
   {
     id: 3,
@@ -28,7 +28,7 @@ let tickets = [
     assignee: "Carlos López",
     category: "soporte",
     description: "Mejorar rendimiento de consultas",
-    date: "2024-01-13",
+    date: "2025-01-13",
   },
   {
     id: 4,
@@ -38,7 +38,7 @@ let tickets = [
     assignee: "Ana Martínez",
     category: "consulta",
     description: "Documentación de endpoints",
-    date: "2024-01-12",
+    date: "2025-01-12",
   },
   {
     id: 5,
@@ -48,7 +48,7 @@ let tickets = [
     assignee: "",
     category: "bug",
     description: "Los reportes no se generan correctamente",
-    date: "2024-01-11",
+    date: "2025-01-11",
   },
 ];
 

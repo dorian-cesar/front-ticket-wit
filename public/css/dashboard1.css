@@ -55,7 +55,8 @@ body {
 }
 
 /* Cards - Mobile First */
-.card {
+.card,
+.card-tickets {
   border: none;
   border-radius: 12px;
   box-shadow: 0 4px 15px var(--shadow-light);
@@ -117,11 +118,16 @@ body {
   transition: all 0.3s ease;
 }
 
-.btn-primary:hover,
-.btn-primary:focus {
+.btn-primary:hover {
   background-color: var(--primary-dark);
   border-color: var(--primary-dark);
-  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--shadow-medium);
+}
+
+.btn-primary:active {
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
+  transform: translateY(2px);
   box-shadow: 0 4px 12px var(--shadow-medium);
 }
 
@@ -539,7 +545,8 @@ body {
     color: var(--text-dark);
   }
 
-  .card {
+  .card,
+  .card-tickets {
     background-color: var(--secondary-color);
     color: var(--text-dark);
   }
