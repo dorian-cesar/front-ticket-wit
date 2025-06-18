@@ -390,3 +390,35 @@ document.addEventListener("DOMContentLoaded", () => {
     (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
   );
 });
+
+const categorySelect = document.getElementById("ticketCategory");
+const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+
+fetch("https://tickets.dev-wit.com/api/areas", {
+  method: "GET",
+  headers: {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
+  },
+})
+  .then((response) => {
+    if (!response.ok) {
+      throw new Error("Error al obtener categorías");
+    }
+    return response.json();
+  })
+  .then((data) => {
+    // Limpia el select si no quieres opciones fijas
+    categorySelect.innerHTML =
+      '<option value="">Seleccionar categoría</option>';
+
+    data.forEach((area) => {
+      const option = document.createElement("option");
+      option.value = area.id;
+      option.textContent = area.nombre;
+      categorySelect.appendChild(option);
+    });
+  })
+  .catch((error) => {
+    console.error("Error cargando categorías:", error);
+  });

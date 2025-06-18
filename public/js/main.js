@@ -151,8 +151,9 @@ loginForm.addEventListener("submit", async function (e) {
   showLoading(true);
 
   try {
-    // Simular llamada a API
-    const result = await simulateLogin(emailInput.value, passwordInput.value);
+    // Llamada a API
+    const result = await Login(emailInput.value, passwordInput.value);
+    const token = result.token
 
     // Reset intentos en caso de éxito
     localStorage.removeItem("loginAttempts");
@@ -161,8 +162,10 @@ loginForm.addEventListener("submit", async function (e) {
     // Guardar sesión
     if (document.getElementById("rememberMe").checked) {
       localStorage.setItem("userLoggedIn", "true"); // sesión persistente
+      localStorage.setItem("authToken", token);
     } else {
       sessionStorage.setItem("userLoggedIn", "true"); // sesión solo hasta cerrar pestaña
+      sessionStorage.setItem("authToken", token);
     }
 
     // Redirección
@@ -206,42 +209,38 @@ function showLoading(show) {
   }
 }
 
-// Simular llamada a API de login
-function simulateLogin(email, password) {
+function Login(email, password) {
   return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      // Credenciales de prueba para herramienta interna
-      const validCredentials = [
-        {
-          email: "admin@wit.com",
-          password: "admin123",
-          role: "Administrador",
-        },
-        { email: "usuario@wit.com", password: "user123", role: "Usuario" },
-        {
-          email: "soporte@wit.com",
-          password: "soporte123",
-          role: "Soporte",
-        },
-      ];
-
-      const user = validCredentials.find(
-        (cred) => cred.email === email && cred.password === password
-      );
-
-      if (user) {
+    fetch("https://tickets.dev-wit.com/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => null);
+          const errorMsg = errorData?.message || "Credenciales incorrectas.";
+          throw new Error(errorMsg);
+        }
+        return res.json();
+      })
+      .then((data) => {
         resolve({
           success: true,
           user: {
-            email: user.email,
-            role: user.role,
+            id: data.user.id,
+            nombre: data.user.nombre,
+            rol: data.user.rol,
             loginTime: new Date().toISOString(),
           },
+          token: data.token,
         });
-      } else {
-        reject(new Error("Credenciales incorrectas."));
-      }
-    }, 2000); // Simular delay de red más realista
+      })
+      .catch((err) => {
+        reject(new Error(err.message || "Error en el login"));
+      });
   });
 }
 
