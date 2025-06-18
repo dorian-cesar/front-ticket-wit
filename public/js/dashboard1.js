@@ -383,6 +383,13 @@ function logout() {
   window.location.href = "/index.html";
 }
 
+// Mostrar nombre de usuario logueado
+const userName = localStorage.getItem("userName");
+const userDisplay = document.getElementById("userNameDisplay");
+if (userName && userDisplay) {
+  userDisplay.textContent = "¡Hola " + userName + "!";
+}
+
 // Inicializar tooltips
 document.addEventListener("DOMContentLoaded", () => {
   const tooltipTriggerList = [].slice.call(
@@ -394,7 +401,8 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 const categorySelect = document.getElementById("ticketCategory");
-const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+const token =
+  localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
 
 fetch("https://tickets.dev-wit.com/api/areas", {
   method: "GET",

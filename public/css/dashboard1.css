@@ -590,3 +590,14 @@ body {
     border-width: 2px;
   }
 }
+
+.btn-logout {
+  font-weight: 600;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.btn-logout:hover,
+.btn-logout:focus {
+  color: #ff6b6b !important;
+  outline: none;
+}

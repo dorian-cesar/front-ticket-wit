@@ -153,6 +153,9 @@ loginForm.addEventListener("submit", async function (e) {
     // Llamada a API
     const result = await Login(emailInput.value, passwordInput.value);
     const token = result.token
+    const nombre = result.user.nombre
+
+    localStorage.setItem("userName", nombre)
 
     // Reset intentos en caso de éxito
     localStorage.removeItem("loginAttempts");
