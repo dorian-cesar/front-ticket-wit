@@ -292,17 +292,19 @@ function viewTicket(id) {
   if (!ticket) return;
 
   const details = `
-        <strong>ID:</strong> #${ticket.id}<br>
-        <strong>Título:</strong> ${ticket.title}<br>
-        <strong>Estado:</strong> ${getStatusText(ticket.status)}<br>
-        <strong>Prioridad:</strong> ${getPriorityText(ticket.priority)}<br>
-        <strong>Asignado a:</strong> ${ticket.assignee || "Sin asignar"}<br>
-        <strong>Categoría:</strong> ${ticket.category}<br>
-        <strong>Fecha:</strong> ${formatDate(ticket.date)}<br>
-        <strong>Descripción:</strong> ${ticket.description}
-    `;
+    <p><strong>ID:</strong> #${ticket.id}</p>
+    <p><strong>Título:</strong> ${ticket.title}</p>
+    <p><strong>Estado:</strong> ${getStatusText(ticket.status)}</p>
+    <p><strong>Prioridad:</strong> ${getPriorityText(ticket.priority)}</p>
+    <p><strong>Asignado a:</strong> ${ticket.assignee || "Sin asignar"}</p>
+    <p><strong>Categoría:</strong> ${ticket.category}</p>
+    <p><strong>Fecha:</strong> ${formatDate(ticket.date)}</p>
+    <p><strong>Descripción:</strong> ${ticket.description}</p>
+  `;
 
-  showAlert(details, "info", "Detalles del Ticket");
+  document.getElementById("ticketModalBody").innerHTML = details;
+  const modal = new bootstrap.Modal(document.getElementById("ticketModal"));
+  modal.show();
 }
 
 // Funciones auxiliares / utilitarias

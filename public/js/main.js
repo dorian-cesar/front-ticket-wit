@@ -6,7 +6,6 @@ const togglePasswordBtn = document.getElementById("togglePassword");
 const loginSpinner = document.getElementById("loginSpinner");
 const loginText = document.getElementById("loginText");
 const alertContainer = document.getElementById("alertContainer");
-const loadingOverlay = document.getElementById("loadingOverlay");
 const forgotPasswordLink = document.getElementById("forgotPasswordLink");
 
 // Configuración de la aplicación
@@ -199,11 +198,9 @@ function handleLoginError(message) {
 // Mostrar/ocultar loading
 function showLoading(show) {
   if (show) {
-    loadingOverlay.style.display = "flex";
     loginSpinner.classList.remove("d-none");
     loginText.textContent = "Verificando...";
   } else {
-    loadingOverlay.style.display = "none";
     loginSpinner.classList.add("d-none");
     loginText.textContent = "Iniciar Sesión";
   }
