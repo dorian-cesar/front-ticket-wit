@@ -20,13 +20,18 @@
     ></script>
     <script defer src="/js/main.js"></script>
     <script>
-      // Si la sesión está activa en localStorage o sessionStorage, redirige al dashboard
-      if (
-        localStorage.getItem("userLoggedIn") === "true" ||
-        sessionStorage.getItem("userLoggedIn") === "true"
-      ) {
-        window.location.href = "/views/dashboard.html";
+      function checkLoggedIn() {
+        const user =
+          localStorage.getItem("userLoggedIn") ||
+          sessionStorage.getItem("userLoggedIn");
+        if (user) {
+          window.location.href = "/views/dashboard1.html";
+        }
       }
+      // Verifica en carga inicial
+      checkLoggedIn();
+      // También verifica si el navegador muestra desde caché (al volver con "atrás")
+      window.addEventListener("pageshow", checkLoggedIn);
     </script>
   </head>
   <body>
