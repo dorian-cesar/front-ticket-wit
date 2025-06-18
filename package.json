@@ -1,7 +1,7 @@
 {
   "name": "ticket-soporte",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "main.js",
   "type": "module",
   "scripts": {
     "start": "node server.js",
