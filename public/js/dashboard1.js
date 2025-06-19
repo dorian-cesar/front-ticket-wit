@@ -380,11 +380,15 @@ function showAlert(message, type = "info", title = "Notificación") {
 function logout() {
   localStorage.removeItem("userLoggedIn");
   sessionStorage.removeItem("userLoggedIn");
+  localStorage.removeItem("authToken")
+  sessionStorage.removeItem("authToken")
+  localStorage.removeItem("userName")
+  sessionStorage.removeItem("userName")
   window.location.href = "/index.html";
 }
 
 // Mostrar nombre de usuario logueado
-const userName = localStorage.getItem("userName");
+const userName = sessionStorage.getItem("userName") || localStorage.getItem("userName");
 const userDisplay = document.getElementById("userNameDisplay");
 if (userName && userDisplay) {
   userDisplay.textContent = "¡Hola " + userName + "!";

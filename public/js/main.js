@@ -163,9 +163,13 @@ loginForm.addEventListener("submit", async function (e) {
     if (document.getElementById("rememberMe").checked) {
       localStorage.setItem("userLoggedIn", "true"); // sesión persistente
       localStorage.setItem("authToken", token);
+      localStorage.setItem("userName", nombre);
+      console.log("token guardado en local")
     } else {
       sessionStorage.setItem("userLoggedIn", "true"); // sesión solo hasta cerrar pestaña
       sessionStorage.setItem("authToken", token);
+      sessionStorage.setItem("userName", nombre);
+      console.log("token guardado en session")
     }
 
     // Redirección
@@ -186,8 +190,6 @@ function handleLoginError(message) {
     const lockoutEnd = Date.now() + APP_CONFIG.lockoutTime;
     localStorage.setItem("lockoutTime", lockoutEnd.toString());
     disableForm(true);
-
-    // Mostrar cuenta regresiva en la alerta
     showLockoutCountdown(lockoutEnd);
   } else {
     const remainingAttempts = APP_CONFIG.maxLoginAttempts - loginAttempts;
@@ -255,8 +257,7 @@ function Login(email, password) {
           const errorData = await res.json().catch(() => null);
           const errorMsg = errorData?.message || "Credenciales incorrectas.";
           const error = new Error(errorMsg);
-          error.status = res.status; // Agrega el código HTTP
-          throw error;
+          error.status = res.status;
         }
         return res.json();
       })
@@ -273,7 +274,7 @@ function Login(email, password) {
         });
       })
       .catch((err) => {
-        reject(err); // Ya tiene .message y posiblemente .status
+        reject(err);
       });
   });
 }
