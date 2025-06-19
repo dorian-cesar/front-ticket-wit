@@ -3,7 +3,7 @@ const loginForm = document.getElementById("loginForm");
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
 const togglePasswordBtn = document.getElementById("togglePassword");
-const checkBoxRemember = document.getElementById("rememberMe")
+const checkBoxRemember = document.getElementById("rememberMe");
 const loginSpinner = document.getElementById("loginSpinner");
 const loginText = document.getElementById("loginText");
 const alertContainer = document.getElementById("alertContainer");
@@ -136,15 +136,12 @@ function isValidEmail(email) {
 loginForm.addEventListener("submit", async function (e) {
   e.preventDefault();
 
-  // Verificar lockout
   if (checkLockout()) return;
 
   if (!validateForm()) {
     showAlert("Por favor corrige los errores en el formulario.");
     return;
   }
-
-  // Mostrar loading
   showLoading(true);
 
   try {
@@ -159,23 +156,27 @@ loginForm.addEventListener("submit", async function (e) {
     localStorage.removeItem("loginAttempts");
     localStorage.removeItem("lockoutTime");
 
-    // Guardar sesión
     if (document.getElementById("rememberMe").checked) {
-      localStorage.setItem("userLoggedIn", "true"); // sesión persistente
+      localStorage.setItem("userLoggedIn", "true");
       localStorage.setItem("authToken", token);
       localStorage.setItem("userName", nombre);
-      console.log("token guardado en local")
     } else {
-      sessionStorage.setItem("userLoggedIn", "true"); // sesión solo hasta cerrar pestaña
+      sessionStorage.setItem("userLoggedIn", "true");
       sessionStorage.setItem("authToken", token);
       sessionStorage.setItem("userName", nombre);
-      console.log("token guardado en session")
     }
-
-    // Redirección
     window.location.href = "/views/dashboard1.html";
   } catch (error) {
-    handleLoginError(error.message);
+    const isAuthError = [401, 403].includes(error.status);
+    const isCredentialMessage = error.message
+      .toLowerCase()
+      .includes("credenciales");
+
+    if (isAuthError && isCredentialMessage) {
+      handleLoginError(error.message);
+    } else {
+      showAlert(`Error al iniciar sesión: ${error.message}`, "danger");
+    }
   } finally {
     showLoading(false);
   }
@@ -258,6 +259,7 @@ function Login(email, password) {
           const errorMsg = errorData?.message || "Credenciales incorrectas.";
           const error = new Error(errorMsg);
           error.status = res.status;
+          throw error;
         }
         return res.json();
       })

@@ -216,6 +216,10 @@ function createTicket() {
     return;
   }
 
+  const chileDate = luxon.DateTime.now()
+    .setZone("America/Santiago")
+    .toFormat("yyyy-MM-dd");
+
   const newTicket = {
     id: nextTicketId++,
     title: title,
@@ -224,7 +228,7 @@ function createTicket() {
     assignee: assignee,
     category: category,
     description: description,
-    date: new Date().toISOString().split("T")[0],
+    date: chileDate,
   };
 
   tickets.unshift(newTicket);
@@ -336,12 +340,9 @@ function getPriorityText(priority) {
 }
 
 function formatDate(dateString) {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("es-ES", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  return luxon.DateTime.fromISO(dateString, { zone: "America/Santiago" })
+    .setLocale("es")
+    .toFormat("d LLL yyyy");
 }
 
 // Validar formulario
@@ -380,15 +381,16 @@ function showAlert(message, type = "info", title = "Notificación") {
 function logout() {
   localStorage.removeItem("userLoggedIn");
   sessionStorage.removeItem("userLoggedIn");
-  localStorage.removeItem("authToken")
-  sessionStorage.removeItem("authToken")
-  localStorage.removeItem("userName")
-  sessionStorage.removeItem("userName")
+  localStorage.removeItem("authToken");
+  sessionStorage.removeItem("authToken");
+  localStorage.removeItem("userName");
+  sessionStorage.removeItem("userName");
   window.location.href = "/index.html";
 }
 
 // Mostrar nombre de usuario logueado
-const userName = sessionStorage.getItem("userName") || localStorage.getItem("userName");
+const userName =
+  sessionStorage.getItem("userName") || localStorage.getItem("userName");
 const userDisplay = document.getElementById("userNameDisplay");
 if (userName && userDisplay) {
   userDisplay.textContent = "¡Hola " + userName + "!";
