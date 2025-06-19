@@ -1,62 +1,13 @@
-// Almacenamiento de datos de tickets
-let tickets1 = [
-  {
-    id: 1,
-    title: "Error en el sistema de login",
-    status: "pendiente",
-    priority: "alta",
-    assignee: "Juan Pérez",
-    category: "bug",
-    description: "Los usuarios no pueden iniciar sesión",
-    date: "2025-01-15",
-  },
-  {
-    id: 2,
-    title: "Solicitud de nueva funcionalidad",
-    status: "esperando",
-    priority: "media",
-    assignee: "María García",
-    category: "feature",
-    description: "Implementar sistema de notificaciones",
-    date: "2025-01-14",
-  },
-  {
-    id: 3,
-    title: "Optimización de base de datos",
-    status: "completado",
-    priority: "alta",
-    assignee: "Carlos López",
-    category: "soporte",
-    description: "Mejorar rendimiento de consultas",
-    date: "2025-01-13",
-  },
-  {
-    id: 4,
-    title: "Consulta sobre API",
-    status: "pendiente",
-    priority: "baja",
-    assignee: "Ana Martínez",
-    category: "consulta",
-    description: "Documentación de endpoints",
-    date: "2025-01-12",
-  },
-  {
-    id: 5,
-    title: "Bug en el módulo de reportes",
-    status: "esperando",
-    priority: "media",
-    assignee: "",
-    category: "bug",
-    description: "Los reportes no se generan correctamente",
-    date: "2025-01-11",
-  },
-];
+let usersData = [];
+let tiposAtencion = [];
+let areas = [];
+let tickets = [];
 
 // let nextTicketId = 6;
 
 // Elementos del DOM
 const ticketsTableBody = document.getElementById("ticketsTableBody");
-const ticketsLoader = document.getElementById("ticketsLoader");
+// const ticketsLoader = document.getElementById("ticketsLoader");
 const statusFilter = document.getElementById("statusFilter");
 const priorityFilter = document.getElementById("priorityFilter");
 const searchInput = document.getElementById("searchInput");
@@ -67,15 +18,11 @@ const token =
   localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
 const userMail =
   localStorage.getItem("userMail") || sessionStorage.getItem("userMail");
-let usersData = [];
-let tiposAtencion = [];
-let areas = [];
-let tickets = [];
 
 // Inicializar el panel de control (dashboard)
 document.addEventListener("DOMContentLoaded", () => {
-  renderTickets();
-  updateStats();
+  // renderTickets();
+  // updateStats();
   setupEventListeners();
 });
 
@@ -106,20 +53,9 @@ function setupEventListeners() {
 
 // Renderizar la tabla de tickets
 function renderTickets(ticketsToRender = tickets) {
-  // Limpiar tabla
   ticketsTableBody.innerHTML = "";
 
-  // Validar si aún se está cargando (ticketsToRender no es array válido)
-  const isLoading = !Array.isArray(ticketsToRender);
-
-  if (isLoading) {
-    ticketsLoader.style.display = "flex";
-    return;
-  }
-
-  // Si es array válido pero vacío → sin resultados
-  if (ticketsToRender.length === 0) {
-    ticketsLoader.style.display = "none";
+  if (!Array.isArray(ticketsToRender) || ticketsToRender.length === 0) {
     ticketsTableBody.innerHTML = `
       <tr>
         <td colspan="7" class="text-center text-muted py-4">
@@ -130,9 +66,6 @@ function renderTickets(ticketsToRender = tickets) {
     `;
     return;
   }
-
-  // Si hay datos válidos
-  ticketsLoader.style.display = "none";
 
   ticketsToRender.forEach((ticket) => {
     const row = document.createElement("tr");
@@ -617,12 +550,11 @@ getUserIdWhenReady((userId) => {
         priority: t.prioridad || "media",
       }));
 
-      console.log("Tickets transformados:", tickets);
       renderTickets(tickets);
       updateStats();
     })
     .catch((err) => {
       console.error("Error cargando tickets:", err);
       showAlert("No se pudieron cargar los tickets.", "warning");
-    });
+    })
 });
