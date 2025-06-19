@@ -62,6 +62,11 @@ const searchInput = document.getElementById("searchInput");
 const createTicketForm = document.getElementById("createTicketForm");
 const saveTicketBtn = document.getElementById("saveTicketBtn");
 const updateTicketBtn = document.getElementById("updateTicketBtn");
+const token =
+  localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+const userMail =
+  localStorage.getItem("userMail") || sessionStorage.getItem("userMail");
+let usersData = [];
 
 // Inicializar el panel de control (dashboard)
 document.addEventListener("DOMContentLoaded", () => {
@@ -204,44 +209,93 @@ function filterTickets() {
 }
 
 // Crear nuevo ticket
-function createTicket() {
+async function createTicket() {
+  const saveBtn = document.getElementById("saveTicketBtn");
+  const btnSpinner = document.getElementById("btnSpinner");
+  const btnIcon = document.getElementById("btnIcon");
+  const btnText = document.getElementById("btnText");
+
+  btnSpinner.classList.remove("d-none");
+  btnIcon.classList.add("d-none");
+  btnText.textContent = "Creando...";
+  saveBtn.disabled = true;
+
   const title = document.getElementById("ticketTitle").value.trim();
   const priority = document.getElementById("ticketPriority").value;
-  const assignee = document.getElementById("ticketAssignee").value;
+  const tipoAtencion = document.getElementById("ticketAssignee").value;
   const category = document.getElementById("ticketCategory").value;
   const description = document.getElementById("ticketDescription").value.trim();
 
   if (!title || !priority || !description) {
     showAlert("Por favor, completa todos los campos obligatorios.", "warning");
+
+    btnSpinner.classList.add("d-none");
+    btnIcon.classList.remove("d-none");
+    btnText.textContent = "Crear Ticket";
+    saveBtn.disabled = false;
     return;
   }
 
-  const chileDate = luxon.DateTime.now()
-    .setZone("America/Santiago")
-    .toFormat("yyyy-MM-dd");
+  const solicitante = usersData.find((u) => u.email === userMail);
+  if (!solicitante) {
+    showAlert(
+      "No se encontró el usuario logueado en los datos de usuarios.",
+      "danger"
+    );
+
+    btnSpinner.classList.add("d-none");
+    btnIcon.classList.remove("d-none");
+    btnText.textContent = "Crear Ticket";
+    saveBtn.disabled = false;
+    return;
+  }
 
   const newTicket = {
-    id: nextTicketId++,
-    title: title,
-    status: "pendiente",
-    priority: priority,
-    assignee: assignee,
-    category: category,
-    description: description,
-    date: chileDate,
+    solicitante_id: solicitante.id,
+    area_id: 7,
+    tipo_atencion_id: 23,
+    observaciones: description,
   };
 
-  tickets.unshift(newTicket);
-  renderTickets();
-  updateStats();
+  try {
+    const response = await fetch(
+      "https://tickets.dev-wit.com/api/tickets/crear",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(newTicket),
+      }
+    );
 
-  // Resetear formulario y cerrar modal
-  createTicketForm.reset();
-  const modalElement = document.getElementById("createTicketModal");
-  const modal = bootstrap.Modal.getInstance(modalElement);
-  modal.hide();
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Error al crear el ticket");
+    }
 
-  showAlert("Ticket creado exitosamente!", "success");
+    const result = await response.json();
+
+    tickets.unshift(result);
+    renderTickets();
+    updateStats();
+
+    createTicketForm.reset();
+    const modalElement = document.getElementById("createTicketModal");
+    const modal = bootstrap.Modal.getInstance(modalElement);
+    modal.hide();
+
+    showAlert("Ticket creado exitosamente!", "success");
+  } catch (error) {
+    console.error("Error al crear ticket:", error);
+    showAlert("No se pudo crear el ticket. " + error.message, "danger");
+  } finally {
+    btnSpinner.classList.add("d-none");
+    btnIcon.classList.remove("d-none");
+    btnText.textContent = "Crear Ticket";
+    saveBtn.disabled = false;
+  }
 }
 
 // Editar ticket
@@ -387,6 +441,11 @@ function logout() {
   sessionStorage.removeItem("authToken");
   localStorage.removeItem("userName");
   sessionStorage.removeItem("userName");
+  localStorage.removeItem("userMail");
+  sessionStorage.removeItem("userMail");
+  localStorage.removeItem("userRole");
+  sessionStorage.removeItem("userRole");
+
   window.location.href = "/index.html";
 }
 
@@ -408,11 +467,8 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 });
 
-
-// Llamadas API
+// Llamadas API (areas y tipos)
 const categorySelect = document.getElementById("ticketCategory");
-const token =
-  localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
 
 fetch("https://tickets.dev-wit.com/api/areas", {
   method: "GET",
@@ -479,3 +535,23 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
   .catch((error) => {
     console.error("Error cargando tipos de atención:", error);
   });
+
+(async function getUsers() {
+  try {
+    const response = await fetch("https://tickets.dev-wit.com/api/users", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`Error HTTP: ${response.status}`);
+    }
+    const data = await response.json();
+    usersData = data;
+    console.log("usersData", usersData);
+  } catch (error) {
+    console.error("Error al obtener usuarios:", error);
+  }
+})();

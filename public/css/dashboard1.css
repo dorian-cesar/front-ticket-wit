@@ -131,6 +131,16 @@ body {
   box-shadow: 0 4px 12px var(--shadow-medium);
 }
 
+.btn-primary:disabled {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+  opacity: 0.8;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+
 .btn-secondary {
   background-color: var(--dark-gray);
   border-color: var(--dark-gray);

@@ -147,10 +147,11 @@ loginForm.addEventListener("submit", async function (e) {
   try {
     // Llamada a API
     const result = await Login(emailInput.value, passwordInput.value);
+    console.log(result)
     const token = result.token;
     const nombre = result.user.nombre;
-
-    localStorage.setItem("userName", nombre);
+    const mail = result.user.mail;
+    const rol = result.user.rol;
 
     // Reset intentos en caso de éxito
     localStorage.removeItem("loginAttempts");
@@ -160,10 +161,14 @@ loginForm.addEventListener("submit", async function (e) {
       localStorage.setItem("userLoggedIn", "true");
       localStorage.setItem("authToken", token);
       localStorage.setItem("userName", nombre);
+      localStorage.setItem("userMail", mail);
+      localStorage.setItem("userRole", rol);
     } else {
       sessionStorage.setItem("userLoggedIn", "true");
       sessionStorage.setItem("authToken", token);
       sessionStorage.setItem("userName", nombre);
+      sessionStorage.setItem("userMail", mail);
+      sessionStorage.setItem("userRole", rol);
     }
     window.location.href = "/views/dashboard1.html";
   } catch (error) {
@@ -269,8 +274,8 @@ function Login(email, password) {
           user: {
             id: data.user.id,
             nombre: data.user.nombre,
-            rol: data.user.rol,
-            loginTime: new Date().toISOString(),
+            mail: email,
+            rol: data.user.rol
           },
           token: data.token,
         });
