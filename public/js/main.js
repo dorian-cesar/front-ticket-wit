@@ -3,6 +3,7 @@ const loginForm = document.getElementById("loginForm");
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
 const togglePasswordBtn = document.getElementById("togglePassword");
+const checkBoxRemember = document.getElementById("rememberMe")
 const loginSpinner = document.getElementById("loginSpinner");
 const loginText = document.getElementById("loginText");
 const alertContainer = document.getElementById("alertContainer");
@@ -11,7 +12,8 @@ const forgotPasswordLink = document.getElementById("forgotPasswordLink");
 // Configuración de la aplicación
 const APP_CONFIG = {
   maxLoginAttempts: 5,
-  lockoutTime: 300000, // 5 minutos en milisegundos
+  // lockoutTime: 300000, // 5 minutos en milisegundos
+  lockoutTime: 3000, // prueba
 };
 
 // Estado de la aplicación
@@ -22,15 +24,10 @@ let lockoutTime = parseInt(localStorage.getItem("lockoutTime") || "0");
 function checkLockout() {
   const now = Date.now();
   if (lockoutTime > now) {
-    const remainingTime = Math.ceil((lockoutTime - now) / 60000);
-    showAlert(
-      `Demasiados intentos fallidos. Intenta nuevamente en ${remainingTime} minuto(s).`,
-      "warning"
-    );
     disableForm(true);
+    showLockoutCountdown(lockoutTime);
     return true;
   } else if (lockoutTime > 0) {
-    // Reset lockout
     localStorage.removeItem("lockoutTime");
     localStorage.removeItem("loginAttempts");
     loginAttempts = 0;
@@ -44,6 +41,7 @@ function disableForm(disable) {
   emailInput.disabled = disable;
   passwordInput.disabled = disable;
   togglePasswordBtn.disabled = disable;
+  checkBoxRemember.disabled = disable;
   loginForm.querySelector('button[type="submit"]').disabled = disable;
 }
 
@@ -76,7 +74,7 @@ function showAlert(message, type = "danger") {
             `;
   alertContainer.innerHTML = alertHTML;
 
-  // Auto-ocultar después de 8 segundos para mensajes informativos
+  // Auto-ocultar después de 5 segundos para mensajes informativos
   if (type === "info" || type === "success") {
     setTimeout(() => {
       const alert = alertContainer.querySelector(".alert");
@@ -84,7 +82,7 @@ function showAlert(message, type = "danger") {
         const bsAlert = new bootstrap.Alert(alert);
         bsAlert.close();
       }
-    }, 8000);
+    }, 5000);
   }
 }
 
@@ -152,10 +150,10 @@ loginForm.addEventListener("submit", async function (e) {
   try {
     // Llamada a API
     const result = await Login(emailInput.value, passwordInput.value);
-    const token = result.token
-    const nombre = result.user.nombre
+    const token = result.token;
+    const nombre = result.user.nombre;
 
-    localStorage.setItem("userName", nombre)
+    localStorage.setItem("userName", nombre);
 
     // Reset intentos en caso de éxito
     localStorage.removeItem("loginAttempts");
@@ -187,15 +185,49 @@ function handleLoginError(message) {
   if (loginAttempts >= APP_CONFIG.maxLoginAttempts) {
     const lockoutEnd = Date.now() + APP_CONFIG.lockoutTime;
     localStorage.setItem("lockoutTime", lockoutEnd.toString());
-    showAlert(
-      `Demasiados intentos fallidos. Acceso bloqueado por 5 minutos. Contacta a soporte si necesitas ayuda.`,
-      "warning"
-    );
     disableForm(true);
+
+    // Mostrar cuenta regresiva en la alerta
+    showLockoutCountdown(lockoutEnd);
   } else {
     const remainingAttempts = APP_CONFIG.maxLoginAttempts - loginAttempts;
     showAlert(`${message} Te quedan ${remainingAttempts} intento(s).`);
   }
+}
+
+// Muestra tiempo de lockout
+function showLockoutCountdown(lockoutEnd) {
+  const alertHTML = `
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      Demasiados intentos fallidos. Intenta nuevamente en <span id="lockout-timer"></span>.
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>`;
+  alertContainer.innerHTML = alertHTML;
+
+  const timerSpan = document.getElementById("lockout-timer");
+
+  function updateCountdown() {
+    const now = Date.now();
+    const remaining = lockoutEnd - now;
+
+    if (remaining <= 0) {
+      clearInterval(interval);
+      showAlert("Ya puedes volver a iniciar sesión.", "success");
+      disableForm(false);
+      localStorage.removeItem("lockoutTime");
+      localStorage.removeItem("loginAttempts");
+      return;
+    }
+
+    const minutes = Math.floor(remaining / 60000);
+    const seconds = Math.floor((remaining % 60000) / 1000);
+    timerSpan.textContent =
+      minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+  }
+
+  updateCountdown();
+  const interval = setInterval(updateCountdown, 1000);
 }
 
 // Mostrar/ocultar loading
@@ -222,7 +254,9 @@ function Login(email, password) {
         if (!res.ok) {
           const errorData = await res.json().catch(() => null);
           const errorMsg = errorData?.message || "Credenciales incorrectas.";
-          throw new Error(errorMsg);
+          const error = new Error(errorMsg);
+          error.status = res.status; // Agrega el código HTTP
+          throw error;
         }
         return res.json();
       })
@@ -239,7 +273,7 @@ function Login(email, password) {
         });
       })
       .catch((err) => {
-        reject(new Error(err.message || "Error en el login"));
+        reject(err); // Ya tiene .message y posiblemente .status
       });
   });
 }
