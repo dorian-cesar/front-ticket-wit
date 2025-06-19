@@ -527,7 +527,7 @@ body {
 /* Extra Large Screens */
 @media (min-width: 1200px) {
   .container-fluid {
-    max-width: 1400px;
+    max-width: 2400px;
     margin: 0 auto;
   }
 }
