@@ -67,6 +67,8 @@ const token =
 const userMail =
   localStorage.getItem("userMail") || sessionStorage.getItem("userMail");
 let usersData = [];
+let tiposAtencion = [];
+let areas = [];
 
 // Inicializar el panel de control (dashboard)
 document.addEventListener("DOMContentLoaded", () => {
@@ -222,8 +224,14 @@ async function createTicket() {
 
   const title = document.getElementById("ticketTitle").value.trim();
   const priority = document.getElementById("ticketPriority").value;
-  const tipoAtencion = document.getElementById("ticketAssignee").value;
-  const category = document.getElementById("ticketCategory").value;
+  const areaSolicitante = parseInt(
+    document.getElementById("ticketAssignee").value,
+    10
+  );
+  const tipoAtencion = parseInt(
+    document.getElementById("ticketCategory").value,
+    10
+  );
   const description = document.getElementById("ticketDescription").value.trim();
 
   if (!title || !priority || !description) {
@@ -252,8 +260,8 @@ async function createTicket() {
 
   const newTicket = {
     solicitante_id: solicitante.id,
-    area_id: 7,
-    tipo_atencion_id: 23,
+    area_id: tipoAtencion,
+    tipo_atencion_id: areaSolicitante,
     observaciones: description,
   };
 
@@ -286,6 +294,7 @@ async function createTicket() {
     const modal = bootstrap.Modal.getInstance(modalElement);
     modal.hide();
 
+    console.log("data para crear ticket", newTicket);
     showAlert("Ticket creado exitosamente!", "success");
   } catch (error) {
     console.error("Error al crear ticket:", error);
@@ -484,6 +493,7 @@ fetch("https://tickets.dev-wit.com/api/areas", {
     return response.json();
   })
   .then((data) => {
+    areas = data;
     // Limpia el select si no quieres opciones fijas
     categorySelect.innerHTML =
       '<option value="">Seleccionar categoría</option>';
@@ -494,6 +504,7 @@ fetch("https://tickets.dev-wit.com/api/areas", {
       option.textContent = area.nombre;
       categorySelect.appendChild(option);
     });
+    console.log("tiposAreas", areas);
   })
   .catch((error) => {
     console.error("Error cargando categorías:", error);
@@ -516,6 +527,7 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
     return response.json();
   })
   .then((data) => {
+    tiposAtencion = data;
     // Limpia y agrega opción por defecto
     tipoSelect.innerHTML = '<option value="">Sin asignar</option>';
     tipoSelectEdit.innerHTML = '<option value="">Sin asignar</option>';
@@ -531,6 +543,7 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
       option2.textContent = tipo.nombre;
       tipoSelectEdit.appendChild(option2);
     });
+    console.log("tiposAtencion", tiposAtencion);
   })
   .catch((error) => {
     console.error("Error cargando tipos de atención:", error);
