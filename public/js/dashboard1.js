@@ -1,5 +1,5 @@
 // Almacenamiento de datos de tickets
-let tickets = [
+let tickets1 = [
   {
     id: 1,
     title: "Error en el sistema de login",
@@ -52,10 +52,11 @@ let tickets = [
   },
 ];
 
-let nextTicketId = 6;
+// let nextTicketId = 6;
 
 // Elementos del DOM
 const ticketsTableBody = document.getElementById("ticketsTableBody");
+const ticketsLoader = document.getElementById("ticketsLoader");
 const statusFilter = document.getElementById("statusFilter");
 const priorityFilter = document.getElementById("priorityFilter");
 const searchInput = document.getElementById("searchInput");
@@ -69,6 +70,7 @@ const userMail =
 let usersData = [];
 let tiposAtencion = [];
 let areas = [];
+let tickets = [];
 
 // Inicializar el panel de control (dashboard)
 document.addEventListener("DOMContentLoaded", () => {
@@ -104,76 +106,84 @@ function setupEventListeners() {
 
 // Renderizar la tabla de tickets
 function renderTickets(ticketsToRender = tickets) {
+  // Limpiar tabla
   ticketsTableBody.innerHTML = "";
 
-  if (ticketsToRender.length === 0) {
-    ticketsTableBody.innerHTML = `
-            <tr>
-                <td colspan="7" class="text-center text-muted py-4">
-                    <i class="bi bi-inbox display-4 d-block mb-2"></i>
-                    No se encontraron tickets
-                </td>
-            </tr>
-        `;
+  // Validar si aún se está cargando (ticketsToRender no es array válido)
+  const isLoading = !Array.isArray(ticketsToRender);
+
+  if (isLoading) {
+    ticketsLoader.style.display = "flex";
     return;
   }
+
+  // Si es array válido pero vacío → sin resultados
+  if (ticketsToRender.length === 0) {
+    ticketsLoader.style.display = "none";
+    ticketsTableBody.innerHTML = `
+      <tr>
+        <td colspan="7" class="text-center text-muted py-4">
+          <i class="bi bi-inbox display-4 d-block mb-2"></i>
+          No se encontraron tickets
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  // Si hay datos válidos
+  ticketsLoader.style.display = "none";
 
   ticketsToRender.forEach((ticket) => {
     const row = document.createElement("tr");
     row.className = "new-ticket";
     row.innerHTML = `
-            <td><strong>#${ticket.id}</strong></td>
-            <td>
-                <div class="fw-semibold">${ticket.title}</div>
-                <small class="text-muted">${ticket.category}</small>
-            </td>
-            <td>
-                <span class="badge status-${ticket.status} badge-status">
-                    ${getStatusIcon(ticket.status)} ${getStatusText(
-      ticket.status
-    )}
-                </span>
-            </td>
-            <td>
-                <span class="badge priority-${ticket.priority} badge-priority">
-                    ${getPriorityText(ticket.priority)}
-                </span>
-            </td>
-            <td>
-                ${
-                  ticket.assignee
-                    ? `
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-person-circle me-2"></i>
-                        ${ticket.assignee}
-                    </div>
-                `
-                    : '<span class="text-muted">Sin asignar</span>'
-                }
-            </td>
-            <td>
-                <small>${formatDate(ticket.date)}</small>
-            </td>
-            <td>
-                <div class="btn-group" role="group">
-                    <button class="btn btn-outline-primary btn-action" onclick="editTicket(${
-                      ticket.id
-                    })" title="Editar">
-                        <i class="bi bi-pencil"></i>
-                    </button>
-                    <button class="btn btn-outline-danger btn-action" onclick="deleteTicket(${
-                      ticket.id
-                    })" title="Eliminar">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                    <button class="btn btn-outline-info btn-action" onclick="viewTicket(${
-                      ticket.id
-                    })" title="Ver detalles">
-                        <i class="bi bi-eye"></i>
-                    </button>
-                </div>
-            </td>
-        `;
+      <td><strong>#${ticket.id}</strong></td>
+      <td>
+        <div class="fw-semibold">${ticket.title}</div>
+        <small class="text-muted">${ticket.category}</small>
+      </td>
+      <td>
+        <span class="badge status-${ticket.status} badge-status">
+          ${getStatusIcon(ticket.status)} ${getStatusText(ticket.status)}
+        </span>
+      </td>
+      <td>
+        <span class="badge priority-${ticket.priority} badge-priority">
+          ${getPriorityText(ticket.priority)}
+        </span>
+      </td>
+      <td>
+        ${
+          ticket.assignee
+            ? `<div class="d-flex align-items-center">
+                <i class="bi bi-person-circle me-2"></i>
+                ${ticket.assignee}
+              </div>`
+            : '<span class="text-muted">Sin asignar</span>'
+        }
+      </td>
+      <td><small>${formatDate(ticket.date)}</small></td>
+      <td>
+        <div class="btn-group" role="group">
+          <button class="btn btn-outline-primary btn-action" onclick="editTicket(${
+            ticket.id
+          })" title="Editar">
+            <i class="bi bi-pencil"></i>
+          </button>
+          <button class="btn btn-outline-danger btn-action" onclick="deleteTicket(${
+            ticket.id
+          })" title="Eliminar">
+            <i class="bi bi-trash"></i>
+          </button>
+          <button class="btn btn-outline-info btn-action" onclick="viewTicket(${
+            ticket.id
+          })" title="Ver detalles">
+            <i class="bi bi-eye"></i>
+          </button>
+        </div>
+      </td>
+    `;
     ticketsTableBody.appendChild(row);
   });
 }
@@ -568,3 +578,51 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
     console.error("Error al obtener usuarios:", error);
   }
 })();
+
+// Esperar usersData para asignar id de usuario conectado
+function getUserIdWhenReady(callback) {
+  const interval = setInterval(() => {
+    if (Array.isArray(usersData) && usersData.length > 0) {
+      const user = usersData.find((u) => u.email === userMail);
+      if (user) {
+        clearInterval(interval);
+        callback(user.id);
+      } else {
+        showAlert("No se encontró el usuario en la lista de datos.", "danger");
+        clearInterval(interval);
+      }
+    }
+  }, 100);
+}
+
+// Llamada tickets con la id del usuario
+getUserIdWhenReady((userId) => {
+  fetch(`https://tickets.dev-wit.com/api/tickets/${userId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      tickets = data.map((t) => ({
+        id: t.id,
+        title: t.area,
+        status: t.estado,
+        assignee: t.ejecutor,
+        category: t.tipo_atencion,
+        description: t.observaciones,
+        date: luxon.DateTime.fromISO(t.fecha_creacion)
+          .setZone("America/Santiago")
+          .toFormat("yyyy-MM-dd"),
+        priority: t.prioridad || "media",
+      }));
+
+      console.log("Tickets transformados:", tickets);
+      renderTickets(tickets);
+      updateStats();
+    })
+    .catch((err) => {
+      console.error("Error cargando tickets:", err);
+      showAlert("No se pudieron cargar los tickets.", "warning");
+    });
+});
