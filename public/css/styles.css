@@ -242,3 +242,13 @@ body {
     transform: rotate(360deg);
   }
 }
+
+/* Sweetalert */
+.swal2-popup {
+  border-radius: 20px !important;
+}
+
+.swal2-confirm,
+.swal2-cancel {
+  border-radius: 10px !important; 
+}

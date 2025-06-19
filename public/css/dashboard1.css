@@ -601,3 +601,23 @@ body {
   color: #ff6b6b !important;
   outline: none;
 }
+
+/* Sweetalert */
+
+.swal2-icon {
+  transform: scale(0.75) !important;
+}
+
+.swal2-title {
+  padding-top: 2px !important;
+}
+
+.swal2-popup {
+  border-radius: 15px !important;
+  background-color: #f0f0f0;
+}
+
+.swal2-confirm,
+.swal2-cancel {
+  border-radius: 8px !important; 
+}

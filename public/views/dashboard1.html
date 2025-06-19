@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="/css/dashboard1.css" />
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/luxon@3.6.1/build/global/luxon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script defer src="/js/dashboard1.js"></script>
     <script>
       window.addEventListener("pageshow", function (event) {
@@ -168,7 +169,7 @@
                       <th>Título</th>
                       <th>Estado</th>
                       <th>Prioridad</th>
-                      <th>Asignado a</th>
+                      <th>Encargado</th>
                       <th>Fecha</th>
                       <th>Acciones</th>
                     </tr>
@@ -226,19 +227,16 @@
               <div class="row">
                 <div class="col-md-6 mb-3">
                   <label for="ticketAssignee" class="form-label"
-                    >Asignado a</label
+                    >Tipo de Atención</label
                   >
                   <select class="form-select" id="ticketAssignee">
                     <option value="">Sin asignar</option>
-                    <option value="Juan Pérez">Juan Pérez</option>
-                    <option value="María García">María García</option>
-                    <option value="Carlos López">Carlos López</option>
-                    <option value="Ana Martínez">Ana Martínez</option>
+                    <!-- Las opciones se reemplazarán con JavaScript -->
                   </select>
                 </div>
                 <div class="col-md-6 mb-3">
                   <label for="ticketCategory" class="form-label"
-                    >Categoría</label
+                    >Área Solicitante</label
                   >
                   <select class="form-select" id="ticketCategory">
                     <!-- Se agrega con javascript -->
@@ -303,14 +301,11 @@
               </div>
               <div class="mb-3">
                 <label for="editTicketAssignee" class="form-label"
-                  >Asignado a</label
+                  >Tipo de Atención</label
                 >
                 <select class="form-select" id="editTicketAssignee">
                   <option value="">Sin asignar</option>
-                  <option value="Juan Pérez">Juan Pérez</option>
-                  <option value="María García">María García</option>
-                  <option value="Carlos López">Carlos López</option>
-                  <option value="Ana Martínez">Ana Martínez</option>
+                  <!-- Las demás opciones se agregarán con JavaScript -->
                 </select>
               </div>
             </form>

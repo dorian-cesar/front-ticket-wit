@@ -282,12 +282,23 @@ function updateTicket() {
 
 // Eliminar ticket
 function deleteTicket(id) {
-  if (confirm("¿Estás seguro de que quieres eliminar este ticket?")) {
-    tickets = tickets.filter((t) => t.id !== id);
-    renderTickets();
-    updateStats();
-    showAlert("Ticket eliminado exitosamente!", "success");
-  }
+  Swal.fire({
+    title: "¿Estás seguro?",
+    text: "Esta acción eliminará el ticket permanentemente.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#e64545",
+    cancelButtonColor: "#34495e",
+    confirmButtonText: "Sí, eliminar",
+    cancelButtonText: "Cancelar",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      tickets = tickets.filter((t) => t.id !== id);
+      renderTickets();
+      updateStats();
+      showAlert("Ticket eliminado exitosamente!", "success");
+    }
+  });
 }
 
 // Ver detalles del ticket
@@ -356,25 +367,16 @@ function validateForm() {
 }
 
 // Mostrar alerta
-function showAlert(message, type = "info", title = "Notificación") {
-  // Crear elemento alerta
-  const alertDiv = document.createElement("div");
-  alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-  alertDiv.style.cssText =
-    "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
-  alertDiv.innerHTML = `
-        <strong>${title}:</strong> ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-
-  document.body.appendChild(alertDiv);
-
-  // Remover automáticamente después de 5 segundos
-  setTimeout(() => {
-    if (alertDiv.parentNode) {
-      alertDiv.remove();
-    }
-  }, 5000);
+function showAlert(message, type = "info") {
+  Swal.fire({
+    toast: true,
+    position: "top-end",
+    icon: type, // puede ser "success", "error", "warning", "info", "question"
+    title: message,
+    showConfirmButton: false,
+    timer: 2500,
+    timerProgressBar: true,
+  });
 }
 
 // Terminar la sesión
@@ -406,6 +408,8 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 });
 
+
+// Llamadas API
 const categorySelect = document.getElementById("ticketCategory");
 const token =
   localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
@@ -437,4 +441,41 @@ fetch("https://tickets.dev-wit.com/api/areas", {
   })
   .catch((error) => {
     console.error("Error cargando categorías:", error);
+  });
+
+const tipoSelect = document.getElementById("ticketAssignee");
+const tipoSelectEdit = document.getElementById("editTicketAssignee");
+
+fetch("https://tickets.dev-wit.com/api/tipos", {
+  method: "GET",
+  headers: {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
+  },
+})
+  .then((response) => {
+    if (!response.ok) {
+      throw new Error("Error al obtener tipos de atención");
+    }
+    return response.json();
+  })
+  .then((data) => {
+    // Limpia y agrega opción por defecto
+    tipoSelect.innerHTML = '<option value="">Sin asignar</option>';
+    tipoSelectEdit.innerHTML = '<option value="">Sin asignar</option>';
+
+    data.forEach((tipo) => {
+      const option1 = document.createElement("option");
+      option1.value = tipo.id;
+      option1.textContent = tipo.nombre;
+      tipoSelect.appendChild(option1);
+
+      const option2 = document.createElement("option");
+      option2.value = tipo.id;
+      option2.textContent = tipo.nombre;
+      tipoSelectEdit.appendChild(option2);
+    });
+  })
+  .catch((error) => {
+    console.error("Error cargando tipos de atención:", error);
   });
