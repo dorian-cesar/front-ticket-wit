@@ -21,6 +21,11 @@ document.addEventListener("DOMContentLoaded", () => {
   setupEventListeners();
 });
 
+// Recargar los tickets
+document.getElementById("refreshTicketsBtn").addEventListener("click", () => {
+  window.location.reload();
+});
+
 // Configurar los listeners de eventos
 function setupEventListeners() {
   // Filtros

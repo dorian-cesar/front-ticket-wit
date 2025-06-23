@@ -122,14 +122,23 @@
                 <i class="bi bi-list-ul me-2"></i>
                 Lista de Tickets
               </h5>
-              <button
-                class="btn btn-primary"
-                data-bs-toggle="modal"
-                data-bs-target="#createTicketModal"
-              >
-                <i class="bi bi-plus-circle me-2"></i>
-                Crear Ticket
-              </button>
+              <div>
+                <button
+                  class="btn btn-secondary me-2"
+                  id="refreshTicketsBtn"
+                  type="button"
+                >
+                  <i class="bi bi-arrow-clockwise me-1"></i>Actualizar Tickets
+                </button>
+                <button
+                  class="btn btn-primary d-none d-sm-inline-block"
+                  data-bs-toggle="modal"
+                  data-bs-target="#createTicketModal"
+                >
+                  <i class="bi bi-plus-circle me-2"></i>
+                  Crear Ticket
+                </button>
+              </div>
             </div>
             <div class="card-body">
               <!-- Filtros -->
@@ -322,6 +331,7 @@
       class="btn btn-primary floating-btn"
       data-bs-toggle="modal"
       data-bs-target="#createTicketModal"
+      title="Crear Ticket"
     >
       <i class="bi bi-plus-lg"></i>
     </button>
