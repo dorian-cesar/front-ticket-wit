@@ -199,8 +199,7 @@
           </div>
           <div class="modal-body">
             <form id="createTicketForm">
-              <div class="row">
-              </div>
+              <div class="row"></div>
 
               <div class="row">
                 <div class="col-md-6 mb-3">
@@ -285,13 +284,14 @@
                 </select>
               </div>
               <div class="mb-3">
-                <label for="editTicketAssignee" class="form-label"
-                  >Tipo de Atención</label
+                <label for="editTicketDescription" class="form-label"
+                  >Descripción</label
                 >
-                <select class="form-select" id="editTicketAssignee">
-                  <option value="">Sin asignar</option>
-                  <!-- Las demás opciones se agregarán con JavaScript -->
-                </select>
+                <textarea
+                  class="form-control"
+                  id="editTicketDescription"
+                  rows="3"
+                ></textarea>
               </div>
             </form>
           </div>

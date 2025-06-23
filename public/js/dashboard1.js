@@ -238,27 +238,22 @@ async function createTicket() {
 // Editar ticket
 function editTicket(id) {
   const ticket = tickets.find((t) => t.id === id);
-  if (!ticket) return;
-
-  document.getElementById("editTicketId").value = ticket.id;
-  document.getElementById("editTicketStatus").value = ticket.status;
-  document.getElementById("editTicketAssignee").value = ticket.assignee;
-
-  const modal = new bootstrap.Modal(document.getElementById("editTicketModal"));
-  modal.show();
+  if (ticket) {
+    openEditModal(ticket);
+  }
 }
 
 // Actualizar ticket
 function updateTicket() {
   const id = Number.parseInt(document.getElementById("editTicketId").value);
   const status = document.getElementById("editTicketStatus").value;
-  const assignee = document.getElementById("editTicketAssignee").value;
+  const description = document.getElementById("editTicketDescription").value;
 
   const ticketIndex = tickets.findIndex((t) => t.id === id);
   if (ticketIndex === -1) return;
 
   tickets[ticketIndex].status = status;
-  tickets[ticketIndex].assignee = assignee;
+  tickets[ticketIndex].description = description;
 
   renderTickets();
   updateStats();
@@ -269,6 +264,18 @@ function updateTicket() {
   modal.hide();
 
   showAlert("Ticket actualizado exitosamente!", "success");
+}
+
+// Setea los valores del ticket en el formulario de edición
+function openEditModal(ticket) {
+  document.getElementById("editTicketId").value = ticket.id;
+  document.getElementById("editTicketStatus").value =
+    ticket.status || "pendiente";
+  document.getElementById("editTicketDescription").value =
+    ticket.description || "";
+
+  const modal = new bootstrap.Modal(document.getElementById("editTicketModal"));
+  modal.show();
 }
 
 // Eliminar ticket
@@ -429,7 +436,6 @@ fetch("https://tickets.dev-wit.com/api/areas", {
   });
 
 const tipoSelect = document.getElementById("ticketAssignee");
-const tipoSelectEdit = document.getElementById("editTicketAssignee");
 const tipoAtencionFilterSelect = document.getElementById("tipoAtencionFilter");
 
 fetch("https://tickets.dev-wit.com/api/tipos", {
@@ -450,7 +456,7 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
 
     // Resetear selects
     tipoSelect.innerHTML = '<option value="">Sin asignar</option>';
-    tipoSelectEdit.innerHTML = '<option value="">Sin asignar</option>';
+    // tipoSelectEdit.innerHTML = '<option value="">Sin asignar</option>';
     tipoAtencionFilterSelect.innerHTML =
       '<option value="">Todos los tipos de atención</option>';
 
@@ -464,7 +470,6 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
       const option2 = document.createElement("option");
       option2.value = tipo.id;
       option2.textContent = tipo.nombre;
-      tipoSelectEdit.appendChild(option2);
 
       const option3 = document.createElement("option");
       option3.value = tipo.nombre; // ← Este debe coincidir con ticket.category si haces comparación por nombre
