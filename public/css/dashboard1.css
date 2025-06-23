@@ -757,54 +757,6 @@ body {
   color: #fff !important;
 }
 
-/* .table,
-.table * {
-  user-select: none !important;
-  -webkit-user-select: none !important;
-  -moz-user-select: none !important;
-  -ms-user-select: none !important;
-  -khtml-user-select: none !important;
-}
-
-.table tbody tr {
-  background-color: white !important;
-  box-shadow: 0 4px 15px rgba(44, 62, 80, 0.1) !important;
-  border: none !important;
-  outline: none !important;
-  transition: none !important;
-  cursor: default;
-  -webkit-tap-highlight-color: transparent !important;
-  -webkit-touch-callout: none !important;
-}
-
-.table tbody td {
-  background-color: transparent !important;
-  box-shadow: none !important;
-  border: none !important;
-  outline: none !important;
-  transition: none !important;
-}
-
-.table tbody tr:hover,
-.table tbody tr:focus,
-.table tbody tr:active {
-  background-color: white !important;
-  box-shadow: 0 4px 15px rgba(44, 62, 80, 0.1) !important;
-  border: none !important;
-  outline: none !important;
-  transition: none !important;
-}
-
-.table tbody td:hover,
-.table tbody td:focus,
-.table tbody td:active {
-  background-color: transparent !important;
-  box-shadow: none !important;
-  border: none !important;
-  outline: none !important;
-  transition: none !important;
-} */
-
 @media (max-width: 767.98px) {
   .table tbody tr {
     background-color: white !important;
