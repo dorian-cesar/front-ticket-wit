@@ -147,7 +147,7 @@ loginForm.addEventListener("submit", async function (e) {
   try {
     // Llamada a API
     const result = await Login(emailInput.value, passwordInput.value);
-    console.log(result)
+    console.log(result);
     const token = result.token;
     const nombre = result.user.nombre;
     const mail = result.user.mail;
@@ -177,7 +177,9 @@ loginForm.addEventListener("submit", async function (e) {
       .toLowerCase()
       .includes("credenciales");
 
-    if (isAuthError && isCredentialMessage) {
+    if (error.message === "Failed to fetch") {
+      showAlert("Servidor caído. Intenta nuevamente más tarde.", "danger");
+    } else if (isAuthError && isCredentialMessage) {
       handleLoginError(error.message);
     } else {
       showAlert(`Error al iniciar sesión: ${error.message}`, "danger");
@@ -275,7 +277,7 @@ function Login(email, password) {
             id: data.user.id,
             nombre: data.user.nombre,
             mail: email,
-            rol: data.user.rol
+            rol: data.user.rol,
           },
           token: data.token,
         });

@@ -3,13 +3,10 @@ let tiposAtencion = [];
 let areas = [];
 let tickets = [];
 
-// let nextTicketId = 6;
-
 // Elementos del DOM
 const ticketsTableBody = document.getElementById("ticketsTableBody");
-// const ticketsLoader = document.getElementById("ticketsLoader");
 const statusFilter = document.getElementById("statusFilter");
-const priorityFilter = document.getElementById("priorityFilter");
+const tipoAtencionFilter = document.getElementById("tipoAtencionFilter");
 const searchInput = document.getElementById("searchInput");
 const createTicketForm = document.getElementById("createTicketForm");
 const saveTicketBtn = document.getElementById("saveTicketBtn");
@@ -21,8 +18,6 @@ const userMail =
 
 // Inicializar el panel de control (dashboard)
 document.addEventListener("DOMContentLoaded", () => {
-  // renderTickets();
-  // updateStats();
   setupEventListeners();
 });
 
@@ -30,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function setupEventListeners() {
   // Filtros
   statusFilter.addEventListener("change", filterTickets);
-  priorityFilter.addEventListener("change", filterTickets);
+  tipoAtencionFilter.addEventListener("change", filterTickets);
   searchInput.addEventListener("input", filterTickets);
 
   // Crear ticket
@@ -82,11 +77,6 @@ function renderTickets(ticketsToRender = tickets) {
         </span>
       </td>
       <td>
-        <span class="badge priority-${ticket.priority} badge-priority">
-          ${getPriorityText(ticket.priority)}
-        </span>
-      </td>
-      <td>
         ${
           ticket.assignee
             ? `<div class="d-flex align-items-center">
@@ -135,19 +125,20 @@ function updateStats() {
 // Filtrar tickets
 function filterTickets() {
   const statusValue = statusFilter.value;
-  const priorityValue = priorityFilter.value;
+  const tipoAtencionValue = tipoAtencionFilter.value;
   const searchValue = searchInput.value.toLowerCase();
 
   const filteredTickets = tickets.filter((ticket) => {
     const matchesStatus = !statusValue || ticket.status === statusValue;
-    const matchesPriority = !priorityValue || ticket.priority === priorityValue;
+    const matchesTipoAtencion =
+      !tipoAtencionValue || ticket.category === tipoAtencionValue;
     const matchesSearch =
       !searchValue ||
       ticket.title.toLowerCase().includes(searchValue) ||
       ticket.description.toLowerCase().includes(searchValue) ||
       ticket.assignee.toLowerCase().includes(searchValue);
 
-    return matchesStatus && matchesPriority && matchesSearch;
+    return matchesStatus && matchesTipoAtencion && matchesSearch;
   });
 
   renderTickets(filteredTickets);
@@ -226,16 +217,16 @@ async function createTicket() {
       throw new Error(errorData.message || "Error al crear el ticket");
     }
 
-    const result = await response.json();
-
-    tickets.unshift(result);
-    renderTickets();
-    updateStats();
+    // const result = await response.json();
+    await loadTickets(solicitante.id);
 
     createTicketForm.reset();
     const modalElement = document.getElementById("createTicketModal");
     const modal = bootstrap.Modal.getInstance(modalElement);
     modal.hide();
+
+    renderTickets();
+    updateStats();
 
     console.log("data para crear ticket", newTicket);
     showAlert("Ticket creado exitosamente!", "success");
@@ -455,6 +446,7 @@ fetch("https://tickets.dev-wit.com/api/areas", {
 
 const tipoSelect = document.getElementById("ticketAssignee");
 const tipoSelectEdit = document.getElementById("editTicketAssignee");
+const tipoAtencionFilterSelect = document.getElementById("tipoAtencionFilter");
 
 fetch("https://tickets.dev-wit.com/api/tipos", {
   method: "GET",
@@ -471,10 +463,14 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
   })
   .then((data) => {
     tiposAtencion = data;
-    // Limpia y agrega opción por defecto
+
+    // Resetear selects
     tipoSelect.innerHTML = '<option value="">Sin asignar</option>';
     tipoSelectEdit.innerHTML = '<option value="">Sin asignar</option>';
+    tipoAtencionFilterSelect.innerHTML =
+      '<option value="">Todos los tipos de atención</option>';
 
+    // Agregar opciones a los tres selects
     data.forEach((tipo) => {
       const option1 = document.createElement("option");
       option1.value = tipo.id;
@@ -485,6 +481,11 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
       option2.value = tipo.id;
       option2.textContent = tipo.nombre;
       tipoSelectEdit.appendChild(option2);
+
+      const option3 = document.createElement("option");
+      option3.value = tipo.nombre; // ← Este debe coincidir con ticket.category si haces comparación por nombre
+      option3.textContent = tipo.nombre;
+      tipoAtencionFilterSelect.appendChild(option3);
     });
     console.log("tiposAtencion", tiposAtencion);
   })
@@ -556,5 +557,38 @@ getUserIdWhenReady((userId) => {
     .catch((err) => {
       console.error("Error cargando tickets:", err);
       showAlert("No se pudieron cargar los tickets.", "warning");
-    })
+    });
 });
+
+// Llamada para recargar tabla de tickets después de createTicket
+async function loadTickets(userId) {
+  try {
+    const response = await fetch(
+      `https://tickets.dev-wit.com/api/tickets/${userId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    const data = await response.json();
+    tickets = data.map((t) => ({
+      id: t.id,
+      title: t.area,
+      status: t.estado,
+      assignee: t.ejecutor,
+      category: t.tipo_atencion,
+      description: t.observaciones,
+      date: luxon.DateTime.fromISO(t.fecha_creacion)
+        .setZone("America/Santiago")
+        .toFormat("yyyy-MM-dd"),
+      priority: t.prioridad || "media",
+    }));
+
+    renderTickets(tickets);
+    updateStats();
+  } catch (err) {
+    console.error("Error recargando tickets:", err);
+    showAlert("No se pudieron recargar los tickets.", "warning");
+  }
+}
