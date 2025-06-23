@@ -113,7 +113,6 @@ function validateForm() {
     passwordInput.classList.remove("is-invalid");
     passwordInput.classList.add("is-valid");
   }
-
   return isValid;
 }
 
@@ -170,7 +169,8 @@ loginForm.addEventListener("submit", async function (e) {
       sessionStorage.setItem("userMail", mail);
       sessionStorage.setItem("userRole", rol);
     }
-    window.location.href = "/views/dashboard1.html";
+    window.location.href = "/views/dashboard-crear.html";
+    // window.location.href = "/views/options.html";
   } catch (error) {
     const isAuthError = [401, 403].includes(error.status);
     const isCredentialMessage = error.message

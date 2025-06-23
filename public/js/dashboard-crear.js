@@ -516,7 +516,7 @@ fetch("https://tickets.dev-wit.com/api/areas", {
       option.textContent = area.nombre;
       categorySelect.appendChild(option);
     });
-    console.log("tiposAreas", areas);
+    // console.log("tiposAreas", areas);
   })
   .catch((error) => {
     console.error("Error cargando categorías:", error);
@@ -563,7 +563,7 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
       option3.textContent = tipo.nombre;
       tipoAtencionFilterSelect.appendChild(option3);
     });
-    console.log("tiposAtencion", tiposAtencion);
+    // console.log("tiposAtencion", tiposAtencion);
   })
   .catch((error) => {
     console.error("Error cargando tipos de atención:", error);
@@ -583,7 +583,7 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
     }
     const data = await response.json();
     usersData = data;
-    console.log("usersData", usersData);
+    // console.log("usersData", usersData);
   } catch (error) {
     console.error("Error al obtener usuarios:", error);
   }

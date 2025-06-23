@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Tickets - Seleccionar Acción</title>
+    <link rel="stylesheet" href="/css/options.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script defer src="/js/options.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-ticket-alt"></i>
+                    <h1>Sistema de Tickets</h1>
+                </div>
+                <div class="user-info">
+                    <span class="welcome-text">Bienvenido, Usuario</span>
+                    <button class="logout-btn" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Cerrar Sesión
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="selection-container">
+                <div class="title-section">
+                    <h2>¿Qué deseas hacer hoy?</h2>
+                    <p>Selecciona una opción para continuar</p>
+                </div>
+
+                <div class="options-grid">
+                    <!-- Crear Tickets -->
+                    <div class="option-card create-card" onclick="navigateTo('crear')">
+                        <div class="card-icon">
+                            <i class="fas fa-plus-circle"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3>Crear Tickets</h3>
+                            <p>Reporta nuevos problemas, solicitudes o incidencias que requieran atención.</p>
+                            <ul class="feature-list">
+                                <li><i class="fas fa-check"></i> Crear nuevos tickets</li>
+                                <li><i class="fas fa-check"></i> Asignar prioridades</li>
+                                <li><i class="fas fa-check"></i> Adjuntar archivos</li>
+                            </ul>
+                        </div>
+                        <div class="card-action">
+                            <span class="action-text">Comenzar</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </div>
+
+                    <!-- Resolver Tickets -->
+                    <div class="option-card resolve-card" onclick="navigateTo('resolver')">
+                        <div class="card-icon">
+                            <i class="fas fa-tools"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3>Resolver Tickets</h3>
+                            <p>Gestiona y resuelve tickets existentes, actualiza estados y proporciona soluciones.</p>
+                            <ul class="feature-list">
+                                <li><i class="fas fa-check"></i> Ver tickets asignados</li>
+                                <li><i class="fas fa-check"></i> Actualizar estados</li>
+                                <li><i class="fas fa-check"></i> Comunicarse con usuarios</li>
+                            </ul>
+                        </div>
+                        <div class="card-action">
+                            <span class="action-text">Gestionar</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Section -->
+                <div class="stats-section">
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-ticket-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number">24</span>
+                            <span class="stat-label">Tickets Activos</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number">8</span>
+                            <span class="stat-label">Pendientes</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number">156</span>
+                            <span class="stat-label">Resueltos</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2024 Sistema de Tickets. Todos los derechos reservados.</p>
+        </footer>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Cargando...</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
