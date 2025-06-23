@@ -44,7 +44,11 @@ body {
 
 /* Header Styles */
 .header {
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--primary-color) 0%,
+    var(--secondary-color) 100%
+  );
   color: white;
   padding: 1rem 0;
   box-shadow: var(--shadow-medium);
