@@ -97,7 +97,7 @@ function renderTickets(ticketsToRender = tickets) {
           ${
             Array.isArray(ticket.historial) && ticket.historial.length > 0
               ? `<button class="btn btn-outline-secondary btn-action" onclick="openAdvanceModal(${ticket.id})" title="Avanzar Ticket">
-                  <i class="bi bi-forward-fill"></i>
+                   <i class="bi bi-forward-fill text-success"></i>
                 </button>`
               : `<button class="btn btn-outline-primary btn-action" onclick="editTicket(${ticket.id})" title="Editar Ticket">
                   <i class="bi bi-pencil"></i>
