@@ -131,13 +131,19 @@ function openAdvanceModal(id) {
 
 // Actualizar estadísticas
 function updateStats() {
-  const completed = tickets.filter((t) => t.status === "completado").length;
-  const pending = tickets.filter((t) => t.status === "pendiente").length;
-  const waiting = tickets.filter((t) => t.status === "esperando").length;
+  const creado = tickets.filter((t) => t.status === "creado").length;
+  const ejecucion = tickets.filter((t) => t.status === "ejecucion").length;
+  const espera = tickets.filter((t) => t.status === "espera").length;
+  const pendiente = tickets.filter((t) => t.status === "pendiente").length;
+  const cancelado = tickets.filter((t) => t.status === "cancelado").length;
+  const completado = tickets.filter((t) => t.status === "completado").length;
 
-  document.getElementById("completedCount").textContent = completed;
-  document.getElementById("pendingCount").textContent = pending;
-  document.getElementById("waitingCount").textContent = waiting;
+  document.getElementById("creadoCount").textContent = creado;
+  document.getElementById("ejecucionCount").textContent = ejecucion;
+  document.getElementById("esperaCount").textContent = espera;
+  document.getElementById("pendingCount").textContent = pendiente;
+  document.getElementById("canceladoCount").textContent = cancelado;
+  document.getElementById("completedCount").textContent = completado;
 }
 
 // Filtrar tickets
@@ -397,8 +403,11 @@ function viewTicket(id) {
 // Funciones auxiliares / utilitarias
 function getStatusText(status) {
   const statusMap = {
+    creado: "Creado",
+    ejecucion: "En ejecución",
+    espera: "En espera",
     pendiente: "Pendiente",
-    esperando: "Esperando Respuesta",
+    cancelado: "Cancelado",
     completado: "Completado",
   };
   return statusMap[status] || status;
@@ -406,8 +415,11 @@ function getStatusText(status) {
 
 function getStatusIcon(status) {
   const iconMap = {
+    creado: '<i class="bi bi-plus-circle"></i>',
+    ejecucion: '<i class="bi bi-play-circle"></i>',
+    espera: '<i class="bi bi-hourglass-split"></i>',
     pendiente: '<i class="bi bi-clock"></i>',
-    esperando: '<i class="bi bi-hourglass-split"></i>',
+    cancelado: '<i class="bi bi-x-circle"></i>',
     completado: '<i class="bi bi-check-circle"></i>',
   };
   return iconMap[status] || "";

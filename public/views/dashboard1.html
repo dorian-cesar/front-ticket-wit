@@ -61,26 +61,53 @@
 
       <!-- Tarjetas de Estadísticas -->
       <div class="row mt-4">
-        <div class="col-md-4 mb-3">
-          <div class="card border-success">
+        <div class="col-6 col-md-4 mb-3">
+          <div class="card border-primary card-status">
             <div class="card-body text-center">
               <div class="d-flex justify-content-between align-items-center">
                 <div>
-                  <h5 class="card-title text-success">Completados</h5>
-                  <h2 class="mb-0" id="completedCount">0</h2>
+                  <h5 class="card-title text-primary">Creados</h5>
+                  <h2 class="mb-0" id="creadoCount">0</h2>
                 </div>
-                <div class="text-success">
-                  <i
-                    class="bi bi-check-circle-fill"
-                    style="font-size: 3rem"
-                  ></i>
+                <div class="text-primary">
+                  <i class="bi bi-plus-circle-fill" style="font-size: 3rem"></i>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div class="col-md-4 mb-3">
-          <div class="card border-warning">
+        <div class="col-6 col-md-4 mb-3">
+          <div class="card border-secondary card-status">
+            <div class="card-body text-center">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h5 class="card-title text-accent-dark">En ejecución</h5>
+                  <h2 class="mb-0 text-accent-dark" id="ejecucionCount">0</h2>
+                </div>
+                <div class="text-accent-dark">
+                  <i class="bi bi-play-circle-fill" style="font-size: 3rem"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-4 mb-3">
+          <div class="card border-info card-status">
+            <div class="card-body text-center">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h5 class="card-title text-info">En espera</h5>
+                  <h2 class="mb-0" id="esperaCount">0</h2>
+                </div>
+                <div class="text-info">
+                  <i class="bi bi-hourglass-split" style="font-size: 3rem"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-4 mb-3">
+          <div class="card border-warning card-status">
             <div class="card-body text-center">
               <div class="d-flex justify-content-between align-items-center">
                 <div>
@@ -94,16 +121,34 @@
             </div>
           </div>
         </div>
-        <div class="col-md-4 mb-3">
-          <div class="card border-info">
+        <div class="col-6 col-md-4 mb-3">
+          <div class="card border-danger card-status">
             <div class="card-body text-center">
               <div class="d-flex justify-content-between align-items-center">
                 <div>
-                  <h5 class="card-title text-info">Esperando Respuesta</h5>
-                  <h2 class="mb-0" id="waitingCount">0</h2>
+                  <h5 class="card-title text-danger">Cancelados</h5>
+                  <h2 class="mb-0" id="canceladoCount">0</h2>
                 </div>
-                <div class="text-info">
-                  <i class="bi bi-hourglass-split" style="font-size: 3rem"></i>
+                <div class="text-danger">
+                  <i class="bi bi-x-circle-fill" style="font-size: 3rem"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-4 mb-3">
+          <div class="card border-success card-status">
+            <div class="card-body text-center">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h5 class="card-title text-success">Completados</h5>
+                  <h2 class="mb-0" id="completedCount">0</h2>
+                </div>
+                <div class="text-success">
+                  <i
+                    class="bi bi-check-circle-fill"
+                    style="font-size: 3rem"
+                  ></i>
                 </div>
               </div>
             </div>
@@ -146,9 +191,12 @@
                 <div class="col-md-4">
                   <select class="form-select" id="statusFilter">
                     <option value="">Todos los estados</option>
-                    <option value="pendiente">Pendientes</option>
-                    <option value="esperando">Esperando Respuesta</option>
-                    <option value="completado">Completados</option>
+                    <option value="creado">Creado</option>
+                    <option value="ejecucion">En ejecución</option>
+                    <option value="espera">En espera</option>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="cancelado">Cancelado</option>
+                    <option value="completado">Completado</option>
                   </select>
                 </div>
                 <div class="col-md-4">
@@ -291,9 +339,12 @@
               <input type="hidden" id="editTicketId" />
               <div class="mb-3">
                 <label for="editTicketStatus" class="form-label">Estado</label>
-                <select class="form-select" id="editTicketStatus">
+                <select id="editTicketStatus" class="form-select">
+                  <option value="creado">Creado</option>
+                  <option value="ejecucion">En ejecución</option>
+                  <option value="espera">En espera</option>
                   <option value="pendiente">Pendiente</option>
-                  <option value="esperando">Esperando Respuesta</option>
+                  <option value="cancelado">Cancelado</option>
                   <option value="completado">Completado</option>
                 </select>
               </div>

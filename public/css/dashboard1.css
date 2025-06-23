@@ -13,7 +13,7 @@
   /* Colores adicionales derivados */
   --primary-light: #34495e;
   --primary-dark: #1a252f;
-  --accent-light: #5dade2;
+  --accent-light: #64b8f0;
   --accent-dark: #2980b9;
   --text-dark: #2c3e50;
   --text-light: #7f8c8d;
@@ -93,7 +93,7 @@ body {
 }
 
 .card.border-info {
-  border-left: 4px solid var(--accent-color) !important;
+  border-left: 4px solid var(--accent-light) !important;
 }
 
 .text-success {
@@ -105,7 +105,11 @@ body {
 }
 
 .text-info {
-  color: var(--accent-color) !important;
+  color: var(--accent-light) !important;
+}
+
+.text-accent-dark {
+  color: var(--accent-dark) !important;
 }
 
 /* Botones personalizados */
@@ -283,37 +287,28 @@ body {
   color: white;
 }
 
-.status-esperando {
-  background-color: var(--accent-color);
-  color: white;
-}
-
 .status-completado {
   background-color: var(--success-color);
   color: white;
 }
 
-/* Priority Badges */
-.badge-priority {
-  font-size: 0.65rem;
-  padding: 0.3rem 0.6rem;
-  border-radius: 15px;
-  font-weight: 600;
-  text-transform: uppercase;
+.status-creado {
+  background-color: var(--primary-color);
+  color: white;
 }
 
-.priority-alta {
+.status-ejecucion {
+  background-color: var(--accent-dark);
+  color: white;
+}
+
+.status-cancelado {
   background-color: var(--danger-color);
   color: white;
 }
 
-.priority-media {
-  background-color: var(--warning-color);
-  color: white;
-}
-
-.priority-baja {
-  background-color: var(--dark-gray);
+.status-espera {
+  background-color: var(--accent-light);
   color: white;
 }
 
@@ -795,5 +790,25 @@ body {
     border: none !important;
     outline: none !important;
     transition: none !important;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .card.card-status {
+    padding: 0.5rem !important;
+    margin-bottom: 0.75rem;
+    box-shadow: 0 2px 8px var(--shadow-light);
+  }
+
+  .card.card-status .card-title {
+    font-size: 0.9rem;
+  }
+
+  .card.card-status h2 {
+    font-size: 1.3rem;
+  }
+
+  .card.card-status i {
+    font-size: 2rem !important;
   }
 }
