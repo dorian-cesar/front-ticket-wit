@@ -36,13 +36,13 @@ function setupEventListeners() {
 
   // Validación del formulario
   document
-    .getElementById("ticketTitle")
-    .addEventListener("input", validateForm);
-  document
     .getElementById("ticketDescription")
     .addEventListener("input", validateForm);
   document
-    .getElementById("ticketPriority")
+    .getElementById("ticketAssignee")
+    .addEventListener("change", validateForm);
+  document
+    .getElementById("ticketCategory")
     .addEventListener("change", validateForm);
 }
 
@@ -156,8 +156,6 @@ async function createTicket() {
   btnText.textContent = "Creando...";
   saveBtn.disabled = true;
 
-  const title = document.getElementById("ticketTitle").value.trim();
-  const priority = document.getElementById("ticketPriority").value;
   const areaSolicitante = parseInt(
     document.getElementById("ticketAssignee").value,
     10
@@ -168,9 +166,8 @@ async function createTicket() {
   );
   const description = document.getElementById("ticketDescription").value.trim();
 
-  if (!title || !priority || !description) {
+  if (!description || !tipoAtencion || !areaSolicitante) {
     showAlert("Por favor, completa todos los campos obligatorios.", "warning");
-
     btnSpinner.classList.add("d-none");
     btnIcon.classList.remove("d-none");
     btnText.textContent = "Crear Ticket";
@@ -217,7 +214,7 @@ async function createTicket() {
       throw new Error(errorData.message || "Error al crear el ticket");
     }
 
-    // const result = await response.json();
+    // Recargar tabla de tickets
     await loadTickets(solicitante.id);
 
     createTicketForm.reset();
@@ -225,14 +222,11 @@ async function createTicket() {
     const modal = bootstrap.Modal.getInstance(modalElement);
     modal.hide();
 
-    renderTickets();
-    updateStats();
-
     console.log("data para crear ticket", newTicket);
     showAlert("Ticket creado exitosamente!", "success");
   } catch (error) {
     console.error("Error al crear ticket:", error);
-    showAlert("No se pudo crear el ticket. " + error.message, "danger");
+    showAlert("No se pudo crear el ticket. " + error.message, "error");
   } finally {
     btnSpinner.classList.add("d-none");
     btnIcon.classList.remove("d-none");
@@ -305,11 +299,10 @@ function viewTicket(id) {
 
   const details = `
     <p><strong>ID:</strong> #${ticket.id}</p>
-    <p><strong>Título:</strong> ${ticket.title}</p>
+    <p><strong>Área:</strong> ${ticket.title}</p>
     <p><strong>Estado:</strong> ${getStatusText(ticket.status)}</p>
-    <p><strong>Prioridad:</strong> ${getPriorityText(ticket.priority)}</p>
     <p><strong>Asignado a:</strong> ${ticket.assignee || "Sin asignar"}</p>
-    <p><strong>Categoría:</strong> ${ticket.category}</p>
+    <p><strong>Tipo de Atención:</strong> ${ticket.category}</p>
     <p><strong>Fecha:</strong> ${formatDate(ticket.date)}</p>
     <p><strong>Descripción:</strong> ${ticket.description}</p>
   `;
@@ -338,15 +331,6 @@ function getStatusIcon(status) {
   return iconMap[status] || "";
 }
 
-function getPriorityText(priority) {
-  const priorityMap = {
-    alta: "Alta",
-    media: "Media",
-    baja: "Baja",
-  };
-  return priorityMap[priority] || priority;
-}
-
 function formatDate(dateString) {
   return luxon.DateTime.fromISO(dateString, { zone: "America/Santiago" })
     .setLocale("es")
@@ -355,11 +339,11 @@ function formatDate(dateString) {
 
 // Validar formulario
 function validateForm() {
-  const title = document.getElementById("ticketTitle").value.trim();
   const description = document.getElementById("ticketDescription").value.trim();
-  const priority = document.getElementById("ticketPriority").value;
+  const tipoAtencion = document.getElementById("ticketAssignee").value;
+  const areaSolicitante = document.getElementById("ticketCategory").value;
 
-  const isValid = title && description && priority;
+  const isValid = description && tipoAtencion && areaSolicitante;
   saveTicketBtn.disabled = !isValid;
 }
 
