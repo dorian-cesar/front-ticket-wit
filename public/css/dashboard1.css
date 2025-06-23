@@ -140,7 +140,6 @@ body {
   cursor: not-allowed;
 }
 
-
 .btn-secondary {
   background-color: var(--dark-gray);
   border-color: var(--dark-gray);
@@ -629,5 +628,65 @@ body {
 
 .swal2-confirm,
 .swal2-cancel {
-  border-radius: 8px !important; 
+  border-radius: 8px !important;
+}
+
+/* Tickets modal history */
+
+.ticket-history-entry {
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background-color: var(--light-gray);
+  border-left: 4px solid var(--accent-color);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px var(--shadow-light);
+}
+
+.ticket-history-entry time {
+  font-size: 0.8rem;
+  color: var(--text-light);
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+.ticket-history-entry .user {
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.ticket-history-entry .change {
+  font-size: 0.85rem;
+  margin-top: 0.3rem;
+}
+
+.ticket-history-entry .note {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--dark-gray);
+}
+
+@media (prefers-color-scheme: dark) {
+  .ticket-history-entry {
+    background-color: #3c4a59;
+    border-left: 4px solid var(--accent-light);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 10px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .ticket-history-entry time,
+  .ticket-history-entry .note {
+    color: #dce3ea;
+  }
+
+  .ticket-history-entry .user {
+    color: #74b9ff;
+    font-weight: bold;
+  }
+
+  .ticket-history-entry .change {
+    color: #ffffff;
+  }
 }

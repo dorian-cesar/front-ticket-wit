@@ -165,6 +165,7 @@ async function createTicket() {
     10
   );
   const description = document.getElementById("ticketDescription").value.trim();
+  const attachmentInput = document.getElementById("ticketAttachment");
 
   if (!description || !tipoAtencion || !areaSolicitante) {
     showAlert("Por favor, completa todos los campos obligatorios.", "warning");
@@ -181,7 +182,6 @@ async function createTicket() {
       "No se encontró el usuario logueado en los datos de usuarios.",
       "danger"
     );
-
     btnSpinner.classList.add("d-none");
     btnIcon.classList.remove("d-none");
     btnText.textContent = "Crear Ticket";
@@ -189,12 +189,20 @@ async function createTicket() {
     return;
   }
 
-  const newTicket = {
-    solicitante_id: solicitante.id,
-    area_id: tipoAtencion,
-    tipo_atencion_id: areaSolicitante,
-    observaciones: description,
-  };
+  const formData = new FormData();
+  formData.append("solicitante_id", solicitante.id);
+  formData.append("area_id", areaSolicitante);
+  formData.append("tipo_atencion_id", tipoAtencion);
+  formData.append("observaciones", description);
+
+  if (attachmentInput.files.length > 0) {
+    formData.append("archivo", attachmentInput.files[0]);
+  }
+
+  // console.log para debug
+  for (const [key, value] of formData.entries()) {
+    console.log(`${key}:`, value);
+  }
 
   try {
     const response = await fetch(
@@ -202,10 +210,9 @@ async function createTicket() {
       {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(newTicket),
+        body: formData,
       }
     );
 
@@ -222,7 +229,6 @@ async function createTicket() {
     const modal = bootstrap.Modal.getInstance(modalElement);
     modal.hide();
 
-    console.log("data para crear ticket", newTicket);
     showAlert("Ticket creado exitosamente!", "success");
   } catch (error) {
     console.error("Error al crear ticket:", error);
@@ -299,10 +305,39 @@ function deleteTicket(id) {
   });
 }
 
+function formatHistorial(historial) {
+  if (!Array.isArray(historial) || historial.length === 0) {
+    return "<p class='text-muted'><em>Sin historial disponible.</em></p>";
+  }
+
+  return historial
+    .map((h) => {
+      const fecha = luxon.DateTime.fromISO(h.fecha, {
+        zone: "America/Santiago",
+      })
+        .setLocale("es")
+        .toFormat("dd/MM/yyyy HH:mm");
+
+      return `
+        <div class="ticket-history-entry">
+          <time>🕒 ${fecha}</time>
+          <div class="user">👤 ${h.usuario_cambio}</div>
+          <div class="change">🔄 ${h.estado_anterior} → <strong>${h.nuevo_estado}</strong></div>
+          <div class="note">📝 ${h.observacion}</div>
+        </div>
+      `;
+    })
+    .join("");
+}
+
 // Ver detalles del ticket
 function viewTicket(id) {
   const ticket = tickets.find((t) => t.id === id);
   if (!ticket) return;
+
+  // Si quieres hacer una llamada API para obtener el historial en vivo, hazlo aquí (opcional)
+
+  const historialHtml = formatHistorial(ticket.historial);
 
   const details = `
     <p><strong>ID:</strong> #${ticket.id}</p>
@@ -312,6 +347,9 @@ function viewTicket(id) {
     <p><strong>Tipo de Atención:</strong> ${ticket.category}</p>
     <p><strong>Fecha:</strong> ${formatDate(ticket.date)}</p>
     <p><strong>Descripción:</strong> ${ticket.description}</p>
+    <hr>
+    <h6 class="mt-3">📚 Historial del Ticket</h6>
+    ${historialHtml}
   `;
 
   document.getElementById("ticketModalBody").innerHTML = details;
@@ -537,7 +575,7 @@ getUserIdWhenReady((userId) => {
         date: luxon.DateTime.fromISO(t.fecha_creacion)
           .setZone("America/Santiago")
           .toFormat("yyyy-MM-dd"),
-        priority: t.prioridad || "media",
+        historial: t.historial || [],
       }));
 
       renderTickets(tickets);
@@ -571,7 +609,7 @@ async function loadTickets(userId) {
       date: luxon.DateTime.fromISO(t.fecha_creacion)
         .setZone("America/Santiago")
         .toFormat("yyyy-MM-dd"),
-      priority: t.prioridad || "media",
+      historial: t.historial || [],
     }));
 
     renderTickets(tickets);
