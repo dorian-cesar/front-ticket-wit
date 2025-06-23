@@ -57,13 +57,13 @@ function renderTickets(ticketsToRender = tickets) {
 
   if (!Array.isArray(ticketsToRender) || ticketsToRender.length === 0) {
     ticketsTableBody.innerHTML = `
-      <tr>
-        <td colspan="7" class="text-center text-muted py-4">
-          <i class="bi bi-inbox display-4 d-block mb-2"></i>
-          No se encontraron tickets
-        </td>
-      </tr>
-    `;
+    <tr class="no-tickets-row">
+      <td colspan="7" class="text-center text-muted py-4">
+        <i class="bi bi-inbox display-4 d-block mb-2"></i>
+        No se encontraron tickets
+      </td>
+    </tr>
+  `;
     return;
   }
 
@@ -71,17 +71,17 @@ function renderTickets(ticketsToRender = tickets) {
     const row = document.createElement("tr");
     row.className = "new-ticket";
     row.innerHTML = `
-      <td><strong>#${ticket.id}</strong></td>
-      <td>
+      <td data-label="ID"><strong>#${ticket.id}</strong></td>
+      <td data-label="Área">
         <div class="fw-semibold">${ticket.title}</div>
         <small class="text-muted">${ticket.category}</small>
       </td>
-      <td>
+      <td data-label="Estado">
         <span class="badge status-${ticket.status} badge-status">
           ${getStatusIcon(ticket.status)} ${getStatusText(ticket.status)}
         </span>
       </td>
-      <td>
+      <td data-label="Asignado">
         ${
           ticket.assignee
             ? `<div class="d-flex align-items-center">
@@ -91,29 +91,42 @@ function renderTickets(ticketsToRender = tickets) {
             : '<span class="text-muted">Sin asignar</span>'
         }
       </td>
-      <td><small>${formatDate(ticket.date)}</small></td>
-      <td>
+      <td data-label="Fecha"><small>${formatDate(ticket.date)}</small></td>
+      <td data-label="Acciones">
         <div class="btn-group" role="group">
-          <button class="btn btn-outline-primary btn-action" onclick="editTicket(${
-            ticket.id
-          })" title="Editar">
-            <i class="bi bi-pencil"></i>
-          </button>
-          <button class="btn btn-outline-danger btn-action" onclick="deleteTicket(${
-            ticket.id
-          })" title="Eliminar">
-            <i class="bi bi-trash"></i>
-          </button>
+          ${
+            Array.isArray(ticket.historial) && ticket.historial.length > 0
+              ? `<button class="btn btn-outline-secondary btn-action" onclick="openAdvanceModal(${ticket.id})" title="Avanzar Ticket">
+                  <i class="bi bi-forward-fill"></i>
+                </button>`
+              : `<button class="btn btn-outline-primary btn-action" onclick="editTicket(${ticket.id})" title="Editar Ticket">
+                  <i class="bi bi-pencil"></i>
+                </button>`
+          }
           <button class="btn btn-outline-info btn-action" onclick="viewTicket(${
             ticket.id
           })" title="Ver detalles">
             <i class="bi bi-eye"></i>
           </button>
         </div>
-      </td>
-    `;
+      </td>`;
     ticketsTableBody.appendChild(row);
   });
+}
+
+// Avanzar ticket
+function openAdvanceModal(id) {
+  const ticket = tickets.find((t) => t.id === id);
+  if (!ticket) return;
+
+  document.getElementById("editTicketId").value = ticket.id;
+  document.getElementById("editTicketStatus").value =
+    ticket.status || "pendiente";
+  document.getElementById("editTicketDescription").value =
+    ticket.description || "";
+
+  const modal = new bootstrap.Modal(document.getElementById("editTicketModal"));
+  modal.show();
 }
 
 // Actualizar estadísticas
@@ -249,9 +262,14 @@ async function createTicket() {
 // Editar ticket
 function editTicket(id) {
   const ticket = tickets.find((t) => t.id === id);
-  if (ticket) {
-    openEditModal(ticket);
+  if (!ticket) return;
+
+  if (Array.isArray(ticket.historial) && ticket.historial.length > 0) {
+    showAlert("Este ticket ya tiene historial. Solo se puede avanzar.", "info");
+    return;
   }
+
+  openEditModal(ticket);
 }
 
 // Actualizar ticket
@@ -353,11 +371,21 @@ function viewTicket(id) {
   const details = `
     <p><strong>ID:</strong> #${ticket.id}</p>
     <p><strong>Área:</strong> ${ticket.title || ticket.area}</p>
-    <p><strong>Estado:</strong> ${getStatusText(ticket.status || ticket.estado)}</p>
-    <p><strong>Asignado a:</strong> ${ticket.assignee || ticket.ejecutor || "Sin asignar"}</p>
-    <p><strong>Tipo de Atención:</strong> ${ticket.category || ticket.tipo_atencion}</p>
-    <p><strong>Fecha:</strong> ${formatDate(ticket.date || ticket.fecha_creacion)}</p>
-    <p><strong>Descripción:</strong> ${ticket.description || ticket.observaciones}</p>
+    <p><strong>Estado:</strong> ${getStatusText(
+      ticket.status || ticket.estado
+    )}</p>
+    <p><strong>Asignado a:</strong> ${
+      ticket.assignee || ticket.ejecutor || "Sin asignar"
+    }</p>
+    <p><strong>Tipo de Atención:</strong> ${
+      ticket.category || ticket.tipo_atencion
+    }</p>
+    <p><strong>Fecha:</strong> ${formatDate(
+      ticket.date || ticket.fecha_creacion
+    )}</p>
+    <p><strong>Descripción:</strong> ${
+      ticket.description || ticket.observaciones
+    }</p>
     ${historialSection}
   `;
 

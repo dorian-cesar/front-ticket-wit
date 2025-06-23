@@ -479,6 +479,64 @@ body {
   }
 }
 
+@media (max-width: 575.98px) {
+  .responsive-refresh-btn {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .responsive-refresh-btn i {
+    font-size: 1rem;
+  }
+}
+
+/* Tabla responsive */
+@media (max-width: 767.98px) {
+  .table thead {
+    display: none;
+  }
+
+  .table tbody tr {
+    display: block;
+    margin-bottom: 1rem;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px var(--shadow-light);
+    padding: 1rem;
+  }
+
+  .table tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border: none;
+    position: relative;
+  }
+
+  .table tbody td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--text-light);
+    flex: 1;
+    max-width: 50%;
+    padding-right: 1rem;
+  }
+
+  .table tbody td > * {
+    max-width: 50%;
+    text-align: right;
+  }
+
+  .no-tickets-row td {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+}
+
 /* Responsive Design - Desktop */
 @media (min-width: 768px) {
   .navbar-brand {
@@ -690,5 +748,100 @@ body {
 
   .ticket-history-entry .change {
     color: #ffffff;
+  }
+}
+
+.refresh-btn {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  color: #fff !important;
+}
+
+/* .table,
+.table * {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  -khtml-user-select: none !important;
+}
+
+.table tbody tr {
+  background-color: white !important;
+  box-shadow: 0 4px 15px rgba(44, 62, 80, 0.1) !important;
+  border: none !important;
+  outline: none !important;
+  transition: none !important;
+  cursor: default;
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none !important;
+}
+
+.table tbody td {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  outline: none !important;
+  transition: none !important;
+}
+
+.table tbody tr:hover,
+.table tbody tr:focus,
+.table tbody tr:active {
+  background-color: white !important;
+  box-shadow: 0 4px 15px rgba(44, 62, 80, 0.1) !important;
+  border: none !important;
+  outline: none !important;
+  transition: none !important;
+}
+
+.table tbody td:hover,
+.table tbody td:focus,
+.table tbody td:active {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  outline: none !important;
+  transition: none !important;
+} */
+
+@media (max-width: 767.98px) {
+  .table tbody tr {
+    background-color: white !important;
+    box-shadow: 0 4px 15px rgba(44, 62, 80, 0.1) !important;
+    border: none !important;
+    outline: none !important;
+    transition: none !important;
+    cursor: default;
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-touch-callout: none !important;
+  }
+
+  .table tbody td {
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    outline: none !important;
+    transition: none !important;
+  }
+
+  .table tbody tr:hover,
+  .table tbody tr:focus,
+  .table tbody tr:active {
+    background-color: white !important;
+    box-shadow: 0 4px 15px rgba(44, 62, 80, 0.1) !important;
+    border: none !important;
+    outline: none !important;
+    transition: none !important;
+  }
+
+  .table tbody td:hover,
+  .table tbody td:focus,
+  .table tbody td:active {
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    outline: none !important;
+    transition: none !important;
   }
 }
