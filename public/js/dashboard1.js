@@ -333,23 +333,27 @@ function formatHistorial(historial) {
 // Ver detalles del ticket
 function viewTicket(id) {
   const ticket = tickets.find((t) => t.id === id);
-  if (!ticket) return;
-
-  // Si quieres hacer una llamada API para obtener el historial en vivo, hazlo aquí (opcional)
+  if (!ticket) return showAlert("Ticket no encontrado", "warning");
 
   const historialHtml = formatHistorial(ticket.historial);
 
+  const historialSection = historialHtml.includes("Sin historial disponible")
+    ? ""
+    : `
+      <hr>
+      <h5 class="mt-4 mb-3 fw-bold">Historial del Ticket</h5>
+      ${historialHtml}
+    `;
+
   const details = `
     <p><strong>ID:</strong> #${ticket.id}</p>
-    <p><strong>Área:</strong> ${ticket.title}</p>
-    <p><strong>Estado:</strong> ${getStatusText(ticket.status)}</p>
-    <p><strong>Asignado a:</strong> ${ticket.assignee || "Sin asignar"}</p>
-    <p><strong>Tipo de Atención:</strong> ${ticket.category}</p>
-    <p><strong>Fecha:</strong> ${formatDate(ticket.date)}</p>
-    <p><strong>Descripción:</strong> ${ticket.description}</p>
-    <hr>
-    <h6 class="mt-3">📚 Historial del Ticket</h6>
-    ${historialHtml}
+    <p><strong>Área:</strong> ${ticket.title || ticket.area}</p>
+    <p><strong>Estado:</strong> ${getStatusText(ticket.status || ticket.estado)}</p>
+    <p><strong>Asignado a:</strong> ${ticket.assignee || ticket.ejecutor || "Sin asignar"}</p>
+    <p><strong>Tipo de Atención:</strong> ${ticket.category || ticket.tipo_atencion}</p>
+    <p><strong>Fecha:</strong> ${formatDate(ticket.date || ticket.fecha_creacion)}</p>
+    <p><strong>Descripción:</strong> ${ticket.description || ticket.observaciones}</p>
+    ${historialSection}
   `;
 
   document.getElementById("ticketModalBody").innerHTML = details;

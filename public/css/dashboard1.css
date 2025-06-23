@@ -634,24 +634,28 @@ body {
 /* Tickets modal history */
 
 .ticket-history-entry {
+  background-color: #ffffff;
+  border-left: 4px solid var(--accent-color);
+  box-shadow: 0 4px 10px var(--shadow-light);
   padding: 1rem;
   margin-bottom: 1rem;
-  background-color: var(--light-gray);
-  border-left: 4px solid var(--accent-color);
   border-radius: 10px;
-  box-shadow: 0 2px 8px var(--shadow-light);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  color: var(--text-dark);
 }
 
-.ticket-history-entry time {
-  font-size: 0.8rem;
-  color: var(--text-light);
+.ticket-history-entry time,
+.ticket-history-entry .note,
+.ticket-history-entry .user,
+.ticket-history-entry .change {
   display: block;
-  margin-bottom: 0.3rem;
+  margin-bottom: 4px;
+  color: var(--text-dark);
 }
 
 .ticket-history-entry .user {
-  font-weight: 600;
-  color: var(--primary-color);
+  font-weight: bold;
+  color: var(--primary-dark);
 }
 
 .ticket-history-entry .change {
@@ -662,27 +666,25 @@ body {
 .ticket-history-entry .note {
   margin-top: 0.5rem;
   font-size: 0.85rem;
-  color: var(--dark-gray);
+  color: var(--primary-color);
 }
 
 @media (prefers-color-scheme: dark) {
   .ticket-history-entry {
-    background-color: #3c4a59;
+    background-color: #415061;
     border-left: 4px solid var(--accent-light);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    padding: 1rem;
-    margin-bottom: 1rem;
-    border-radius: 10px;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    color: var(--text-dark);
   }
 
   .ticket-history-entry time,
-  .ticket-history-entry .note {
+  .ticket-history-entry .note,
+  .ticket-history-entry .change {
     color: #dce3ea;
   }
 
   .ticket-history-entry .user {
-    color: #74b9ff;
+    color: #ebebeb;
     font-weight: bold;
   }
 
