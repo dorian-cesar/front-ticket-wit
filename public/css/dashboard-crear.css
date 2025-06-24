@@ -9,6 +9,7 @@
   --danger-color: #e74c3c;
   --light-gray: #ecf0f1;
   --dark-gray: #7f8c8d;
+  --primary-bootstrap: #0d6efd;
 
   /* Colores adicionales derivados */
   --primary-light: #34495e;
@@ -97,7 +98,7 @@ body {
 }
 
 .card.border-primary {
-  border-left: 4px solid var(--primary-color) !important; /* creado */
+  border-left: 4px solid var(--primary-bootstrap) !important; /* creado */
 }
 
 .card.border-accent {
