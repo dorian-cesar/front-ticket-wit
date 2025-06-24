@@ -303,7 +303,7 @@ async function updateTicket() {
   const nuevoEstado = document.getElementById("editTicketStatus").value;
   const observacion = document.getElementById("editTicketDescription").value;
 
-  console.log("nuevo estado:", nuevoEstado)
+  console.log("nuevo estado:", nuevoEstado);
 
   const payload = {
     nuevo_estado: nuevoEstado,
@@ -643,19 +643,16 @@ function getUserIdWhenReady(callback) {
 
 // Llamada tickets con la id del usuario
 getUserIdWhenReady((userId) => {
-  fetch("https://tickets.dev-wit.com/api/tickets", {
+  const endpoint = `https://tickets.dev-wit.com/api/tickets/ejecutor/${userId}`;
+
+  fetch(endpoint, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   })
     .then((res) => res.json())
     .then((data) => {
-      const filteredData =
-        userRole === "ejecutor"
-          ? data.filter((t) => t.id_ejecutor === userId)
-          : data;
-
-      tickets = filteredData.map((t) => ({
+      tickets = data.map((t) => ({
         id: t.id,
         title: t.area,
         status: t.estado,
@@ -680,20 +677,17 @@ getUserIdWhenReady((userId) => {
 
 // Llamada para recargar tabla de tickets después de createTicket
 async function loadTickets(userId) {
+  const endpoint = `https://tickets.dev-wit.com/api/tickets/ejecutor/${userId}`;
+
   try {
-    const response = await fetch("https://tickets.dev-wit.com/api/tickets", {
+    const response = await fetch(endpoint, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
     const data = await response.json();
 
-    const filteredData =
-      userRole === "ejecutor"
-        ? data.filter((t) => t.id_ejecutor === userId)
-        : data;
-
-    tickets = filteredData.map((t) => ({
+    tickets = data.map((t) => ({
       id: t.id,
       title: t.area,
       status: t.estado,
