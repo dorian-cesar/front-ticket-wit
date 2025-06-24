@@ -17,6 +17,8 @@ const userMail =
   localStorage.getItem("userMail") || sessionStorage.getItem("userMail");
 const userRole =
   localStorage.getItem("userRole") || sessionStorage.getItem("userRole");
+const userId =
+  localStorage.getItem("userId") || sessionStorage.getItem("userId");
 
 // Inicializar el panel de control (dashboard)
 document.addEventListener("DOMContentLoaded", () => {
@@ -301,9 +303,12 @@ async function updateTicket() {
   const nuevoEstado = document.getElementById("editTicketStatus").value;
   const observacion = document.getElementById("editTicketDescription").value;
 
+  console.log("nuevo estado:", nuevoEstado)
+
   const payload = {
     nuevo_estado: nuevoEstado,
     observacion: observacion,
+    usuario_id: userId,
   };
 
   try {
@@ -676,7 +681,7 @@ getUserIdWhenReady((userId) => {
 // Llamada para recargar tabla de tickets después de createTicket
 async function loadTickets(userId) {
   try {
-    const response = await fetch("https://tickets.dev-wit.com/api/tickets/", {
+    const response = await fetch("https://tickets.dev-wit.com/api/tickets", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
