@@ -387,6 +387,7 @@ function viewTicket(id) {
       ${historialHtml}
     `;
 
+  const archivoUrl = `https://tickets.dev-wit.com/uploads/${ticket.archivo_pdf}`;
   const details = `
   <p><strong>ID:</strong> #${ticket.id}</p>
   <p><strong>Área:</strong> ${ticket.title || ticket.area}</p>
@@ -408,14 +409,12 @@ function viewTicket(id) {
   ${
     ticket.archivo_pdf
       ? `
-    <p><strong>Archivo Adjunto:</strong> 
-      <a href="https://tickets.dev-wit.com/uploads/${ticket.archivo_pdf}" 
-         target="_blank" 
-         rel="noopener noreferrer"
-         class="link-primary">
-         Ver PDF
-      </a>
-    </p>`
+      <p><strong>Archivo Adjunto:</strong></p>
+      <div style="margin-bottom: 1rem;">
+        <a href="${archivoUrl}" target="_blank" rel="noopener noreferrer" class="btn-pdf">
+          <i class="bi bi-file-earmark-pdf" style="margin-right: 0.4rem;"></i> Ver PDF
+        </a>
+      </div>`
       : ""
   }
   ${historialSection}

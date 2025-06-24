@@ -391,26 +391,38 @@ function viewTicket(id) {
       ${historialHtml}
     `;
 
+  const archivoUrl = `https://tickets.dev-wit.com/uploads/${ticket.archivo_pdf}`;
   const details = `
-    <p><strong>ID:</strong> #${ticket.id}</p>
-    <p><strong>Área:</strong> ${ticket.title || ticket.area}</p>
-    <p><strong>Estado:</strong> ${getStatusText(
-      ticket.status || ticket.estado
-    )}</p>
-    <p><strong>Asignado a:</strong> ${
-      ticket.assignee || ticket.ejecutor || "Sin asignar"
-    }</p>
-    <p><strong>Tipo de Atención:</strong> ${
-      ticket.category || ticket.tipo_atencion
-    }</p>
-    <p><strong>Fecha:</strong> ${formatDate(
-      ticket.date || ticket.fecha_creacion
-    )}</p>
-    <p><strong>Descripción:</strong> ${
-      ticket.description || ticket.observaciones
-    }</p>
-    ${historialSection}
-  `;
+  <p><strong>ID:</strong> #${ticket.id}</p>
+  <p><strong>Área:</strong> ${ticket.title || ticket.area}</p>
+  <p><strong>Estado:</strong> ${getStatusText(
+    ticket.status || ticket.estado
+  )}</p>
+  <p><strong>Asignado a:</strong> ${
+    ticket.assignee || ticket.ejecutor || "Sin asignar"
+  }</p>
+  <p><strong>Tipo de Atención:</strong> ${
+    ticket.category || ticket.tipo_atencion
+  }</p>
+  <p><strong>Fecha:</strong> ${formatDate(
+    ticket.date || ticket.fecha_creacion
+  )}</p>
+  <p><strong>Descripción:</strong> ${
+    ticket.description || ticket.observaciones
+  }</p>
+  ${
+    ticket.archivo_pdf
+      ? `
+      <p><strong>Archivo Adjunto:</strong></p>
+      <div style="margin-bottom: 1rem;">
+        <a href="${archivoUrl}" target="_blank" rel="noopener noreferrer" class="btn-pdf">
+          <i class="bi bi-file-earmark-pdf" style="margin-right: 0.4rem;"></i> Ver PDF
+        </a>
+      </div>`
+      : ""
+  }
+  ${historialSection}
+`;
 
   document.getElementById("ticketModalBody").innerHTML = details;
   const modal = new bootstrap.Modal(document.getElementById("ticketModal"));
@@ -606,7 +618,7 @@ function getUserIdWhenReady(callback) {
 
 // Llamada tickets con la id del usuario
 getUserIdWhenReady((userId) => {
-  fetch(`https://tickets.dev-wit.com/api/tickets/${userId}`, {
+  fetch("https://tickets.dev-wit.com/api/tickets/", {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -622,13 +634,14 @@ getUserIdWhenReady((userId) => {
         id: t.id,
         title: t.area,
         status: t.estado,
-        assignee: t.ejecutor,
+        assignee: t.solicitante,
         category: t.tipo_atencion,
         description: t.observaciones,
         date: luxon.DateTime.fromISO(t.fecha_creacion)
           .setZone("America/Santiago")
           .toFormat("yyyy-MM-dd"),
         historial: t.historial || [],
+        archivo_pdf: t.archivo_pdf || null,
       }));
 
       renderTickets(tickets);
@@ -643,14 +656,11 @@ getUserIdWhenReady((userId) => {
 // Llamada para recargar tabla de tickets después de createTicket
 async function loadTickets(userId) {
   try {
-    const response = await fetch(
-      `https://tickets.dev-wit.com/api/tickets/${userId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await fetch("https://tickets.dev-wit.com/api/tickets/", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     const data = await response.json();
 
     const filteredData =
@@ -662,13 +672,14 @@ async function loadTickets(userId) {
       id: t.id,
       title: t.area,
       status: t.estado,
-      assignee: t.ejecutor,
+      assignee: t.solicitante,
       category: t.tipo_atencion,
       description: t.observaciones,
       date: luxon.DateTime.fromISO(t.fecha_creacion)
         .setZone("America/Santiago")
         .toFormat("yyyy-MM-dd"),
       historial: t.historial || [],
+      archivo_pdf: t.archivo_pdf || null,
     }));
 
     renderTickets(tickets);
