@@ -295,12 +295,10 @@ async function createTicket() {
 function editTicket(id) {
   const ticket = tickets.find((t) => t.id === id);
   if (!ticket) return;
-
   if (Array.isArray(ticket.historial) && ticket.historial.length > 0) {
     showAlert("Este ticket ya tiene historial. Solo se puede avanzar.", "info");
     return;
   }
-
   openEditModal(ticket);
 }
 
@@ -337,27 +335,6 @@ function openEditModal(ticket) {
 
   const modal = new bootstrap.Modal(document.getElementById("editTicketModal"));
   modal.show();
-}
-
-// Eliminar ticket
-function deleteTicket(id) {
-  Swal.fire({
-    title: "¿Estás seguro?",
-    text: "Esta acción eliminará el ticket permanentemente.",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#e64545",
-    cancelButtonColor: "#34495e",
-    confirmButtonText: "Sí, eliminar",
-    cancelButtonText: "Cancelar",
-  }).then((result) => {
-    if (result.isConfirmed) {
-      tickets = tickets.filter((t) => t.id !== id);
-      renderTickets();
-      updateStats();
-      showAlert("Ticket eliminado exitosamente!", "success");
-    }
-  });
 }
 
 function formatHistorial(historial) {

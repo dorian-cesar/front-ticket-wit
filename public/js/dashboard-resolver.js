@@ -359,33 +359,11 @@ async function updateTicket() {
 // Setea los valores del ticket en el formulario de edición
 function openEditModal(ticket) {
   document.getElementById("editTicketId").value = ticket.id;
-  document.getElementById("statusFilter").value = ticket.status || "pendiente";
-  document.getElementById("editTicketDescription").value =
-    ticket.description || "";
+  document.getElementById("statusFilter").value = ticket.status;
+  document.getElementById("editTicketDescription").value = "";
 
   const modal = new bootstrap.Modal(document.getElementById("editTicketModal"));
   modal.show();
-}
-
-// Eliminar ticket
-function deleteTicket(id) {
-  Swal.fire({
-    title: "¿Estás seguro?",
-    text: "Esta acción eliminará el ticket permanentemente.",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#e64545",
-    cancelButtonColor: "#34495e",
-    confirmButtonText: "Sí, eliminar",
-    cancelButtonText: "Cancelar",
-  }).then((result) => {
-    if (result.isConfirmed) {
-      tickets = tickets.filter((t) => t.id !== id);
-      renderTickets();
-      updateStats();
-      showAlert("Ticket eliminado exitosamente!", "success");
-    }
-  });
 }
 
 function formatHistorial(historial) {
