@@ -292,7 +292,21 @@
                 <label for="ticketAttachment" class="form-label"
                   >Adjuntar archivo</label
                 >
-                <input type="file" class="form-control" id="ticketAttachment" />
+                <div class="d-flex align-items-center gap-2">
+                  <input
+                    type="file"
+                    class="form-control"
+                    id="ticketAttachment"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-outline-danger"
+                    id="clearAttachmentBtn"
+                    title="Borrar archivo adjunto"
+                  >
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </div>
               </div>
             </form>
           </div>

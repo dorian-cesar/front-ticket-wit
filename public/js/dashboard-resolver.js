@@ -43,9 +43,6 @@ function setupEventListeners() {
   tipoAtencionFilter.addEventListener("change", filterTickets);
   searchInput.addEventListener("input", filterTickets);
 
-  // Crear ticket
-  saveTicketBtn.addEventListener("click", createTicket);
-
   // Actualizar ticket
   updateTicketBtn.addEventListener("click", updateTicket);
 
@@ -187,129 +184,6 @@ function filterTickets() {
   renderTickets(filteredTickets);
 }
 
-// Crear nuevo ticket
-async function createTicket() {
-  const saveBtn = document.getElementById("saveTicketBtn");
-  const btnSpinner = document.getElementById("btnSpinner");
-  const btnIcon = document.getElementById("btnIcon");
-  const btnText = document.getElementById("btnText");
-
-  btnSpinner.classList.remove("d-none");
-  btnIcon.classList.add("d-none");
-  btnText.textContent = "Creando...";
-  saveBtn.disabled = true;
-
-  const areaSolicitante = parseInt(
-    document.getElementById("ticketAssignee").value,
-    10
-  );
-  const tipoAtencion = parseInt(
-    document.getElementById("ticketCategory").value,
-    10
-  );
-  const description = document.getElementById("ticketDescription").value.trim();
-  const attachmentInput = document.getElementById("ticketAttachment");
-
-  if (!description || !tipoAtencion || !areaSolicitante) {
-    showAlert("Por favor, completa todos los campos obligatorios.", "warning");
-    btnSpinner.classList.add("d-none");
-    btnIcon.classList.remove("d-none");
-    btnText.textContent = "Crear Ticket";
-    saveBtn.disabled = false;
-    return;
-  }
-
-  const solicitante = usersData.find((u) => u.email === userMail);
-  if (!solicitante) {
-    showAlert(
-      "No se encontró el usuario logueado en los datos de usuarios.",
-      "danger"
-    );
-    btnSpinner.classList.add("d-none");
-    btnIcon.classList.remove("d-none");
-    btnText.textContent = "Crear Ticket";
-    saveBtn.disabled = false;
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append("solicitante_id", solicitante.id);
-  formData.append("area_id", areaSolicitante);
-  formData.append("tipo_atencion_id", tipoAtencion);
-  formData.append("observaciones", description);
-
-  if (attachmentInput.files.length > 0) {
-    const file = attachmentInput.files[0];
-
-    if (file.size > 10 * 1024 * 1024) {
-      showAlert("El archivo adjunto no debe superar los 10MB.", "warning");
-      btnSpinner.classList.add("d-none");
-      btnIcon.classList.remove("d-none");
-      btnText.textContent = "Crear Ticket";
-      saveBtn.disabled = false;
-      return;
-    }
-
-    formData.append("archivo_pdf", file);
-  }
-
-  // console.log para debug
-  for (const [key, value] of formData.entries()) {
-    console.log(`${key}:`, value);
-  }
-
-  try {
-    const response = await fetch(
-      "https://tickets.dev-wit.com/api/tickets/crear",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      }
-    );
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Detalle del error:", errorData);
-      const message = errorData.message || "Error al crear el ticket";
-      throw new Error(message);
-    }
-
-    // Recargar tabla de tickets
-    await loadTickets(solicitante.id);
-
-    createTicketForm.reset();
-    const modalElement = document.getElementById("createTicketModal");
-    const modal = bootstrap.Modal.getInstance(modalElement);
-    modal.hide();
-
-    showAlert("Ticket creado exitosamente!", "success");
-  } catch (error) {
-    console.error("Error al crear ticket:", error);
-    showAlert("No se pudo crear el ticket. " + error.message, "error");
-  } finally {
-    btnSpinner.classList.add("d-none");
-    btnIcon.classList.remove("d-none");
-    btnText.textContent = "Crear Ticket";
-    saveBtn.disabled = false;
-  }
-}
-
-// Editar ticket
-function editTicket(id) {
-  const ticket = tickets.find((t) => t.id === id);
-  if (!ticket) return;
-
-  if (Array.isArray(ticket.historial) && ticket.historial.length > 0) {
-    showAlert("Este ticket ya tiene historial. Solo se puede avanzar.", "info");
-    return;
-  }
-
-  openEditModal(ticket);
-}
-
 // Actualizar ticket
 async function updateTicket() {
   const id = Number.parseInt(document.getElementById("editTicketId").value);
@@ -408,36 +282,36 @@ function viewTicket(id) {
 
   const archivoUrl = `https://tickets.dev-wit.com/uploads/${ticket.archivo_pdf}`;
   const details = `
-  <p><strong>ID:</strong> #${ticket.id}</p>
-  <p><strong>Área:</strong> ${ticket.title || ticket.area}</p>
-  <p><strong>Estado:</strong> ${getStatusText(
-    ticket.status || ticket.estado
-  )}</p>
-  <p><strong>Solicitado por:</strong> ${
-    ticket.assignee || ticket.ejecutor || "Sin asignar"
-  }</p>
-  <p><strong>Tipo de Atención:</strong> ${
-    ticket.category || ticket.tipo_atencion
-  }</p>
-  <p><strong>Fecha:</strong> ${formatDate(
-    ticket.date || ticket.fecha_creacion
-  )}</p>
-  <p><strong>Descripción:</strong> ${
-    ticket.description || ticket.observaciones
-  }</p>
-  ${
-    ticket.archivo_pdf
-      ? `
-      <p><strong>Archivo Adjunto:</strong></p>
-      <div style="margin-bottom: 1rem;">
-        <a href="${archivoUrl}" target="_blank" rel="noopener noreferrer" class="btn-pdf">
-          <i class="bi bi-file-earmark-pdf" style="margin-right: 0.4rem;"></i> Ver PDF
-        </a>
-      </div>`
-      : ""
-  }
-  ${historialSection}
-`;
+    <p><strong>ID:</strong> #${ticket.id}</p>
+    <p><strong>Área:</strong> ${ticket.title || ticket.area}</p>
+    <p><strong>Estado:</strong> ${getStatusText(
+      ticket.status || ticket.estado
+    )}</p>
+    <p><strong>Solicitado por:</strong> ${
+      ticket.assignee || ticket.ejecutor || "Sin asignar"
+    }</p>
+    <p><strong>Tipo de Atención:</strong> ${
+      ticket.category || ticket.tipo_atencion
+    }</p>
+    <p><strong>Fecha:</strong> ${formatDate(
+      ticket.date || ticket.fecha_creacion
+    )}</p>
+    <p><strong>Descripción:</strong> ${
+      ticket.description || ticket.observaciones
+    }</p>
+    ${
+      ticket.archivo_pdf
+        ? `
+        <p><strong>Archivo Adjunto:</strong></p>
+        <div style="margin-bottom: 1rem;">
+          <a href="${archivoUrl}" target="_blank" rel="noopener noreferrer" class="btn-pdf">
+            <i class="bi bi-file-earmark-pdf" style="margin-right: 0.4rem;"></i> Ver PDF
+          </a>
+        </div>`
+        : ""
+    }
+    ${historialSection}
+  `;
 
   document.getElementById("ticketModalBody").innerHTML = details;
   const modal = new bootstrap.Modal(document.getElementById("ticketModal"));
@@ -681,7 +555,7 @@ getUserIdWhenReady((userId) => {
     });
 });
 
-// Llamada para recargar tabla de tickets después de createTicket
+// Llamada para recargar tabla de tickets
 async function loadTickets(userId) {
   const endpoint = `https://tickets.dev-wit.com/api/tickets/ejecutor/${userId}`;
 

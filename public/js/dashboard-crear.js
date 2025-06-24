@@ -19,6 +19,12 @@ const userMail =
 // Inicializar el panel de control (dashboard)
 document.addEventListener("DOMContentLoaded", () => {
   setupEventListeners();
+  const attachmentInput = document.getElementById("ticketAttachment");
+  const clearAttachmentBtn = document.getElementById("clearAttachmentBtn");
+
+  clearAttachmentBtn.addEventListener("click", () => {
+    attachmentInput.value = "";
+  });
 });
 
 // Recargar los tickets
