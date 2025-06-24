@@ -86,11 +86,12 @@ function renderTickets(ticketsToRender = tickets) {
     const row = document.createElement("tr");
     row.className = "new-ticket";
     const statusClass = statusClassMap[ticket.status] || "creado";
+    const estado = ticket.status.toLowerCase();
     const avanzarBtn =
-      ticket.status.toLowerCase() !== "listo"
+      estado !== "listo" && estado !== "cancelado"
         ? `<button class="btn btn-outline-secondary btn-action" onclick="openAdvanceModal(${ticket.id})" title="Avanzar Ticket">
-            <i class="bi bi-forward-fill text-success"></i>
-          </button>`
+        <i class="bi bi-forward-fill text-success"></i>
+      </button>`
         : "";
 
     row.innerHTML = `
@@ -186,6 +187,10 @@ function filterTickets() {
 
 // Actualizar ticket
 async function updateTicket() {
+  updateTicketBtn.disabled = true;
+  const originalText = updateTicketBtn.innerHTML;
+  updateTicketBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Actualizando...`;
+
   const id = Number.parseInt(document.getElementById("editTicketId").value);
   const nuevoEstado = document.getElementById("editTicketStatus").value;
   const observacion = document.getElementById("editTicketDescription").value;
@@ -195,8 +200,6 @@ async function updateTicket() {
     observacion: observacion,
     usuario_id: userId,
   };
-
-  console.log("modificar ticket:", payload);
 
   try {
     const response = await fetch(
@@ -227,6 +230,9 @@ async function updateTicket() {
   } catch (error) {
     console.error("Error actualizando ticket:", error);
     showAlert("No se pudo actualizar el ticket. " + error.message, "error");
+  } finally {
+    updateTicketBtn.disabled = false;
+    updateTicketBtn.innerHTML = originalText;
   }
 }
 
