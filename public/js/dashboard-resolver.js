@@ -61,6 +61,14 @@ function setupEventListeners() {
     .addEventListener("change", validateForm);
 }
 
+const statusClassMap = {
+  creado: "creado",
+  "en ejecución": "en-ejecucion",
+  "pendiente por presupuesto": "pendiente-por-presupuesto",
+  cancelado: "cancelado",
+  listo: "listo",
+};
+
 // Renderizar la tabla de tickets
 function renderTickets(ticketsToRender = tickets) {
   ticketsTableBody.innerHTML = "";
@@ -80,6 +88,7 @@ function renderTickets(ticketsToRender = tickets) {
   ticketsToRender.forEach((ticket) => {
     const row = document.createElement("tr");
     row.className = "new-ticket";
+    const statusClass = statusClassMap[ticket.status] || "creado";
     row.innerHTML = `
       <td data-label="ID"><strong>#${ticket.id}</strong></td>
       <td data-label="Área">
@@ -87,10 +96,10 @@ function renderTickets(ticketsToRender = tickets) {
         <small class="text-muted">${ticket.category}</small>
       </td>
       <td data-label="Estado">
-        <span class="badge status-${ticket.status} badge-status">
-          ${getStatusIcon(ticket.status)} ${getStatusText(ticket.status)}
-        </span>
-      </td>
+      <span class="badge status-${statusClass} badge-status">
+        ${getStatusIcon(ticket.status)} ${getStatusText(ticket.status)}
+      </span>
+    </td>
       <td data-label="Asignado">
         ${
           ticket.assignee
@@ -126,7 +135,7 @@ function openAdvanceModal(id) {
   if (!ticket) return;
 
   document.getElementById("editTicketId").value = ticket.id;
-  document.getElementById("editTicketStatus").value =
+  document.getElementById("statusFilter").value =
     ticket.status || "pendiente";
   document.getElementById("editTicketDescription").value =
     ticket.description || "";
@@ -146,8 +155,8 @@ function updateStats() {
   const listo = tickets.filter((t) => t.status === "listo").length;
 
   document.getElementById("creadoCount").textContent = creado;
-  document.getElementById("enEjecucionCount").textContent = enEjecucion;
-  document.getElementById("pendientePresupuestoCount").textContent =
+  document.getElementById("ejecucionCount").textContent = enEjecucion;
+  document.getElementById("pendienteCount").textContent =
     pendientePorPresupuesto;
   document.getElementById("canceladoCount").textContent = cancelado;
   document.getElementById("listoCount").textContent = listo;
@@ -304,13 +313,13 @@ async function updateTicket() {
   const nuevoEstado = document.getElementById("editTicketStatus").value;
   const observacion = document.getElementById("editTicketDescription").value;
 
-  console.log("nuevo estado:", nuevoEstado);
-
   const payload = {
     nuevo_estado: nuevoEstado,
     observacion: observacion,
     usuario_id: userId,
   };
+
+  console.log("modificar ticket:", payload);
 
   try {
     const response = await fetch(
@@ -347,7 +356,7 @@ async function updateTicket() {
 // Setea los valores del ticket en el formulario de edición
 function openEditModal(ticket) {
   document.getElementById("editTicketId").value = ticket.id;
-  document.getElementById("editTicketStatus").value =
+  document.getElementById("statusFilter").value =
     ticket.status || "pendiente";
   document.getElementById("editTicketDescription").value =
     ticket.description || "";
@@ -424,7 +433,7 @@ function viewTicket(id) {
   <p><strong>Estado:</strong> ${getStatusText(
     ticket.status || ticket.estado
   )}</p>
-  <p><strong>Asignado a:</strong> ${
+  <p><strong>Solicitado por:</strong> ${
     ticket.assignee || ticket.ejecutor || "Sin asignar"
   }</p>
   <p><strong>Tipo de Atención:</strong> ${
@@ -456,25 +465,27 @@ function viewTicket(id) {
 }
 
 // Funciones auxiliares / utilitarias
+const statusMap = {
+  creado: "Creado",
+  "en ejecución": "En ejecución",
+  "pendiente por presupuesto": "Pendiente por presupuesto",
+  cancelado: "Cancelado",
+  listo: "Listo",
+};
+
+const iconMap = {
+  creado: '<i class="bi bi-plus-circle"></i>',
+  "en ejecución": '<i class="bi bi-play-circle"></i>',
+  "pendiente por presupuesto": '<i class="bi bi-clock"></i>',
+  cancelado: '<i class="bi bi-x-circle"></i>',
+  listo: '<i class="bi bi-check-circle"></i>',
+};
+
 function getStatusText(status) {
-  const statusMap = {
-    creado: "Creado",
-    "en ejecución": "En ejecución",
-    "pendiente por presupuesto": "Pendiente por presupuesto",
-    cancelado: "Cancelado",
-    listo: "Listo",
-  };
   return statusMap[status] || status;
 }
 
 function getStatusIcon(status) {
-  const iconMap = {
-    creado: '<i class="bi bi-plus-circle"></i>',
-    "en ejecución": '<i class="bi bi-play-circle"></i>',
-    "pendiente por presupuesto": '<i class="bi bi-clock"></i>',
-    cancelado: '<i class="bi bi-x-circle"></i>',
-    listo: '<i class="bi bi-check-circle"></i>',
-  };
   return iconMap[status] || "";
 }
 
