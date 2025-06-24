@@ -94,15 +94,6 @@ function renderTickets(ticketsToRender = tickets) {
       <td data-label="Fecha"><small>${formatDate(ticket.date)}</small></td>
       <td data-label="Acciones">
         <div class="btn-group" role="group">
-          ${
-            Array.isArray(ticket.historial) && ticket.historial.length > 0
-              ? `<button class="btn btn-outline-secondary btn-action" onclick="openAdvanceModal(${ticket.id})" title="Avanzar Ticket">
-                   <i class="bi bi-forward-fill text-success"></i>
-                </button>`
-              : `<button class="btn btn-outline-primary btn-action" onclick="editTicket(${ticket.id})" title="Editar Ticket">
-                  <i class="bi bi-pencil"></i>
-                </button>`
-          }
           <button class="btn btn-outline-info btn-action" onclick="viewTicket(${
             ticket.id
           })" title="Ver detalles">
@@ -215,12 +206,32 @@ async function createTicket() {
 
   const formData = new FormData();
   formData.append("solicitante_id", solicitante.id);
-  formData.append("area_id", areaSolicitante);
-  formData.append("tipo_atencion_id", tipoAtencion);
+  formData.append("area_id", tipoAtencion);
+  formData.append("tipo_atencion_id", areaSolicitante);
   formData.append("observaciones", description);
 
   if (attachmentInput.files.length > 0) {
-    formData.append("archivo", attachmentInput.files[0]);
+    const file = attachmentInput.files[0];
+
+    if (file.size > 10 * 1024 * 1024) {
+      showAlert("El archivo adjunto no debe superar los 10MB.", "warning");
+      btnSpinner.classList.add("d-none");
+      btnIcon.classList.remove("d-none");
+      btnText.textContent = "Crear Ticket";
+      saveBtn.disabled = false;
+      return;
+    }
+
+    if (file.type !== "application/pdf") {
+      showAlert("Solo se permiten archivos en formato PDF.", "warning");
+      btnSpinner.classList.add("d-none");
+      btnIcon.classList.remove("d-none");
+      btnText.textContent = "Crear Ticket";
+      saveBtn.disabled = false;
+      return;
+    }
+
+    formData.append("archivo_pdf", file);
   }
 
   // console.log para debug
@@ -242,7 +253,9 @@ async function createTicket() {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || "Error al crear el ticket");
+      console.error("Detalle del error:", errorData);
+      const message = errorData.message || "Error al crear el ticket";
+      throw new Error(message);
     }
 
     // Recargar tabla de tickets
@@ -375,25 +388,38 @@ function viewTicket(id) {
     `;
 
   const details = `
-    <p><strong>ID:</strong> #${ticket.id}</p>
-    <p><strong>Área:</strong> ${ticket.title || ticket.area}</p>
-    <p><strong>Estado:</strong> ${getStatusText(
-      ticket.status || ticket.estado
-    )}</p>
-    <p><strong>Asignado a:</strong> ${
-      ticket.assignee || ticket.ejecutor || "Sin asignar"
-    }</p>
-    <p><strong>Tipo de Atención:</strong> ${
-      ticket.category || ticket.tipo_atencion
-    }</p>
-    <p><strong>Fecha:</strong> ${formatDate(
-      ticket.date || ticket.fecha_creacion
-    )}</p>
-    <p><strong>Descripción:</strong> ${
-      ticket.description || ticket.observaciones
-    }</p>
-    ${historialSection}
-  `;
+  <p><strong>ID:</strong> #${ticket.id}</p>
+  <p><strong>Área:</strong> ${ticket.title || ticket.area}</p>
+  <p><strong>Estado:</strong> ${getStatusText(
+    ticket.status || ticket.estado
+  )}</p>
+  <p><strong>Asignado a:</strong> ${
+    ticket.assignee || ticket.ejecutor || "Sin asignar"
+  }</p>
+  <p><strong>Tipo de Atención:</strong> ${
+    ticket.category || ticket.tipo_atencion
+  }</p>
+  <p><strong>Fecha:</strong> ${formatDate(
+    ticket.date || ticket.fecha_creacion
+  )}</p>
+  <p><strong>Descripción:</strong> ${
+    ticket.description || ticket.observaciones
+  }</p>
+  ${
+    ticket.archivo_pdf
+      ? `
+    <p><strong>Archivo Adjunto:</strong> 
+      <a href="https://tickets.dev-wit.com/uploads/${ticket.archivo_pdf}" 
+         target="_blank" 
+         rel="noopener noreferrer"
+         class="link-primary">
+         Ver PDF
+      </a>
+    </p>`
+      : ""
+  }
+  ${historialSection}
+`;
 
   document.getElementById("ticketModalBody").innerHTML = details;
   const modal = new bootstrap.Modal(document.getElementById("ticketModal"));
@@ -625,6 +651,7 @@ getUserIdWhenReady((userId) => {
           .setZone("America/Santiago")
           .toFormat("yyyy-MM-dd"),
         historial: t.historial || [],
+        archivo_pdf: t.archivo_pdf,
       }));
 
       renderTickets(tickets);
@@ -659,6 +686,7 @@ async function loadTickets(userId) {
         .setZone("America/Santiago")
         .toFormat("yyyy-MM-dd"),
       historial: t.historial || [],
+      archivo_pdf: t.archivo_pdf,
     }));
 
     renderTickets(tickets);

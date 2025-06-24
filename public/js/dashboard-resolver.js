@@ -94,18 +94,10 @@ function renderTickets(ticketsToRender = tickets) {
       <td data-label="Fecha"><small>${formatDate(ticket.date)}</small></td>
       <td data-label="Acciones">
         <div class="btn-group" role="group">
-          ${
-            Array.isArray(ticket.historial) && ticket.historial.length > 0
-              ? `<button class="btn btn-outline-secondary btn-action" onclick="openAdvanceModal(${ticket.id})" title="Avanzar Ticket">
-                   <i class="bi bi-forward-fill text-success"></i>
-                </button>`
-              : `<button class="btn btn-outline-primary btn-action" onclick="editTicket(${ticket.id})" title="Editar Ticket">
-                  <i class="bi bi-pencil"></i>
-                </button>`
-          }
-          <button class="btn btn-outline-info btn-action" onclick="viewTicket(${
-            ticket.id
-          })" title="Ver detalles">
+          <button class="btn btn-outline-secondary btn-action" onclick="openAdvanceModal(${ticket.id})" title="Avanzar Ticket">
+            <i class="bi bi-forward-fill text-success"></i>
+          </button>
+          <button class="btn btn-outline-info btn-action" onclick="viewTicket(${ticket.id})" title="Ver detalles">
             <i class="bi bi-eye"></i>
           </button>
         </div>
@@ -220,7 +212,18 @@ async function createTicket() {
   formData.append("observaciones", description);
 
   if (attachmentInput.files.length > 0) {
-    formData.append("archivo", attachmentInput.files[0]);
+    const file = attachmentInput.files[0];
+
+    if (file.size > 10 * 1024 * 1024) {
+      showAlert("El archivo adjunto no debe superar los 10MB.", "warning");
+      btnSpinner.classList.add("d-none");
+      btnIcon.classList.remove("d-none");
+      btnText.textContent = "Crear Ticket";
+      saveBtn.disabled = false;
+      return;
+    }
+
+    formData.append("archivo_pdf", file);
   }
 
   // console.log para debug
@@ -239,10 +242,12 @@ async function createTicket() {
         body: formData,
       }
     );
-
+    
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || "Error al crear el ticket");
+      console.error("Detalle del error:", errorData);
+      const message = errorData.message || "Error al crear el ticket";
+      throw new Error(message);
     }
 
     // Recargar tabla de tickets
