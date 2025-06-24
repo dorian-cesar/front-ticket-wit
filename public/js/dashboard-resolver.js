@@ -89,6 +89,13 @@ function renderTickets(ticketsToRender = tickets) {
     const row = document.createElement("tr");
     row.className = "new-ticket";
     const statusClass = statusClassMap[ticket.status] || "creado";
+    const avanzarBtn =
+      ticket.status.toLowerCase() !== "listo"
+        ? `<button class="btn btn-outline-secondary btn-action" onclick="openAdvanceModal(${ticket.id})" title="Avanzar Ticket">
+            <i class="bi bi-forward-fill text-success"></i>
+          </button>`
+        : "";
+
     row.innerHTML = `
       <td data-label="ID"><strong>#${ticket.id}</strong></td>
       <td data-label="Área">
@@ -96,10 +103,10 @@ function renderTickets(ticketsToRender = tickets) {
         <small class="text-muted">${ticket.category}</small>
       </td>
       <td data-label="Estado">
-      <span class="badge status-${statusClass} badge-status">
-        ${getStatusIcon(ticket.status)} ${getStatusText(ticket.status)}
-      </span>
-    </td>
+        <span class="badge status-${statusClass} badge-status">
+          ${getStatusIcon(ticket.status)} ${getStatusText(ticket.status)}
+        </span>
+      </td>
       <td data-label="Asignado">
         ${
           ticket.assignee
@@ -113,11 +120,7 @@ function renderTickets(ticketsToRender = tickets) {
       <td data-label="Fecha"><small>${formatDate(ticket.date)}</small></td>
       <td data-label="Acciones">
         <div class="btn-group" role="group">
-          <button class="btn btn-outline-secondary btn-action" onclick="openAdvanceModal(${
-            ticket.id
-          })" title="Avanzar Ticket">
-            <i class="bi bi-forward-fill text-success"></i>
-          </button>
+          ${avanzarBtn}
           <button class="btn btn-outline-info btn-action" onclick="viewTicket(${
             ticket.id
           })" title="Ver detalles">
@@ -125,6 +128,7 @@ function renderTickets(ticketsToRender = tickets) {
           </button>
         </div>
       </td>`;
+
     ticketsTableBody.appendChild(row);
   });
 }
@@ -135,8 +139,7 @@ function openAdvanceModal(id) {
   if (!ticket) return;
 
   document.getElementById("editTicketId").value = ticket.id;
-  document.getElementById("statusFilter").value =
-    ticket.status || "pendiente";
+  document.getElementById("statusFilter").value = ticket.status || "pendiente";
   document.getElementById("editTicketDescription").value =
     ticket.description || "";
 
@@ -356,8 +359,7 @@ async function updateTicket() {
 // Setea los valores del ticket en el formulario de edición
 function openEditModal(ticket) {
   document.getElementById("editTicketId").value = ticket.id;
-  document.getElementById("statusFilter").value =
-    ticket.status || "pendiente";
+  document.getElementById("statusFilter").value = ticket.status || "pendiente";
   document.getElementById("editTicketDescription").value =
     ticket.description || "";
 
