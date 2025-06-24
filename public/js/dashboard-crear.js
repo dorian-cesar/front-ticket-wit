@@ -42,9 +42,6 @@ function setupEventListeners() {
   // Crear ticket
   saveTicketBtn.addEventListener("click", createTicket);
 
-  // Actualizar ticket
-  updateTicketBtn.addEventListener("click", updateTicket);
-
   // Validación del formulario
   document
     .getElementById("ticketDescription")
@@ -295,40 +292,6 @@ async function createTicket() {
     btnText.textContent = "Crear Ticket";
     saveBtn.disabled = false;
   }
-}
-
-// Editar ticket
-function editTicket(id) {
-  const ticket = tickets.find((t) => t.id === id);
-  if (!ticket) return;
-  if (Array.isArray(ticket.historial) && ticket.historial.length > 0) {
-    showAlert("Este ticket ya tiene historial. Solo se puede avanzar.", "info");
-    return;
-  }
-  openEditModal(ticket);
-}
-
-// Actualizar ticket
-function updateTicket() {
-  const id = Number.parseInt(document.getElementById("editTicketId").value);
-  const status = document.getElementById("editTicketStatus").value;
-  const description = document.getElementById("editTicketDescription").value;
-
-  const ticketIndex = tickets.findIndex((t) => t.id === id);
-  if (ticketIndex === -1) return;
-
-  tickets[ticketIndex].status = status;
-  tickets[ticketIndex].description = description;
-
-  renderTickets();
-  updateStats();
-
-  const modal = bootstrap.Modal.getInstance(
-    document.getElementById("editTicketModal")
-  );
-  modal.hide();
-
-  showAlert("Ticket actualizado exitosamente!", "success");
 }
 
 // Setea los valores del ticket en el formulario de edición
