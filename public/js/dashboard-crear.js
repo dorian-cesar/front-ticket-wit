@@ -51,6 +51,14 @@ function setupEventListeners() {
     .addEventListener("change", validateForm);
 }
 
+const statusClassMap = {
+  creado: "creado",
+  "en ejecución": "en-ejecucion",
+  "pendiente por presupuesto": "pendiente-por-presupuesto",
+  cancelado: "cancelado",
+  listo: "listo",
+};
+
 // Renderizar la tabla de tickets
 function renderTickets(ticketsToRender = tickets) {
   ticketsTableBody.innerHTML = "";
@@ -70,37 +78,41 @@ function renderTickets(ticketsToRender = tickets) {
   ticketsToRender.forEach((ticket) => {
     const row = document.createElement("tr");
     row.className = "new-ticket";
+
+    const statusClass = statusClassMap[ticket.status] || "creado";
+
     row.innerHTML = `
-      <td data-label="ID"><strong>#${ticket.id}</strong></td>
-      <td data-label="Área">
-        <div class="fw-semibold">${ticket.title}</div>
-        <small class="text-muted">${ticket.category}</small>
-      </td>
-      <td data-label="Estado">
-        <span class="badge status-${ticket.status} badge-status">
-          ${getStatusIcon(ticket.status)} ${getStatusText(ticket.status)}
-        </span>
-      </td>
-      <td data-label="Asignado">
-        ${
-          ticket.assignee
-            ? `<div class="d-flex align-items-center">
-                <i class="bi bi-person-circle me-2"></i>
-                ${ticket.assignee}
-              </div>`
-            : '<span class="text-muted">Sin asignar</span>'
-        }
-      </td>
-      <td data-label="Fecha"><small>${formatDate(ticket.date)}</small></td>
-      <td data-label="Acciones">
-        <div class="btn-group" role="group">
-          <button class="btn btn-outline-info btn-action" onclick="viewTicket(${
-            ticket.id
-          })" title="Ver detalles">
-            <i class="bi bi-eye"></i>
-          </button>
-        </div>
-      </td>`;
+    <td data-label="ID"><strong>#${ticket.id}</strong></td>
+    <td data-label="Área">
+      <div class="fw-semibold">${ticket.title}</div>
+      <small class="text-muted">${ticket.category}</small>
+    </td>
+    <td data-label="Estado">
+      <span class="badge status-${statusClass} badge-status">
+        ${getStatusIcon(ticket.status)} ${getStatusText(ticket.status)}
+      </span>
+    </td>
+    <td data-label="Asignado">
+      ${
+        ticket.assignee
+          ? `<div class="d-flex align-items-center">
+              <i class="bi bi-person-circle me-2"></i>
+              ${ticket.assignee}
+            </div>`
+          : '<span class="text-muted">Sin asignar</span>'
+      }
+    </td>
+    <td data-label="Fecha"><small>${formatDate(ticket.date)}</small></td>
+    <td data-label="Acciones">
+      <div class="btn-group" role="group">
+        <button class="btn btn-outline-info btn-action" onclick="viewTicket(${
+          ticket.id
+        })" title="Ver detalles">
+          <i class="bi bi-eye"></i>
+        </button>
+      </div>
+    </td>`;
+
     ticketsTableBody.appendChild(row);
   });
 }
@@ -122,15 +134,18 @@ function openAdvanceModal(id) {
 
 // Actualizar estadísticas
 function updateStats() {
-  const creado = tickets.filter(t => t.status === 'creado').length;
-  const enEjecucion = tickets.filter(t => t.status === 'en_ejecucion').length;
-  const pendientePresupuesto = tickets.filter(t => t.status === 'pendiente_presupuesto').length;
-  const cancelado = tickets.filter(t => t.status === 'cancelado').length;
-  const listo = tickets.filter(t => t.status === 'listo').length;
+  const creado = tickets.filter((t) => t.status === "creado").length;
+  const enEjecucion = tickets.filter((t) => t.status === "en ejecución").length;
+  const pendientePorPresupuesto = tickets.filter(
+    (t) => t.status === "pendiente por presupuesto"
+  ).length;
+  const cancelado = tickets.filter((t) => t.status === "cancelado").length;
+  const listo = tickets.filter((t) => t.status === "listo").length;
 
   document.getElementById("creadoCount").textContent = creado;
   document.getElementById("ejecucionCount").textContent = enEjecucion;
-  document.getElementById("pendienteCount").textContent = pendientePresupuesto;
+  document.getElementById("pendienteCount").textContent =
+    pendientePorPresupuesto;
   document.getElementById("canceladoCount").textContent = cancelado;
   document.getElementById("listoCount").textContent = listo;
 }
@@ -424,25 +439,27 @@ function viewTicket(id) {
 }
 
 // Funciones auxiliares / utilitarias
+const statusMap = {
+  creado: "Creado",
+  "en ejecución": "En ejecución",
+  "pendiente por presupuesto": "Pendiente por presupuesto",
+  cancelado: "Cancelado",
+  listo: "Listo",
+};
+
+const iconMap = {
+  creado: '<i class="bi bi-plus-circle"></i>',
+  "en ejecución": '<i class="bi bi-play-circle"></i>',
+  "pendiente por presupuesto": '<i class="bi bi-clock"></i>',
+  cancelado: '<i class="bi bi-x-circle"></i>',
+  listo: '<i class="bi bi-check-circle"></i>',
+};
+
 function getStatusText(status) {
-  const statusMap = {
-    'creado': 'Creado',
-    'en_ejecucion': 'En ejecución',
-    'pendiente_presupuesto': 'Pendiente por presupuesto',
-    'cancelado': 'Cancelado',
-    'listo': 'Listo'
-  };
   return statusMap[status] || status;
 }
 
 function getStatusIcon(status) {
-  const iconMap = {
-    'creado': '<i class="bi bi-plus-circle"></i>',
-    'en_ejecucion': '<i class="bi bi-play-circle"></i>',
-    'pendiente_presupuesto': '<i class="bi bi-clock"></i>',
-    'cancelado': '<i class="bi bi-x-circle"></i>',
-    'listo': '<i class="bi bi-check-circle"></i>'
-  };
   return iconMap[status] || "";
 }
 

@@ -192,11 +192,11 @@
               <!-- Filtros -->
               <div class="row mb-3">
                 <div class="col-md-4">
-                  <select class="form-select" id="statusFilter">
+                  <select id="statusFilter" class="form-select">
                     <option value="">Todos los estados</option>
                     <option value="creado">Creado</option>
-                    <option value="en_ejecucion">En ejecución</option>
-                    <option value="pendiente_por_presupuesto">
+                    <option value="en ejecución">En ejecución</option>
+                    <option value="pendiente por presupuesto">
                       Pendiente por presupuesto
                     </option>
                     <option value="cancelado">Cancelado</option>
@@ -342,11 +342,11 @@
             <form id="editTicketForm">
               <input type="hidden" id="editTicketId" />
               <div class="mb-3">
-                <label for="editTicketStatus" class="form-label">Estado</label>
-                <select id="editTicketStatus" class="form-select">
+                <label for="statusFilter" class="form-label">Estado</label>
+                <select id="statusFilter" class="form-select">
                   <option value="creado">Creado</option>
-                  <option value="en_ejecucion">En ejecución</option>
-                  <option value="pendiente_por_presupuesto">
+                  <option value="en ejecucion">En ejecución</option>
+                  <option value="pendiente por presupuesto">
                     Pendiente por presupuesto
                   </option>
                   <option value="cancelado">Cancelado</option>
