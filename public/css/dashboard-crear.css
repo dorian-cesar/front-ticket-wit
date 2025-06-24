@@ -474,6 +474,10 @@ body {
   .responsive-refresh-btn i {
     font-size: 1rem;
   }
+
+  .logo-pullman {
+    max-width: 100px;
+  }
 }
 
 /* Tabla responsive */
