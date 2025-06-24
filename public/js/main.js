@@ -169,8 +169,16 @@ loginForm.addEventListener("submit", async function (e) {
       sessionStorage.setItem("userMail", mail);
       sessionStorage.setItem("userRole", rol);
     }
-    // window.location.href = "/views/dashboard-crear.html";
-    window.location.href = "/views/options.html";
+
+    const rolLower = rol.toLowerCase();
+    if (rolLower === "solicitante") {
+      window.location.href = "/views/dashboard-crear.html";
+    } else if (rolLower === "ejecutor") {
+      window.location.href = "/views/dashboard-resolver.html";
+    } else {
+      window.location.href = "/views/options.html";
+    }
+    
   } catch (error) {
     const isAuthError = [401, 403].includes(error.status);
     const isCredentialMessage = error.message
