@@ -22,15 +22,23 @@
     <script src="https://cdn.jsdelivr.net/npm/luxon@3.6.1/build/global/luxon.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script defer src="/js/dashboard-resolver.js"></script>
-    <script>
-      window.addEventListener("pageshow", function (event) {
-        const user =
-          localStorage.getItem("userLoggedIn") ||
-          sessionStorage.getItem("userLoggedIn");
-        if (!user) {
+    <script defer>
+      function verificarAccesoPorRol() {
+        const role =
+          localStorage.getItem("userRole") ||
+          sessionStorage.getItem("userRole");
+        if (!role) {
           window.location.href = "/index.html";
+          return;
         }
-      });
+        const rolNormalizado = role.toLowerCase();
+        const rolesPermitidos = ["ejecutor", "admin"];
+        if (!rolesPermitidos.includes(rolNormalizado)) {
+          window.location.href = "/views/dashboard-crear.html";
+        }
+      }
+      window.addEventListener("DOMContentLoaded", verificarAccesoPorRol);
+      window.addEventListener("pageshow", verificarAccesoPorRol);
     </script>
   </head>
   <body>
