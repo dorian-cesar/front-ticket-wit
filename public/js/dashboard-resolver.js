@@ -296,26 +296,46 @@ function editTicket(id) {
 }
 
 // Actualizar ticket
-function updateTicket() {
+async function updateTicket() {
   const id = Number.parseInt(document.getElementById("editTicketId").value);
-  const status = document.getElementById("editTicketStatus").value;
-  const description = document.getElementById("editTicketDescription").value;
+  const nuevoEstado = document.getElementById("editTicketStatus").value;
+  const observacion = document.getElementById("editTicketDescription").value;
 
-  const ticketIndex = tickets.findIndex((t) => t.id === id);
-  if (ticketIndex === -1) return;
+  const payload = {
+    nuevo_estado: nuevoEstado,
+    observacion: observacion,
+  };
 
-  tickets[ticketIndex].status = status;
-  tickets[ticketIndex].description = description;
+  try {
+    const response = await fetch(
+      `https://tickets.dev-wit.com/api/tickets/estado/${id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      }
+    );
 
-  renderTickets();
-  updateStats();
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Error al actualizar el ticket");
+    }
 
-  const modal = bootstrap.Modal.getInstance(
-    document.getElementById("editTicketModal")
-  );
-  modal.hide();
+    getUserIdWhenReady((userId) => loadTickets(userId));
 
-  showAlert("Ticket actualizado exitosamente!", "success");
+    const modal = bootstrap.Modal.getInstance(
+      document.getElementById("editTicketModal")
+    );
+    modal.hide();
+
+    showAlert("Ticket actualizado exitosamente!", "success");
+  } catch (error) {
+    console.error("Error actualizando ticket:", error);
+    showAlert("No se pudo actualizar el ticket. " + error.message, "error");
+  }
 }
 
 // Setea los valores del ticket en el formulario de edición
