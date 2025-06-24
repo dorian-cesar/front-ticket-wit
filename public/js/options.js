@@ -31,11 +31,7 @@ function navigateTo(option) {
 
 // Función de logout
 function logout() {
-  localStorage.removeItem("userLoggedIn");
-  localStorage.removeItem("authToken");
-  localStorage.removeItem("userName");
-  localStorage.removeItem("userMail");
-  localStorage.removeItem("userRole");
+  localStorage.clear();
   sessionStorage.clear();
 
   window.location.href = "../index.html";

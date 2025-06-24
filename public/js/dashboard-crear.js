@@ -482,16 +482,8 @@ function showAlert(message, type = "info") {
 
 // Terminar la sesión
 function logout() {
-  localStorage.removeItem("userLoggedIn");
-  sessionStorage.removeItem("userLoggedIn");
-  localStorage.removeItem("authToken");
-  sessionStorage.removeItem("authToken");
-  localStorage.removeItem("userName");
-  sessionStorage.removeItem("userName");
-  localStorage.removeItem("userMail");
-  sessionStorage.removeItem("userMail");
-  localStorage.removeItem("userRole");
-  sessionStorage.removeItem("userRole");
+  localStorage.clear();
+  sessionStorage.clear();
 
   window.location.href = "/index.html";
 }

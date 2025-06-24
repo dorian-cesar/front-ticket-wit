@@ -21,11 +21,20 @@
     <script defer src="/js/main.js"></script>
     <script>
       function checkLoggedIn() {
-        const user =
+        const userLoggedIn =
           localStorage.getItem("userLoggedIn") ||
           sessionStorage.getItem("userLoggedIn");
-        if (user) {
-          // window.location.href = "/views/options.html";
+
+        const userRole =
+          localStorage.getItem("userRole") ||
+          sessionStorage.getItem("userRole");
+
+        const rolLower = userRole.toLowerCase();
+        if (rolLower === "solicitante") {
+          window.location.href = "/views/dashboard-crear.html";
+        } else if (rolLower === "ejecutor") {
+          window.location.href = "/views/dashboard-resolver.html";
+        } else {
           window.location.href = "/views/options.html";
         }
       }

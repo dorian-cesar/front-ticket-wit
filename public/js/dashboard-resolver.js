@@ -15,10 +15,18 @@ const token =
   localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
 const userMail =
   localStorage.getItem("userMail") || sessionStorage.getItem("userMail");
+const userRole =
+  localStorage.getItem("userRole") || sessionStorage.getItem("userRole");
 
 // Inicializar el panel de control (dashboard)
 document.addEventListener("DOMContentLoaded", () => {
   setupEventListeners();
+  const tooltipTriggerList = [].slice.call(
+    document.querySelectorAll("[title]")
+  );
+  tooltipTriggerList.map(
+    (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
+  );
 });
 
 // Recargar los tickets
@@ -94,10 +102,14 @@ function renderTickets(ticketsToRender = tickets) {
       <td data-label="Fecha"><small>${formatDate(ticket.date)}</small></td>
       <td data-label="Acciones">
         <div class="btn-group" role="group">
-          <button class="btn btn-outline-secondary btn-action" onclick="openAdvanceModal(${ticket.id})" title="Avanzar Ticket">
+          <button class="btn btn-outline-secondary btn-action" onclick="openAdvanceModal(${
+            ticket.id
+          })" title="Avanzar Ticket">
             <i class="bi bi-forward-fill text-success"></i>
           </button>
-          <button class="btn btn-outline-info btn-action" onclick="viewTicket(${ticket.id})" title="Ver detalles">
+          <button class="btn btn-outline-info btn-action" onclick="viewTicket(${
+            ticket.id
+          })" title="Ver detalles">
             <i class="bi bi-eye"></i>
           </button>
         </div>
@@ -242,7 +254,7 @@ async function createTicket() {
         body: formData,
       }
     );
-    
+
     if (!response.ok) {
       const errorData = await response.json();
       console.error("Detalle del error:", errorData);
@@ -461,16 +473,8 @@ function showAlert(message, type = "info") {
 
 // Terminar la sesión
 function logout() {
-  localStorage.removeItem("userLoggedIn");
-  sessionStorage.removeItem("userLoggedIn");
-  localStorage.removeItem("authToken");
-  sessionStorage.removeItem("authToken");
-  localStorage.removeItem("userName");
-  sessionStorage.removeItem("userName");
-  localStorage.removeItem("userMail");
-  sessionStorage.removeItem("userMail");
-  localStorage.removeItem("userRole");
-  sessionStorage.removeItem("userRole");
+  localStorage.clear();
+  sessionStorage.clear();
 
   window.location.href = "/index.html";
 }
@@ -482,16 +486,6 @@ const userDisplay = document.getElementById("userNameDisplay");
 if (userName && userDisplay) {
   userDisplay.textContent = "¡Hola " + userName + "!";
 }
-
-// Inicializar tooltips
-document.addEventListener("DOMContentLoaded", () => {
-  const tooltipTriggerList = [].slice.call(
-    document.querySelectorAll("[title]")
-  );
-  tooltipTriggerList.map(
-    (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
-  );
-});
 
 // Llamadas API (areas y tipos)
 const categorySelect = document.getElementById("ticketCategory");
@@ -619,7 +613,12 @@ getUserIdWhenReady((userId) => {
   })
     .then((res) => res.json())
     .then((data) => {
-      tickets = data.map((t) => ({
+      const filteredData =
+        userRole === "ejecutor"
+          ? data.filter((t) => t.id_ejecutor === userId)
+          : data;
+
+      tickets = filteredData.map((t) => ({
         id: t.id,
         title: t.area,
         status: t.estado,
@@ -653,7 +652,13 @@ async function loadTickets(userId) {
       }
     );
     const data = await response.json();
-    tickets = data.map((t) => ({
+
+    const filteredData =
+      userRole === "ejecutor"
+        ? data.filter((t) => t.id_ejecutor === userId)
+        : data;
+
+    tickets = filteredData.map((t) => ({
       id: t.id,
       title: t.area,
       status: t.estado,

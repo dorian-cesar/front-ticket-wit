@@ -151,6 +151,7 @@ loginForm.addEventListener("submit", async function (e) {
     const nombre = result.user.nombre;
     const mail = result.user.mail;
     const rol = result.user.rol;
+    const id = result.user.id;
 
     // Reset intentos en caso de éxito
     localStorage.removeItem("loginAttempts");
@@ -162,12 +163,15 @@ loginForm.addEventListener("submit", async function (e) {
       localStorage.setItem("userName", nombre);
       localStorage.setItem("userMail", mail);
       localStorage.setItem("userRole", rol);
+      localStorage.setItem("userId", id);
+
     } else {
       sessionStorage.setItem("userLoggedIn", "true");
       sessionStorage.setItem("authToken", token);
       sessionStorage.setItem("userName", nombre);
       sessionStorage.setItem("userMail", mail);
       sessionStorage.setItem("userRole", rol);
+      sessionStorage.setItem("userId", id);
     }
 
     const rolLower = rol.toLowerCase();
