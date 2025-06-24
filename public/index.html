@@ -24,11 +24,12 @@
         const userLoggedIn =
           localStorage.getItem("userLoggedIn") ||
           sessionStorage.getItem("userLoggedIn");
-
         const userRole =
           localStorage.getItem("userRole") ||
           sessionStorage.getItem("userRole");
-
+        if (!userLoggedIn || !userRole) {
+          return;
+        }
         const rolLower = userRole.toLowerCase();
         if (rolLower === "solicitante") {
           window.location.href = "/views/dashboard-crear.html";
@@ -50,7 +51,11 @@
         <div class="card-login col-md-7 col-lg-5 col-xl-4">
           <div class="login-container">
             <div class="company-logo">
-              <img style="width: 200px;" src="/img/logo-pullman-nuevo.svg" alt="Logo Pullman" />
+              <img
+                style="width: 200px"
+                src="/img/logo-pullman-nuevo.svg"
+                alt="Logo Pullman"
+              />
             </div>
 
             <div class="login-header">
