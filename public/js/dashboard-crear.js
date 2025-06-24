@@ -122,19 +122,17 @@ function openAdvanceModal(id) {
 
 // Actualizar estadísticas
 function updateStats() {
-  const creado = tickets.filter((t) => t.status === "creado").length;
-  const ejecucion = tickets.filter((t) => t.status === "ejecucion").length;
-  const espera = tickets.filter((t) => t.status === "espera").length;
-  const pendiente = tickets.filter((t) => t.status === "pendiente").length;
-  const cancelado = tickets.filter((t) => t.status === "cancelado").length;
-  const completado = tickets.filter((t) => t.status === "completado").length;
+  const creado = tickets.filter(t => t.status === 'creado').length;
+  const enEjecucion = tickets.filter(t => t.status === 'en_ejecucion').length;
+  const pendientePresupuesto = tickets.filter(t => t.status === 'pendiente_presupuesto').length;
+  const cancelado = tickets.filter(t => t.status === 'cancelado').length;
+  const listo = tickets.filter(t => t.status === 'listo').length;
 
   document.getElementById("creadoCount").textContent = creado;
-  document.getElementById("ejecucionCount").textContent = ejecucion;
-  document.getElementById("esperaCount").textContent = espera;
-  document.getElementById("pendingCount").textContent = pendiente;
+  document.getElementById("ejecucionCount").textContent = enEjecucion;
+  document.getElementById("pendienteCount").textContent = pendientePresupuesto;
   document.getElementById("canceladoCount").textContent = cancelado;
-  document.getElementById("completedCount").textContent = completado;
+  document.getElementById("listoCount").textContent = listo;
 }
 
 // Filtrar tickets
@@ -428,24 +426,22 @@ function viewTicket(id) {
 // Funciones auxiliares / utilitarias
 function getStatusText(status) {
   const statusMap = {
-    creado: "Creado",
-    ejecucion: "En ejecución",
-    espera: "En espera",
-    pendiente: "Pendiente",
-    cancelado: "Cancelado",
-    completado: "Completado",
+    'creado': 'Creado',
+    'en_ejecucion': 'En ejecución',
+    'pendiente_presupuesto': 'Pendiente por presupuesto',
+    'cancelado': 'Cancelado',
+    'listo': 'Listo'
   };
   return statusMap[status] || status;
 }
 
 function getStatusIcon(status) {
   const iconMap = {
-    creado: '<i class="bi bi-plus-circle"></i>',
-    ejecucion: '<i class="bi bi-play-circle"></i>',
-    espera: '<i class="bi bi-hourglass-split"></i>',
-    pendiente: '<i class="bi bi-clock"></i>',
-    cancelado: '<i class="bi bi-x-circle"></i>',
-    completado: '<i class="bi bi-check-circle"></i>',
+    'creado': '<i class="bi bi-plus-circle"></i>',
+    'en_ejecucion': '<i class="bi bi-play-circle"></i>',
+    'pendiente_presupuesto': '<i class="bi bi-clock"></i>',
+    'cancelado': '<i class="bi bi-x-circle"></i>',
+    'listo': '<i class="bi bi-check-circle"></i>'
   };
   return iconMap[status] || "";
 }

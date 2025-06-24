@@ -49,7 +49,11 @@
           <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
             <div class="container-fluid">
               <span class="navbar-brand mb-0 h1">
-                <img style="width: 25px;" src="/img/logo-pullman-min.png" alt="Logo Pullman" />
+                <img
+                  style="width: 25px"
+                  src="/img/logo-pullman-min.png"
+                  alt="Logo Pullman"
+                />
                 Mesa de Ayuda Pullman Bus
               </span>
               <div class="d-flex align-items-center gap-2">
@@ -84,6 +88,7 @@
             </div>
           </div>
         </div>
+
         <div class="col-6 col-md-4 mb-3">
           <div class="card border-secondary card-status">
             <div class="card-body text-center">
@@ -99,13 +104,16 @@
             </div>
           </div>
         </div>
+
         <div class="col-6 col-md-4 mb-3">
           <div class="card border-info card-status">
             <div class="card-body text-center">
               <div class="d-flex justify-content-between align-items-center">
                 <div>
-                  <h5 class="card-title text-info">En espera</h5>
-                  <h2 class="mb-0" id="esperaCount">0</h2>
+                  <h5 class="card-title text-info">
+                    Pendiente por presupuesto
+                  </h5>
+                  <h2 class="mb-0" id="pendienteCount">0</h2>
                 </div>
                 <div class="text-info">
                   <i class="bi bi-hourglass-split" style="font-size: 3rem"></i>
@@ -114,21 +122,7 @@
             </div>
           </div>
         </div>
-        <div class="col-6 col-md-4 mb-3">
-          <div class="card border-warning card-status">
-            <div class="card-body text-center">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <h5 class="card-title text-warning">Pendientes</h5>
-                  <h2 class="mb-0" id="pendingCount">0</h2>
-                </div>
-                <div class="text-warning">
-                  <i class="bi bi-clock-fill" style="font-size: 3rem"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+
         <div class="col-6 col-md-4 mb-3">
           <div class="card border-danger card-status">
             <div class="card-body text-center">
@@ -144,13 +138,14 @@
             </div>
           </div>
         </div>
+
         <div class="col-6 col-md-4 mb-3">
           <div class="card border-success card-status">
             <div class="card-body text-center">
               <div class="d-flex justify-content-between align-items-center">
                 <div>
-                  <h5 class="card-title text-success">Completados</h5>
-                  <h2 class="mb-0" id="completedCount">0</h2>
+                  <h5 class="card-title text-success">Listos</h5>
+                  <h2 class="mb-0" id="listoCount">0</h2>
                 </div>
                 <div class="text-success">
                   <i
@@ -200,11 +195,12 @@
                   <select class="form-select" id="statusFilter">
                     <option value="">Todos los estados</option>
                     <option value="creado">Creado</option>
-                    <option value="ejecucion">En ejecución</option>
-                    <option value="espera">En espera</option>
-                    <option value="pendiente">Pendiente</option>
+                    <option value="en_ejecucion">En ejecución</option>
+                    <option value="pendiente_por_presupuesto">
+                      Pendiente por presupuesto
+                    </option>
                     <option value="cancelado">Cancelado</option>
-                    <option value="completado">Completado</option>
+                    <option value="listo">Listo</option>
                   </select>
                 </div>
                 <div class="col-md-4">
@@ -349,11 +345,12 @@
                 <label for="editTicketStatus" class="form-label">Estado</label>
                 <select id="editTicketStatus" class="form-select">
                   <option value="creado">Creado</option>
-                  <option value="ejecucion">En ejecución</option>
-                  <option value="espera">En espera</option>
-                  <option value="pendiente">Pendiente</option>
+                  <option value="en_ejecucion">En ejecución</option>
+                  <option value="pendiente_por_presupuesto">
+                    Pendiente por presupuesto
+                  </option>
                   <option value="cancelado">Cancelado</option>
-                  <option value="completado">Completado</option>
+                  <option value="listo">Listo</option>
                 </select>
               </div>
               <div class="mb-3">

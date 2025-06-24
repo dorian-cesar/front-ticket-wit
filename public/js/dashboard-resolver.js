@@ -138,18 +138,19 @@ function openAdvanceModal(id) {
 // Actualizar estadísticas
 function updateStats() {
   const creado = tickets.filter((t) => t.status === "creado").length;
-  const ejecucion = tickets.filter((t) => t.status === "ejecucion").length;
-  const espera = tickets.filter((t) => t.status === "espera").length;
-  const pendiente = tickets.filter((t) => t.status === "pendiente").length;
+  const enEjecucion = tickets.filter((t) => t.status === "en ejecución").length;
+  const pendientePorPresupuesto = tickets.filter(
+    (t) => t.status === "pendiente por presupuesto"
+  ).length;
   const cancelado = tickets.filter((t) => t.status === "cancelado").length;
-  const completado = tickets.filter((t) => t.status === "completado").length;
+  const listo = tickets.filter((t) => t.status === "listo").length;
 
   document.getElementById("creadoCount").textContent = creado;
-  document.getElementById("ejecucionCount").textContent = ejecucion;
-  document.getElementById("esperaCount").textContent = espera;
-  document.getElementById("pendingCount").textContent = pendiente;
+  document.getElementById("enEjecucionCount").textContent = enEjecucion;
+  document.getElementById("pendientePresupuestoCount").textContent =
+    pendientePorPresupuesto;
   document.getElementById("canceladoCount").textContent = cancelado;
-  document.getElementById("completedCount").textContent = completado;
+  document.getElementById("listoCount").textContent = listo;
 }
 
 // Filtrar tickets
@@ -458,11 +459,10 @@ function viewTicket(id) {
 function getStatusText(status) {
   const statusMap = {
     creado: "Creado",
-    ejecucion: "En ejecución",
-    espera: "En espera",
-    pendiente: "Pendiente",
+    "en ejecución": "En ejecución",
+    "pendiente por presupuesto": "Pendiente por presupuesto",
     cancelado: "Cancelado",
-    completado: "Completado",
+    listo: "Listo",
   };
   return statusMap[status] || status;
 }
@@ -470,11 +470,10 @@ function getStatusText(status) {
 function getStatusIcon(status) {
   const iconMap = {
     creado: '<i class="bi bi-plus-circle"></i>',
-    ejecucion: '<i class="bi bi-play-circle"></i>',
-    espera: '<i class="bi bi-hourglass-split"></i>',
-    pendiente: '<i class="bi bi-clock"></i>',
+    "en ejecución": '<i class="bi bi-play-circle"></i>',
+    "pendiente por presupuesto": '<i class="bi bi-clock"></i>',
     cancelado: '<i class="bi bi-x-circle"></i>',
-    completado: '<i class="bi bi-check-circle"></i>',
+    listo: '<i class="bi bi-check-circle"></i>',
   };
   return iconMap[status] || "";
 }
@@ -652,19 +651,35 @@ getUserIdWhenReady((userId) => {
   })
     .then((res) => res.json())
     .then((data) => {
-      tickets = data.map((t) => ({
-        id: t.id,
-        title: t.area,
-        status: t.estado,
-        assignee: t.solicitante,
-        category: t.tipo_atencion,
-        description: t.observaciones,
-        date: luxon.DateTime.fromISO(t.fecha_creacion)
-          .setZone("America/Santiago")
-          .toFormat("yyyy-MM-dd"),
-        historial: t.historial || [],
-        archivo_pdf: t.archivo_pdf || null,
-      }));
+      tickets = data.map((t) => {
+        // Obtener último estado y fecha del historial si existe
+        let ultimoEstado = t.estado;
+        let fechaTicket = t.fecha_creacion;
+
+        if (Array.isArray(t.historial) && t.historial.length > 0) {
+          const ultimoCambio = t.historial[t.historial.length - 1];
+          if (ultimoCambio && ultimoCambio.nuevo_estado) {
+            ultimoEstado = ultimoCambio.nuevo_estado;
+          }
+          if (ultimoCambio && ultimoCambio.fecha) {
+            fechaTicket = ultimoCambio.fecha;
+          }
+        }
+
+        return {
+          id: t.id,
+          title: t.area,
+          status: ultimoEstado,
+          assignee: t.solicitante,
+          category: t.tipo_atencion,
+          description: t.observaciones,
+          date: luxon.DateTime.fromISO(fechaTicket)
+            .setZone("America/Santiago")
+            .toFormat("yyyy-MM-dd"),
+          historial: t.historial || [],
+          archivo_pdf: t.archivo_pdf || null,
+        };
+      });
 
       renderTickets(tickets);
       updateStats();
