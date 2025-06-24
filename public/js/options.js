@@ -1,3 +1,8 @@
+const userRole =
+  localStorage.getItem("userRole") || sessionStorage.getItem("userRole");
+const userName =
+  localStorage.getItem("userName") || sessionStorage.getItem("userName");
+
 document.addEventListener("DOMContentLoaded", () => {
   initializePage();
   addAnimations();
@@ -98,33 +103,33 @@ function addHoverEffects() {
 function loadUserData() {
   // Simular carga de datos del usuario
   const userData = {
-    name: "Usuario Demo",
-    role: "Administrador",
+    name: userName,
+    role: userRole,
     lastLogin: new Date().toLocaleDateString(),
   };
 
   // Actualizar información del usuario en la interfaz
   const welcomeText = document.querySelector(".welcome-text");
   if (welcomeText) {
-    welcomeText.textContent = `Bienvenido, ${userData.name}`;
+    welcomeText.textContent = `¡Bienvenido(a), ${userData.name}!`;
   }
 
   // Cargar estadísticas (simuladas)
-  loadStats();
+  // loadStats();
 }
 
 // Cargar estadísticas
-function loadStats() {
-  // Simular datos de estadísticas
-  const stats = {
-    active: Math.floor(Math.random() * 50) + 10,
-    pending: Math.floor(Math.random() * 20) + 5,
-    resolved: Math.floor(Math.random() * 200) + 100,
-  };
+// function loadStats() {
+//   // Simular datos de estadísticas
+//   const stats = {
+//     active: Math.floor(Math.random() * 50) + 10,
+//     pending: Math.floor(Math.random() * 20) + 5,
+//     resolved: Math.floor(Math.random() * 200) + 100,
+//   };
 
-  // Actualizar números con animación
-  animateNumbers(stats);
-}
+//   // Actualizar números con animación
+//   animateNumbers(stats);
+// }
 
 // Animar números de estadísticas
 function animateNumbers(stats) {
@@ -149,7 +154,8 @@ function animateNumbers(stats) {
 
 // Verificar autenticación
 function checkAuthentication() {
-  const token = localStorage.getItem("authToken");
+  const token =
+    localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
 
   if (!token) {
     console.warn("No se encontró token de autenticación");

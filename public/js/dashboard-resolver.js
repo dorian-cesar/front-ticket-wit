@@ -638,7 +638,7 @@ function getUserIdWhenReady(callback) {
 
 // Llamada tickets con la id del usuario
 getUserIdWhenReady((userId) => {
-  fetch("https://tickets.dev-wit.com/api/tickets/", {
+  fetch("https://tickets.dev-wit.com/api/tickets", {
     headers: {
       Authorization: `Bearer ${token}`,
     },
