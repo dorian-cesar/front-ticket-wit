@@ -7,6 +7,8 @@ let estadoMap = {};
 let statusClassMap = {};
 let statusMap = {};
 let iconMap = {};
+let currentPage = 1;
+const rowsPerPage = 10;
 
 // Elementos del DOM
 const ticketsTableBody = document.getElementById("ticketsTableBody");
@@ -85,10 +87,15 @@ function renderTickets(ticketsToRender = tickets) {
           No se encontraron tickets
         </td>
       </tr>`;
+    renderPagination(0);
     return;
   }
 
-  ticketsToRender.forEach((ticket) => {
+  const start = (currentPage - 1) * rowsPerPage;
+  const end = start + rowsPerPage;
+  const paginatedTickets = ticketsToRender.slice(start, end);
+
+  paginatedTickets.forEach((ticket) => {
     const statusId = ticket.status_id;
     const row = document.createElement("tr");
     row.className = "new-ticket";
@@ -130,6 +137,31 @@ function renderTickets(ticketsToRender = tickets) {
 
     ticketsTableBody.appendChild(row);
   });
+
+  renderPagination(Math.ceil(ticketsToRender.length / rowsPerPage));
+}
+
+// Paginación
+function renderPagination(totalPages) {
+  const paginationContainer = document.getElementById("paginationContainer");
+  if (!paginationContainer) return;
+
+  paginationContainer.innerHTML = "";
+
+  if (totalPages <= 1) return;
+
+  for (let i = 1; i <= totalPages; i++) {
+    const btn = document.createElement("button");
+    btn.textContent = i;
+    btn.className = `btn btn-sm ${
+      i === currentPage ? "btn-primary" : "btn-outline-primary"
+    } mx-1`;
+    btn.addEventListener("click", () => {
+      currentPage = i;
+      filterTickets();
+    });
+    paginationContainer.appendChild(btn);
+  }
 }
 
 // Actualizar estadísticas
