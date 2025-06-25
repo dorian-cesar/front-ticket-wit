@@ -331,8 +331,7 @@ function validateAdvanceForm() {
   const estadoSeleccionado = parseInt(estadoSelect.value, 10);
   const nombreEstado = estadoMap[estadoSeleccionado] || "";
 
-  const esValido =
-    nombreEstado === "asignado" || nombreEstado === "rechazado";
+  const esValido = nombreEstado === "asignado" || nombreEstado === "rechazado";
 
   updateBtn.disabled = !esValido;
 }
@@ -395,7 +394,7 @@ function logout() {
 // Mostrar nombre de usuario logueado
 const userDisplay = document.getElementById("userNameDisplay");
 if (userName && userDisplay) {
-  userDisplay.textContent = "¡Hola " + userName + "!";
+  userDisplay.textContent = "¡Bienvenido(a) " + userName + "!";
 }
 
 // Llamadas API (areas y tipos)
@@ -655,7 +654,15 @@ function populateStatusFilter(estados) {
     ) {
       const option2 = document.createElement("option");
       option2.value = estado.id;
-      option2.textContent = nombreCapitalizado;
+
+      if (nombreLower === "asignado") {
+        option2.textContent = "Autorizar";
+      } else if (nombreLower === "rechazado") {
+        option2.textContent = "Rechazar";
+      } else {
+        option2.textContent = nombreCapitalizado;
+      }
+
       selectEdit.appendChild(option2);
     }
   });

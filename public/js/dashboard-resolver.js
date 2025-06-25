@@ -407,7 +407,7 @@ function logout() {
 // Mostrar nombre de usuario logueado
 const userDisplay = document.getElementById("userNameDisplay");
 if (userName && userDisplay) {
-  userDisplay.textContent = "¡Hola " + userName + "!";
+  userDisplay.textContent = "¡Bienvenido(a) " + userName + "!";
 }
 
 // Llamadas API (areas y tipos)
