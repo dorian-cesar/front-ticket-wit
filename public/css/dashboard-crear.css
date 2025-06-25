@@ -62,7 +62,6 @@ body {
   border-radius: 12px;
   box-shadow: 0 4px 15px var(--shadow-light);
   transition: all 0.3s ease;
-  margin-bottom: 1rem;
   background: white;
 }
 
