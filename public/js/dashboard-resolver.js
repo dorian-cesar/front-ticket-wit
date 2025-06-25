@@ -200,14 +200,23 @@ async function updateTicket() {
   updateTicketBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Actualizando...`;
 
   const id = Number.parseInt(document.getElementById("editTicketId").value);
-  const nuevoEstado = document.getElementById("editTicketStatus").value;
+  const nuevoEstado = parseInt(
+    document.getElementById("editTicketStatus").value,
+    10
+  );
   const observacion = document.getElementById("editTicketDescription").value;
 
   const payload = {
-    nuevo_estado: nuevoEstado,
-    observacion: observacion,
-    usuario_id: userId,
+    id_nuevo_estado: nuevoEstado,
+    observacion,
+    usuario_id: parseInt(userId, 10),
   };
+
+  console.log("Payload enviado:", {
+    id_nuevo_estado: nuevoEstado,
+    observacion,
+    usuario_id: parseInt(userId, 10),
+  });
 
   try {
     const response = await fetch(
@@ -528,6 +537,7 @@ getUserIdWhenReady((userId) => {
   })
     .then((res) => res.json())
     .then((data) => {
+      console.log("tickets" ,data)
       tickets = data.map((t) => {
         // Obtener último estado y fecha del historial si existe
         let ultimoEstado = t.id_estado;
@@ -535,7 +545,7 @@ getUserIdWhenReady((userId) => {
 
         if (Array.isArray(t.historial) && t.historial.length > 0) {
           const ultimoCambio = t.historial[t.historial.length - 1];
-          if (ultimoCambio && ultimoCambio.nuevo_estado) {
+          if (ultimoCambio && ultimoCambio.id_nuevo_estado) {
             ultimoEstado = ultimoCambio.id_nuevo_estado;
           }
           if (ultimoCambio && ultimoCambio.fecha) {
@@ -613,7 +623,7 @@ async function fetchEstados() {
       throw new Error(`Error ${res.status}: ${res.statusText}`);
     }
     const estados = await res.json();
-    console.log("estados:", estados);
+    // console.log("estados:", estados);
     estados.forEach((estado) => {
       estadoMap[estado.id] = estado.nombre.toLowerCase();
       statusMap[estado.id] = capitalize(estado.nombre);

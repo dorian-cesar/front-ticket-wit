@@ -587,8 +587,7 @@ getUserIdWhenReady((userId) => {
         historial: t.historial || [],
         archivo_pdf: t.archivo_pdf,
       }));
-
-      console.log("tickets:", tickets);
+      // console.log("tickets:", tickets);
       renderTickets(tickets);
       updateStats();
     })
@@ -640,22 +639,17 @@ async function fetchEstados() {
         "Content-Type": "application/json",
       },
     });
-
     if (!res.ok) {
       throw new Error(`Error ${res.status}: ${res.statusText}`);
     }
-
     const estados = await res.json();
-
-    console.log("estados:", estados);
-
+    // console.log("estados:", estados);
     estados.forEach((estado) => {
       estadoMap[estado.id] = estado.nombre.toLowerCase();
       statusMap[estado.id] = capitalize(estado.nombre);
       statusClassMap[estado.id] = customClasses[estado.id] || "sin-clase";
       iconMap[estado.id] = customIcons[estado.id] || "";
     });
-
     populateStatusFilter(estados);
   } catch (error) {
     console.error("Error cargando estados:", error.message);
@@ -673,7 +667,6 @@ function capitalize(texto) {
 function populateStatusFilter(estados) {
   const select = document.getElementById("statusFilter");
   select.innerHTML = '<option value="">Todos los estados</option>';
-
   estados.forEach((estado) => {
     const option = document.createElement("option");
     option.value = estado.id;
