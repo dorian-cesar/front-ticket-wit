@@ -57,16 +57,10 @@ function setupEventListeners() {
   // Actualizar ticket
   updateTicketBtn.addEventListener("click", updateTicket);
 
-  // Validación del formulario
+  // Validación del formulario de avanzar ticket
   document
-    .getElementById("ticketDescription")
-    .addEventListener("input", validateForm);
-  document
-    .getElementById("ticketAssignee")
-    .addEventListener("change", validateForm);
-  document
-    .getElementById("ticketCategory")
-    .addEventListener("change", validateForm);
+    .getElementById("editTicketStatus")
+    .addEventListener("change", validateAdvanceForm);
 }
 
 // Renderizar la tabla de tickets
@@ -90,17 +84,10 @@ function renderTickets(ticketsToRender = tickets) {
     row.className = "new-ticket";
 
     const statusClass = statusClassMap[ticket.status_id];
-    const estadoNombre = estadoMap[ticket.status_id] || "";
-    const avanzarBtn = ![
-      "listo",
-      "cancelado",
-      "pendiente por autorizar",
-      "rechazado",
-    ].includes(estadoNombre)
-      ? `<button class="btn btn-outline-secondary btn-action" onclick="openAdvanceModal(${ticket.id})" title="Avanzar Ticket">
+
+    const avanzarBtn = `<button class="btn btn-outline-secondary btn-action" onclick="openAdvanceModal(${ticket.id})" title="Avanzar Ticket">
         <i class="bi bi-forward-fill text-success"></i>
-      </button>`
-      : "";
+      </button>`;
 
     row.innerHTML = `
       <td data-label="ID"><strong>#${ticket.id}</strong></td>
@@ -145,11 +132,12 @@ function openAdvanceModal(id) {
   if (!ticket) return;
 
   document.getElementById("editTicketId").value = ticket.id;
-  document.getElementById("editTicketStatus").value = ticket.status_id;
+  document.getElementById("editTicketStatus").value = "";
   document.getElementById("editTicketDescription").value = "";
 
   const modal = new bootstrap.Modal(document.getElementById("editTicketModal"));
   modal.show();
+  validateAdvanceForm();
 }
 
 // Actualizar estadísticas
@@ -208,20 +196,16 @@ async function updateTicket() {
   const observacion = document.getElementById("editTicketDescription").value;
 
   const payload = {
-    id_nuevo_estado: nuevoEstado,
+    id_estado: nuevoEstado,
     observacion,
     usuario_id: parseInt(userId, 10),
   };
 
-  console.log("Payload enviado:", {
-    id_nuevo_estado: nuevoEstado,
-    observacion,
-    usuario_id: parseInt(userId, 10),
-  });
+  console.log("payload asignar/rechazar:", payload);
 
   try {
     const response = await fetch(
-      `https://tickets.dev-wit.com/api/tickets/estado/${id}`,
+      `https://tickets.dev-wit.comapi/tickets/autorizar-rechazar/${id}`,
       {
         method: "PUT",
         headers: {
@@ -339,6 +323,20 @@ function viewTicket(id) {
   modal.show();
 }
 
+// Validar formulario
+function validateAdvanceForm() {
+  const estadoSelect = document.getElementById("editTicketStatus");
+  const updateBtn = document.getElementById("updateTicketBtn");
+
+  const estadoSeleccionado = parseInt(estadoSelect.value, 10);
+  const nombreEstado = estadoMap[estadoSeleccionado] || "";
+
+  const esValido =
+    nombreEstado === "asignado" || nombreEstado === "rechazado";
+
+  updateBtn.disabled = !esValido;
+}
+
 // Funciones auxiliares / utilitarias
 const customIcons = {
   1: '<i class="bi bi-shield-check"></i>',
@@ -372,16 +370,6 @@ function formatDate(dateString) {
   return luxon.DateTime.fromISO(dateString, { zone: "America/Santiago" })
     .setLocale("es")
     .toFormat("d LLL yyyy");
-}
-
-// Validar formulario
-function validateForm() {
-  const description = document.getElementById("ticketDescription").value.trim();
-  const tipoAtencion = document.getElementById("ticketAssignee").value;
-  const areaSolicitante = document.getElementById("ticketCategory").value;
-
-  const isValid = description && tipoAtencion && areaSolicitante;
-  saveTicketBtn.disabled = !isValid;
 }
 
 // Alertas
@@ -529,7 +517,7 @@ function getUserIdWhenReady(callback) {
 
 // Llamada tickets con la id del usuario
 getUserIdWhenReady((userId) => {
-  const endpoint = `https://tickets.dev-wit.com/api/tickets/ejecutor/${userId}`;
+  const endpoint = `https://tickets.dev-wit.com/api/tickets/pendientes/jefatura/${userId}`;
 
   fetch(endpoint, {
     headers: {
@@ -538,9 +526,8 @@ getUserIdWhenReady((userId) => {
   })
     .then((res) => res.json())
     .then((data) => {
-      console.log("tickets" ,data)
+      // console.log("tickets" ,data)
       tickets = data.map((t) => {
-        // Obtener último estado y fecha del historial si existe
         let ultimoEstado = t.id_estado;
         let fechaTicket = t.fecha_creacion;
 
@@ -558,7 +545,7 @@ getUserIdWhenReady((userId) => {
           id: t.id,
           title: t.area,
           status_id: ultimoEstado,
-          assignee: t.solicitante,
+          assignee: t.nombre_solicitante,
           category: t.tipo_atencion,
           description: t.observaciones,
           date: luxon.DateTime.fromISO(fechaTicket)
@@ -580,7 +567,7 @@ getUserIdWhenReady((userId) => {
 
 // Llamada para recargar tabla de tickets
 async function loadTickets(userId) {
-  const endpoint = `https://tickets.dev-wit.com/api/tickets/ejecutor/${userId}`;
+  const endpoint = `https://tickets.dev-wit.com/api/tickets/pendientes/jefatura/${userId}`;
 
   try {
     const response = await fetch(endpoint, {
@@ -594,7 +581,7 @@ async function loadTickets(userId) {
       id: t.id,
       title: t.area,
       status_id: t.id_estado,
-      assignee: t.solicitante,
+      assignee: t.nombre_solicitante,
       category: t.tipo_atencion,
       description: t.observaciones,
       date: luxon.DateTime.fromISO(t.fecha_creacion)
@@ -649,6 +636,7 @@ function populateStatusFilter(estados) {
   const select = document.getElementById("statusFilter");
   const selectEdit = document.getElementById("editTicketStatus");
   select.innerHTML = '<option value="">Todos los estados</option>';
+  selectEdit.innerHTML = '<option value="">Seleccione un estado</option>';
   estados.forEach((estado) => {
     const nombreCapitalizado = capitalize(estado.nombre);
 
@@ -657,9 +645,18 @@ function populateStatusFilter(estados) {
     option1.textContent = nombreCapitalizado;
     select.appendChild(option1);
 
-    const option2 = document.createElement("option");
-    option2.value = estado.id;
-    option2.textContent = nombreCapitalizado;
-    selectEdit.appendChild(option2);
+    const nombreLower = estado.nombre.toLowerCase();
+    if (
+      nombreLower !== "cancelado" &&
+      nombreLower !== "listo" &&
+      nombreLower !== "en ejecución" &&
+      nombreLower !== "pendiente por presupuesto" &&
+      nombreLower !== "pendiente por autorizar"
+    ) {
+      const option2 = document.createElement("option");
+      option2.value = estado.id;
+      option2.textContent = nombreCapitalizado;
+      selectEdit.appendChild(option2);
+    }
   });
 }

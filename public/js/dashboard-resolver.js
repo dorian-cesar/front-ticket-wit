@@ -540,7 +540,6 @@ getUserIdWhenReady((userId) => {
     .then((data) => {
       console.log("tickets", data);
       tickets = data.map((t) => {
-        // Obtener último estado y fecha del historial si existe
         let ultimoEstado = t.id_estado;
         let fechaTicket = t.fecha_creacion;
 
