@@ -1,3 +1,4 @@
+// Inicialización de variables
 let usersData = [];
 let tiposAtencion = [];
 let areas = [];
@@ -15,13 +16,24 @@ const token =
   localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
 const userMail =
   localStorage.getItem("userMail") || sessionStorage.getItem("userMail");
+const userName =
+  sessionStorage.getItem("userName") || localStorage.getItem("userName");
 
-// Inicializar el panel de control (dashboard)
 document.addEventListener("DOMContentLoaded", () => {
+  // Inicializar el panel de control (dashboard)
   setupEventListeners();
+
+  // Inicializar tooltips
+  const tooltipTriggerList = [].slice.call(
+    document.querySelectorAll("[title]")
+  );
+  tooltipTriggerList.map(
+    (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
+  );
+
+  // Manejo de archivo adjunto
   const attachmentInput = document.getElementById("ticketAttachment");
   const clearAttachmentBtn = document.getElementById("clearAttachmentBtn");
-
   clearAttachmentBtn.addEventListener("click", () => {
     attachmentInput.value = "";
   });
@@ -126,8 +138,7 @@ function openAdvanceModal(id) {
   if (!ticket) return;
 
   document.getElementById("editTicketId").value = ticket.id;
-  document.getElementById("editTicketStatus").value =
-    ticket.status || "pendiente";
+  document.getElementById("editTicketStatus").value = ticket.status || "creado";
   document.getElementById("editTicketDescription").value =
     ticket.description || "";
 
@@ -211,7 +222,7 @@ async function createTicket() {
   if (!solicitante) {
     showAlert(
       "No se encontró el usuario logueado en los datos de usuarios.",
-      "danger"
+      "error"
     );
     btnSpinner.classList.add("d-none");
     btnIcon.classList.remove("d-none");
@@ -230,7 +241,7 @@ async function createTicket() {
     const file = attachmentInput.files[0];
 
     if (file.size > 10 * 1024 * 1024) {
-      showAlert("El archivo adjunto no debe superar los 10MB.", "warning");
+      showAlert("El archivo adjunto no debe superar los 10MB", "warning");
       btnSpinner.classList.add("d-none");
       btnIcon.classList.remove("d-none");
       btnText.textContent = "Crear Ticket";
@@ -239,7 +250,7 @@ async function createTicket() {
     }
 
     if (file.type !== "application/pdf") {
-      showAlert("Solo se permiten archivos en formato PDF.", "warning");
+      showAlert("Solo se permiten archivos en formato PDF", "warning");
       btnSpinner.classList.add("d-none");
       btnIcon.classList.remove("d-none");
       btnText.textContent = "Crear Ticket";
@@ -294,21 +305,9 @@ async function createTicket() {
   }
 }
 
-// Setea los valores del ticket en el formulario de edición
-function openEditModal(ticket) {
-  document.getElementById("editTicketId").value = ticket.id;
-  document.getElementById("editTicketStatus").value =
-    ticket.status || "pendiente";
-  document.getElementById("editTicketDescription").value =
-    ticket.description || "";
-
-  const modal = new bootstrap.Modal(document.getElementById("editTicketModal"));
-  modal.show();
-}
-
 function formatHistorial(historial) {
   if (!Array.isArray(historial) || historial.length === 0) {
-    return "<p class='text-muted'><em>Sin historial disponible.</em></p>";
+    return "<p class='text-muted'><em>Sin historial disponible</em></p>";
   }
 
   return historial
@@ -425,7 +424,7 @@ function validateForm() {
   saveTicketBtn.disabled = !isValid;
 }
 
-// Mostrar alerta
+// Alertas
 function showAlert(message, type = "info") {
   Swal.fire({
     toast: true,
@@ -442,27 +441,14 @@ function showAlert(message, type = "info") {
 function logout() {
   localStorage.clear();
   sessionStorage.clear();
-
   window.location.href = "/index.html";
 }
 
 // Mostrar nombre de usuario logueado
-const userName =
-  sessionStorage.getItem("userName") || localStorage.getItem("userName");
 const userDisplay = document.getElementById("userNameDisplay");
 if (userName && userDisplay) {
   userDisplay.textContent = "¡Hola " + userName + "!";
 }
-
-// Inicializar tooltips
-document.addEventListener("DOMContentLoaded", () => {
-  const tooltipTriggerList = [].slice.call(
-    document.querySelectorAll("[title]")
-  );
-  tooltipTriggerList.map(
-    (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
-  );
-});
 
 // Llamadas API (areas y tipos)
 const categorySelect = document.getElementById("ticketCategory");
@@ -476,7 +462,7 @@ fetch("https://tickets.dev-wit.com/api/areas", {
 })
   .then((response) => {
     if (!response.ok) {
-      throw new Error("Error al obtener categorías");
+      throw new Error("Error al obtener áreas");
     }
     return response.json();
   })
@@ -495,7 +481,7 @@ fetch("https://tickets.dev-wit.com/api/areas", {
     // console.log("tiposAreas", areas);
   })
   .catch((error) => {
-    console.error("Error cargando categorías:", error);
+    console.error("Error cargando áreas:", error);
   });
 
 const tipoSelect = document.getElementById("ticketAssignee");
@@ -519,7 +505,6 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
 
     // Resetear selects
     tipoSelect.innerHTML = '<option value="">Sin asignar</option>';
-    // tipoSelectEdit.innerHTML = '<option value="">Sin asignar</option>';
     tipoAtencionFilterSelect.innerHTML =
       '<option value="">Todos los tipos de atención</option>';
 
@@ -535,7 +520,7 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
       option2.textContent = tipo.nombre;
 
       const option3 = document.createElement("option");
-      option3.value = tipo.nombre; // ← Este debe coincidir con ticket.category si haces comparación por nombre
+      option3.value = tipo.nombre;
       option3.textContent = tipo.nombre;
       tipoAtencionFilterSelect.appendChild(option3);
     });
@@ -555,7 +540,7 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
       },
     });
     if (!response.ok) {
-      throw new Error(`Error HTTP: ${response.status}`);
+      throw new Error(`Error al obtener usuarios: ${response.status}`);
     }
     const data = await response.json();
     usersData = data;
@@ -574,7 +559,7 @@ function getUserIdWhenReady(callback) {
         clearInterval(interval);
         callback(user.id);
       } else {
-        showAlert("No se encontró el usuario en la lista de datos.", "danger");
+        showAlert("No se encontró el usuario en la lista de datos.", "error");
         clearInterval(interval);
       }
     }

@@ -1,3 +1,4 @@
+// Inicialización de variables
 let usersData = [];
 let tiposAtencion = [];
 let areas = [];
@@ -504,7 +505,7 @@ function getUserIdWhenReady(callback) {
         clearInterval(interval);
         callback(user.id);
       } else {
-        showAlert("No se encontró el usuario en la lista de datos.", "danger");
+        showAlert("No se encontró el usuario en la lista de datos.", "error");
         clearInterval(interval);
       }
     }
