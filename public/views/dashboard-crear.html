@@ -73,22 +73,41 @@
 
       <!-- Tarjetas de Estadísticas -->
       <div class="row mt-4 align-items-stretch">
+        <!-- Pendiente por Autorizar -->
+        <div class="col mb-3 h-100">
+          <div class="card border-info card-status w-100 h-100">
+            <div
+              class="card-body text-center d-flex justify-content-between align-items-center"
+            >
+              <div>
+                <h5 class="card-title text-info">Por Autorizar</h5>
+                <h2 class="mb-0" id="pendienteAutorizarCount">0</h2>
+              </div>
+              <div class="text-info">
+                <i class="bi bi-shield-check" style="font-size: 3rem"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Asignados -->
         <div class="col mb-3 h-100">
           <div class="card border-primary card-status w-100 h-100">
             <div
               class="card-body text-center d-flex justify-content-between align-items-center"
             >
               <div>
-                <h5 class="card-title text-primary">Creados</h5>
-                <h2 class="mb-0" id="creadoCount">0</h2>
+                <h5 class="card-title text-primary">Asignados</h5>
+                <h2 class="mb-0" id="asignadoCount">0</h2>
               </div>
               <div class="text-primary">
-                <i class="bi bi-plus-circle-fill" style="font-size: 3rem"></i>
+                <i class="bi bi-person-check-fill" style="font-size: 3rem"></i>
               </div>
             </div>
           </div>
         </div>
 
+        <!-- En Ejecución -->
         <div class="col mb-3 h-100">
           <div class="card border-accent card-status w-100 h-100">
             <div
@@ -105,15 +124,14 @@
           </div>
         </div>
 
+        <!-- Pendiente por Presupuesto -->
         <div class="col mb-3 h-100">
           <div class="card border-warning card-status w-100 h-100">
             <div
               class="card-body text-center d-flex justify-content-between align-items-center"
             >
               <div>
-                <h5 class="card-title text-warning">
-                  Pendiente
-                </h5>
+                <h5 class="card-title text-warning">Pendiente</h5>
                 <h2 class="mb-0" id="pendienteCount">0</h2>
               </div>
               <div class="text-warning">
@@ -123,6 +141,7 @@
           </div>
         </div>
 
+        <!-- Cancelados -->
         <div class="col mb-3 h-100">
           <div class="card border-danger card-status w-100 h-100">
             <div
@@ -139,6 +158,7 @@
           </div>
         </div>
 
+        <!-- Listos -->
         <div class="col mb-3 h-100">
           <div class="card border-success card-status w-100 h-100">
             <div

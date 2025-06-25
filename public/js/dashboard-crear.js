@@ -3,6 +3,10 @@ let usersData = [];
 let tiposAtencion = [];
 let areas = [];
 let tickets = [];
+let estadoMap = {};
+let statusClassMap = {};
+let statusMap = {};
+let iconMap = {};
 
 // Elementos del DOM
 const ticketsTableBody = document.getElementById("ticketsTableBody");
@@ -22,6 +26,9 @@ const userName =
 document.addEventListener("DOMContentLoaded", () => {
   // Inicializar el panel de control (dashboard)
   setupEventListeners();
+
+  // Traer estados de tickets
+  fetchEstados();
 
   // Inicializar tooltips
   const tooltipTriggerList = [].slice.call(
@@ -66,67 +73,60 @@ function setupEventListeners() {
     .addEventListener("change", validateForm);
 }
 
-const statusClassMap = {
-  creado: "creado",
-  "en ejecución": "en-ejecucion",
-  "pendiente por presupuesto": "pendiente-por-presupuesto",
-  cancelado: "cancelado",
-  listo: "listo",
-};
-
 // Renderizar la tabla de tickets
 function renderTickets(ticketsToRender = tickets) {
   ticketsTableBody.innerHTML = "";
 
   if (!Array.isArray(ticketsToRender) || ticketsToRender.length === 0) {
     ticketsTableBody.innerHTML = `
-    <tr class="no-tickets-row">
-      <td colspan="7" class="text-center text-muted py-4">
-        <i class="bi bi-inbox display-4 d-block mb-2"></i>
-        No se encontraron tickets
-      </td>
-    </tr>
-  `;
+      <tr class="no-tickets-row">
+        <td colspan="7" class="text-center text-muted py-4">
+          <i class="bi bi-inbox display-4 d-block mb-2"></i>
+          No se encontraron tickets
+        </td>
+      </tr>`;
     return;
   }
 
   ticketsToRender.forEach((ticket) => {
+    const statusId = ticket.status_id;
     const row = document.createElement("tr");
     row.className = "new-ticket";
 
-    const statusClass = statusClassMap[ticket.status] || "creado";
+    const statusClass = statusClassMap[statusId] || "sin-clase";
 
     row.innerHTML = `
-    <td data-label="ID"><strong>#${ticket.id}</strong></td>
-    <td data-label="Área">
-      <div class="fw-semibold">${ticket.title}</div>
-      <small class="text-muted">${ticket.category}</small>
-    </td>
-    <td data-label="Estado">
-      <span class="badge status-${statusClass} badge-status">
-        ${getStatusIcon(ticket.status)} ${getStatusText(ticket.status)}
-      </span>
-    </td>
-    <td data-label="Asignado">
-      ${
-        ticket.assignee
-          ? `<div class="d-flex align-items-center">
-              <i class="bi bi-person-circle me-2"></i>
-              ${ticket.assignee}
-            </div>`
-          : '<span class="text-muted">Sin asignar</span>'
-      }
-    </td>
-    <td data-label="Fecha"><small>${formatDate(ticket.date)}</small></td>
-    <td data-label="Acciones">
-      <div class="btn-group" role="group">
-        <button class="btn btn-outline-info btn-action" onclick="viewTicket(${
-          ticket.id
-        })" title="Ver detalles">
-          <i class="bi bi-eye"></i>
-        </button>
-      </div>
-    </td>`;
+      <td data-label="ID"><strong>#${ticket.id}</strong></td>
+      <td data-label="Área">
+        <div class="fw-semibold">${ticket.title}</div>
+        <small class="text-muted">${ticket.category}</small>
+      </td>
+      <td data-label="Estado">
+        <span class="badge status-${statusClass} badge-status">
+          ${getStatusIcon(statusId)} ${getStatusText(statusId)}
+        </span>
+      </td>
+      <td data-label="Asignado">
+        ${
+          ticket.assignee
+            ? `<div class="d-flex align-items-center">
+                <i class="bi bi-person-circle me-2"></i>
+                ${ticket.assignee}
+              </div>`
+            : '<span class="text-muted">Sin asignar</span>'
+        }
+      </td>
+      <td data-label="Fecha"><small>${formatDate(ticket.date)}</small></td>
+      <td data-label="Acciones">
+        <div class="btn-group" role="group">
+          <button class="btn btn-outline-info btn-action" onclick="viewTicket(${
+            ticket.id
+          })" title="Ver detalles">
+            <i class="bi bi-eye"></i>
+          </button>
+        </div>
+      </td>
+    `;
 
     ticketsTableBody.appendChild(row);
   });
@@ -134,18 +134,18 @@ function renderTickets(ticketsToRender = tickets) {
 
 // Actualizar estadísticas
 function updateStats() {
-  const creado = tickets.filter((t) => t.status === "creado").length;
-  const enEjecucion = tickets.filter((t) => t.status === "en ejecución").length;
-  const pendientePorPresupuesto = tickets.filter(
-    (t) => t.status === "pendiente por presupuesto"
-  ).length;
-  const cancelado = tickets.filter((t) => t.status === "cancelado").length;
-  const listo = tickets.filter((t) => t.status === "listo").length;
+  const asignado = tickets.filter((t) => t.status_id === 2).length;
+  const pendienteAutorizar = tickets.filter((t) => t.status_id === 1).length;
+  const enEjecucion = tickets.filter((t) => t.status_id === 3).length;
+  const pendientePresupuesto = tickets.filter((t) => t.status_id === 4).length;
+  const cancelado = tickets.filter((t) => t.status_id === 5).length;
+  const listo = tickets.filter((t) => t.status_id === 6).length;
 
-  document.getElementById("creadoCount").textContent = creado;
+  document.getElementById("asignadoCount").textContent = asignado;
+  document.getElementById("pendienteAutorizarCount").textContent =
+    pendienteAutorizar;
   document.getElementById("ejecucionCount").textContent = enEjecucion;
-  document.getElementById("pendienteCount").textContent =
-    pendientePorPresupuesto;
+  document.getElementById("pendienteCount").textContent = pendientePresupuesto;
   document.getElementById("canceladoCount").textContent = cancelado;
   document.getElementById("listoCount").textContent = listo;
 }
@@ -157,7 +157,7 @@ function filterTickets() {
   const searchValue = searchInput.value.toLowerCase();
 
   const filteredTickets = tickets.filter((ticket) => {
-    const matchesStatus = !statusValue || ticket.status === statusValue;
+    const matchesStatus = !statusValue || ticket.status_id == statusValue;
     const matchesTipoAtencion =
       !tipoAtencionValue || ticket.category === tipoAtencionValue;
     const matchesSearch =
@@ -370,28 +370,30 @@ function viewTicket(id) {
 }
 
 // Funciones auxiliares / utilitarias
-const statusMap = {
-  creado: "Creado",
-  "en ejecución": "En ejecución",
-  "pendiente por presupuesto": "Pendiente por presupuesto",
-  cancelado: "Cancelado",
-  listo: "Listo",
+const customIcons = {
+  1: '<i class="bi bi-shield-check"></i>',
+  2: '<i class="bi bi-person-check"></i>',
+  3: '<i class="bi bi-play-circle"></i>',
+  4: '<i class="bi bi-clock"></i>',
+  5: '<i class="bi bi-x-circle"></i>',
+  6: '<i class="bi bi-check-circle"></i>',
 };
 
-const iconMap = {
-  creado: '<i class="bi bi-plus-circle"></i>',
-  "en ejecución": '<i class="bi bi-play-circle"></i>',
-  "pendiente por presupuesto": '<i class="bi bi-clock"></i>',
-  cancelado: '<i class="bi bi-x-circle"></i>',
-  listo: '<i class="bi bi-check-circle"></i>',
+const customClasses = {
+  1: "pendiente-por-autorizar",
+  2: "asignado",
+  3: "en-ejecucion",
+  4: "pendiente-por-presupuesto",
+  5: "cancelado",
+  6: "listo",
 };
 
-function getStatusText(status) {
-  return statusMap[status] || status;
+function getStatusText(statusId) {
+  return statusMap[statusId] || "Desconocido";
 }
 
-function getStatusIcon(status) {
-  return iconMap[status] || "";
+function getStatusIcon(statusId) {
+  return iconMap[statusId] || "";
 }
 
 function formatDate(dateString) {
@@ -564,7 +566,7 @@ getUserIdWhenReady((userId) => {
       tickets = data.map((t) => ({
         id: t.id,
         title: t.area,
-        status: t.estado,
+        status_id: t.id_estado,
         assignee: t.ejecutor,
         category: t.tipo_atencion,
         description: t.observaciones,
@@ -575,6 +577,7 @@ getUserIdWhenReady((userId) => {
         archivo_pdf: t.archivo_pdf,
       }));
 
+      console.log("tickets:", tickets)
       renderTickets(tickets);
       updateStats();
     })
@@ -599,7 +602,7 @@ async function loadTickets(userId) {
     tickets = data.map((t) => ({
       id: t.id,
       title: t.area,
-      status: t.estado,
+      status_id: t.id_estado,
       assignee: t.ejecutor,
       category: t.tipo_atencion,
       description: t.observaciones,
@@ -616,4 +619,54 @@ async function loadTickets(userId) {
     console.error("Error recargando tickets:", err);
     showAlert("No se pudieron recargar los tickets.", "warning");
   }
+}
+
+async function fetchEstados() {
+  try {
+    const res = await fetch("https://tickets.dev-wit.com/api/estados", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    });
+
+    if (!res.ok) {
+      throw new Error(`Error ${res.status}: ${res.statusText}`);
+    }
+
+    const estados = await res.json();
+
+    console.log("estados:", estados)
+
+    estados.forEach((estado) => {
+      estadoMap[estado.id] = estado.nombre.toLowerCase();
+      statusMap[estado.id] = capitalize(estado.nombre);
+      statusClassMap[estado.id] = customClasses[estado.id] || "sin-clase";
+      iconMap[estado.id] = customIcons[estado.id] || "";
+    });
+
+    populateStatusFilter(estados);
+  } catch (error) {
+    console.error("Error cargando estados:", error.message);
+  }
+}
+
+function capitalize(texto) {
+  return texto
+    .toLowerCase()
+    .split(" ")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+function populateStatusFilter(estados) {
+  const select = document.getElementById("statusFilter");
+  select.innerHTML = '<option value="">Todos los estados</option>';
+
+  estados.forEach((estado) => {
+    const option = document.createElement("option");
+    option.value = estado.id;
+    option.textContent = capitalize(estado.nombre);
+    select.appendChild(option);
+  });
 }
