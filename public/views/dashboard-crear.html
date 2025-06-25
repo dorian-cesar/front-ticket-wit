@@ -73,7 +73,6 @@
 
       <!-- Tarjetas de Estadísticas -->
       <div class="row mt-4 align-items-stretch">
-        <!-- Pendiente por Autorizar -->
         <div class="col mb-3 h-100">
           <div class="card border-info card-status w-100 h-100">
             <div
@@ -90,7 +89,6 @@
           </div>
         </div>
 
-        <!-- Asignados -->
         <div class="col mb-3 h-100">
           <div class="card border-primary card-status w-100 h-100">
             <div
@@ -107,7 +105,6 @@
           </div>
         </div>
 
-        <!-- En Ejecución -->
         <div class="col mb-3 h-100">
           <div class="card border-accent card-status w-100 h-100">
             <div
@@ -124,7 +121,6 @@
           </div>
         </div>
 
-        <!-- Pendiente por Presupuesto -->
         <div class="col mb-3 h-100">
           <div class="card border-warning card-status w-100 h-100">
             <div
@@ -141,7 +137,22 @@
           </div>
         </div>
 
-        <!-- Cancelados -->
+        <div class="col mb-3 h-100">
+          <div class="card border-secondary card-status w-100 h-100">
+            <div
+              class="card-body text-center d-flex justify-content-between align-items-center"
+            >
+              <div>
+                <h5 class="card-title text-secondary">Rechazados</h5>
+                <h2 class="mb-0" id="rechazadoCount">0</h2>
+              </div>
+              <div class="text-secondary">
+                <i class="bi bi-slash-circle-fill" style="font-size: 3rem"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="col mb-3 h-100">
           <div class="card border-danger card-status w-100 h-100">
             <div
@@ -158,7 +169,6 @@
           </div>
         </div>
 
-        <!-- Listos -->
         <div class="col mb-3 h-100">
           <div class="card border-success card-status w-100 h-100">
             <div
@@ -211,13 +221,7 @@
                 <div class="col-md-4">
                   <select id="statusFilter" class="form-select">
                     <option value="">Todos los estados</option>
-                    <option value="creado">Creado</option>
-                    <option value="en ejecución">En ejecución</option>
-                    <option value="pendiente por presupuesto">
-                      Pendiente por presupuesto
-                    </option>
-                    <option value="cancelado">Cancelado</option>
-                    <option value="listo">Listo</option>
+                    <!-- se llenan con js -->
                   </select>
                 </div>
                 <div class="col-md-4">

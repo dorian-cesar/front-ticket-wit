@@ -138,6 +138,7 @@ function updateStats() {
   const pendienteAutorizar = tickets.filter((t) => t.status_id === 1).length;
   const enEjecucion = tickets.filter((t) => t.status_id === 3).length;
   const pendientePresupuesto = tickets.filter((t) => t.status_id === 4).length;
+  const rechazado = tickets.filter((t) => t.status_id === 9).length;
   const cancelado = tickets.filter((t) => t.status_id === 5).length;
   const listo = tickets.filter((t) => t.status_id === 6).length;
 
@@ -146,6 +147,7 @@ function updateStats() {
     pendienteAutorizar;
   document.getElementById("ejecucionCount").textContent = enEjecucion;
   document.getElementById("pendienteCount").textContent = pendientePresupuesto;
+  document.getElementById("rechazadoCount").textContent = rechazado;
   document.getElementById("canceladoCount").textContent = cancelado;
   document.getElementById("listoCount").textContent = listo;
 }
@@ -384,6 +386,7 @@ const customIcons = {
   4: '<i class="bi bi-clock"></i>',
   5: '<i class="bi bi-x-circle"></i>',
   6: '<i class="bi bi-check-circle"></i>',
+  9: '<i class="bi bi-slash-circle"></i>',
 };
 
 const customClasses = {
@@ -393,6 +396,7 @@ const customClasses = {
   4: "pendiente-por-presupuesto",
   5: "cancelado",
   6: "listo",
+  9: "rechazado",
 };
 
 function getStatusText(statusId) {

@@ -312,6 +312,11 @@ body {
   color: var(--text-dark);
 }
 
+.status-rechazado {
+  background-color: #6c757d;
+  color: #fff;
+}
+
 .status-cancelado {
   background-color: var(--danger-color);
 }
