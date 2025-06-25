@@ -203,6 +203,7 @@ function filterTickets() {
     return matchesStatus && matchesTipoAtencion && matchesSearch;
   });
 
+  currentPage = 1;
   renderTickets(filteredTickets);
 }
 
