@@ -12,6 +12,8 @@ const searchInput = document.getElementById("searchInput");
 const createTicketForm = document.getElementById("createTicketForm");
 const saveTicketBtn = document.getElementById("saveTicketBtn");
 const updateTicketBtn = document.getElementById("updateTicketBtn");
+
+// Obtener data de storage
 const token =
   localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
 const userMail =
@@ -20,6 +22,8 @@ const userRole =
   localStorage.getItem("userRole") || sessionStorage.getItem("userRole");
 const userId =
   localStorage.getItem("userId") || sessionStorage.getItem("userId");
+const userName =
+  sessionStorage.getItem("userName") || localStorage.getItem("userName");
 
 // Inicializar el panel de control (dashboard)
 document.addEventListener("DOMContentLoaded", () => {
@@ -138,9 +142,8 @@ function openAdvanceModal(id) {
   if (!ticket) return;
 
   document.getElementById("editTicketId").value = ticket.id;
-  document.getElementById("statusFilter").value = ticket.status || "pendiente";
-  document.getElementById("editTicketDescription").value =
-    ticket.description || "";
+  document.getElementById("statusFilter").value = ticket.status || "creado";
+  document.getElementById("editTicketDescription").value = "";
 
   const modal = new bootstrap.Modal(document.getElementById("editTicketModal"));
   modal.show();
@@ -235,16 +238,6 @@ async function updateTicket() {
     updateTicketBtn.disabled = false;
     updateTicketBtn.innerHTML = originalText;
   }
-}
-
-// Setea los valores del ticket en el formulario de edición
-function openEditModal(ticket) {
-  document.getElementById("editTicketId").value = ticket.id;
-  document.getElementById("statusFilter").value = ticket.status;
-  document.getElementById("editTicketDescription").value = "";
-
-  const modal = new bootstrap.Modal(document.getElementById("editTicketModal"));
-  modal.show();
 }
 
 function formatHistorial(historial) {
@@ -366,7 +359,7 @@ function validateForm() {
   saveTicketBtn.disabled = !isValid;
 }
 
-// Mostrar alerta
+// Alertas
 function showAlert(message, type = "info") {
   Swal.fire({
     toast: true,
@@ -383,13 +376,10 @@ function showAlert(message, type = "info") {
 function logout() {
   localStorage.clear();
   sessionStorage.clear();
-
   window.location.href = "/index.html";
 }
 
 // Mostrar nombre de usuario logueado
-const userName =
-  sessionStorage.getItem("userName") || localStorage.getItem("userName");
 const userDisplay = document.getElementById("userNameDisplay");
 if (userName && userDisplay) {
   userDisplay.textContent = "¡Hola " + userName + "!";
@@ -407,7 +397,7 @@ fetch("https://tickets.dev-wit.com/api/areas", {
 })
   .then((response) => {
     if (!response.ok) {
-      throw new Error("Error al obtener categorías");
+      throw new Error("Error al obtener áreas");
     }
     return response.json();
   })
@@ -426,7 +416,7 @@ fetch("https://tickets.dev-wit.com/api/areas", {
     // console.log("tiposAreas", areas);
   })
   .catch((error) => {
-    console.error("Error cargando categorías:", error);
+    console.error("Error cargando áreas:", error);
   });
 
 const tipoSelect = document.getElementById("ticketAssignee");
@@ -466,7 +456,7 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
       option2.textContent = tipo.nombre;
 
       const option3 = document.createElement("option");
-      option3.value = tipo.nombre; // ← Este debe coincidir con ticket.category si haces comparación por nombre
+      option3.value = tipo.nombre;
       option3.textContent = tipo.nombre;
       tipoAtencionFilterSelect.appendChild(option3);
     });

@@ -132,20 +132,6 @@ function renderTickets(ticketsToRender = tickets) {
   });
 }
 
-// Avanzar ticket
-function openAdvanceModal(id) {
-  const ticket = tickets.find((t) => t.id === id);
-  if (!ticket) return;
-
-  document.getElementById("editTicketId").value = ticket.id;
-  document.getElementById("editTicketStatus").value = ticket.status || "creado";
-  document.getElementById("editTicketDescription").value =
-    ticket.description || "";
-
-  const modal = new bootstrap.Modal(document.getElementById("editTicketModal"));
-  modal.show();
-}
-
 // Actualizar estadísticas
 function updateStats() {
   const creado = tickets.filter((t) => t.status === "creado").length;
