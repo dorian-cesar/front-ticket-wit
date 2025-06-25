@@ -32,9 +32,9 @@
           return;
         }
         const rolNormalizado = role.toLowerCase();
-        const rolesPermitidos = ["ejecutor", "admin"];
+        const rolesPermitidos = ["jefatura", "admin"];
         if (!rolesPermitidos.includes(rolNormalizado)) {
-          window.location.href = "/views/dashboard-crear.html";
+          window.location.href = "/index.html";
         }
       }
       window.addEventListener("DOMContentLoaded", verificarAccesoPorRol);

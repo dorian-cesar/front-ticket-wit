@@ -113,23 +113,7 @@ function loadUserData() {
   if (welcomeText) {
     welcomeText.textContent = `¡Bienvenido(a), ${userData.name}!`;
   }
-
-  // Cargar estadísticas (simuladas)
-  // loadStats();
 }
-
-// Cargar estadísticas
-// function loadStats() {
-//   // Simular datos de estadísticas
-//   const stats = {
-//     active: Math.floor(Math.random() * 50) + 10,
-//     pending: Math.floor(Math.random() * 20) + 5,
-//     resolved: Math.floor(Math.random() * 200) + 100,
-//   };
-
-//   // Actualizar números con animación
-//   animateNumbers(stats);
-// }
 
 // Animar números de estadísticas
 function animateNumbers(stats) {

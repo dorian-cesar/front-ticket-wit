@@ -12,8 +12,8 @@ const forgotPasswordLink = document.getElementById("forgotPasswordLink");
 // Configuración de la aplicación
 const APP_CONFIG = {
   maxLoginAttempts: 5,
-  // lockoutTime: 300000, // 5 minutos en milisegundos
-  lockoutTime: 3000, // prueba
+  lockoutTime: 300000, // 5 minutos en milisegundos
+  // lockoutTime: 3000, // prueba
 };
 
 // Estado de la aplicación
@@ -179,6 +179,8 @@ loginForm.addEventListener("submit", async function (e) {
       window.location.href = "/views/dashboard-crear.html";
     } else if (rolLower === "ejecutor") {
       window.location.href = "/views/dashboard-resolver.html";
+      } else if (rolLower === "jefatura") {
+      window.location.href = "/views/dashboard-jefatura.html";
     } else {
       window.location.href = "/views/options.html";
     }
