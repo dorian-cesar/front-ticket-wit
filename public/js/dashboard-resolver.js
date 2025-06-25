@@ -3,6 +3,10 @@ let usersData = [];
 let tiposAtencion = [];
 let areas = [];
 let tickets = [];
+let estadoMap = {};
+let statusClassMap = {};
+let statusMap = {};
+let iconMap = {};
 
 // Elementos del DOM
 const ticketsTableBody = document.getElementById("ticketsTableBody");
@@ -25,9 +29,11 @@ const userId =
 const userName =
   sessionStorage.getItem("userName") || localStorage.getItem("userName");
 
-// Inicializar el panel de control (dashboard)
 document.addEventListener("DOMContentLoaded", () => {
+  // Inicializar el panel de control (dashboard)
   setupEventListeners();
+  // Traer estados de tickets
+  fetchEstados();
   const tooltipTriggerList = [].slice.call(
     document.querySelectorAll("[title]")
   );
@@ -63,14 +69,6 @@ function setupEventListeners() {
     .addEventListener("change", validateForm);
 }
 
-const statusClassMap = {
-  creado: "creado",
-  "en ejecución": "en-ejecucion",
-  "pendiente por presupuesto": "pendiente-por-presupuesto",
-  cancelado: "cancelado",
-  listo: "listo",
-};
-
 // Renderizar la tabla de tickets
 function renderTickets(ticketsToRender = tickets) {
   ticketsTableBody.innerHTML = "";
@@ -90,14 +88,18 @@ function renderTickets(ticketsToRender = tickets) {
   ticketsToRender.forEach((ticket) => {
     const row = document.createElement("tr");
     row.className = "new-ticket";
-    const statusClass = statusClassMap[ticket.status] || "creado";
-    const estado = ticket.status.toLowerCase();
-    const avanzarBtn =
-      estado !== "listo" && estado !== "cancelado"
-        ? `<button class="btn btn-outline-secondary btn-action" onclick="openAdvanceModal(${ticket.id})" title="Avanzar Ticket">
+
+    const statusClass = statusClassMap[ticket.status_id];
+    const estadoNombre = estadoMap[ticket.status_id] || "";
+    const avanzarBtn = ![
+      "listo",
+      "cancelado",
+      "pendiente por autorizar",
+    ].includes(estadoNombre)
+      ? `<button class="btn btn-outline-secondary btn-action" onclick="openAdvanceModal(${ticket.id})" title="Avanzar Ticket">
         <i class="bi bi-forward-fill text-success"></i>
       </button>`
-        : "";
+      : "";
 
     row.innerHTML = `
       <td data-label="ID"><strong>#${ticket.id}</strong></td>
@@ -107,7 +109,7 @@ function renderTickets(ticketsToRender = tickets) {
       </td>
       <td data-label="Estado">
         <span class="badge status-${statusClass} badge-status">
-          ${getStatusIcon(ticket.status)} ${getStatusText(ticket.status)}
+          ${getStatusIcon(ticket.status_id)} ${getStatusText(ticket.status_id)}
         </span>
       </td>
       <td data-label="Asignado">
@@ -142,7 +144,7 @@ function openAdvanceModal(id) {
   if (!ticket) return;
 
   document.getElementById("editTicketId").value = ticket.id;
-  document.getElementById("statusFilter").value = ticket.status || "creado";
+  document.getElementById("editTicketStatus").value = ticket.status_id;
   document.getElementById("editTicketDescription").value = "";
 
   const modal = new bootstrap.Modal(document.getElementById("editTicketModal"));
@@ -151,18 +153,18 @@ function openAdvanceModal(id) {
 
 // Actualizar estadísticas
 function updateStats() {
-  const creado = tickets.filter((t) => t.status === "creado").length;
-  const enEjecucion = tickets.filter((t) => t.status === "en ejecución").length;
-  const pendientePorPresupuesto = tickets.filter(
-    (t) => t.status === "pendiente por presupuesto"
-  ).length;
-  const cancelado = tickets.filter((t) => t.status === "cancelado").length;
-  const listo = tickets.filter((t) => t.status === "listo").length;
+  const asignado = tickets.filter((t) => t.status_id === 2).length;
+  const pendienteAutorizar = tickets.filter((t) => t.status_id === 1).length;
+  const enEjecucion = tickets.filter((t) => t.status_id === 3).length;
+  const pendientePresupuesto = tickets.filter((t) => t.status_id === 4).length;
+  const cancelado = tickets.filter((t) => t.status_id === 5).length;
+  const listo = tickets.filter((t) => t.status_id === 6).length;
 
-  document.getElementById("creadoCount").textContent = creado;
+  document.getElementById("asignadoCount").textContent = asignado;
+  document.getElementById("pendienteAutorizarCount").textContent =
+    pendienteAutorizar;
   document.getElementById("ejecucionCount").textContent = enEjecucion;
-  document.getElementById("pendienteCount").textContent =
-    pendientePorPresupuesto;
+  document.getElementById("pendienteCount").textContent = pendientePresupuesto;
   document.getElementById("canceladoCount").textContent = cancelado;
   document.getElementById("listoCount").textContent = listo;
 }
@@ -174,7 +176,7 @@ function filterTickets() {
   const searchValue = searchInput.value.toLowerCase();
 
   const filteredTickets = tickets.filter((ticket) => {
-    const matchesStatus = !statusValue || ticket.status === statusValue;
+    const matchesStatus = !statusValue || ticket.status_id == statusValue;
     const matchesTipoAtencion =
       !tipoAtencionValue || ticket.category === tipoAtencionValue;
     const matchesSearch =
@@ -242,7 +244,7 @@ async function updateTicket() {
 
 function formatHistorial(historial) {
   if (!Array.isArray(historial) || historial.length === 0) {
-    return "<p class='text-muted'><em>Sin historial disponible.</em></p>";
+    return "<p class='text-muted'><em>Sin historial disponible</em></p>";
   }
 
   return historial
@@ -253,11 +255,18 @@ function formatHistorial(historial) {
         .setLocale("es")
         .toFormat("dd/MM/yyyy HH:mm");
 
+      const iconAnterior = getStatusIcon(h.estado_anterior);
+      const iconNuevo = getStatusIcon(h.nuevo_estado);
+      const textoAnterior = getStatusText(h.estado_anterior);
+      const textoNuevo = getStatusText(h.nuevo_estado);
+
       return `
         <div class="ticket-history-entry">
           <time>🕒 ${fecha}</time>
           <div class="user">👤 ${h.usuario_cambio}</div>
-          <div class="change">🔄 ${h.estado_anterior} → <strong>${h.nuevo_estado}</strong></div>
+          <div class="change">
+            🔄 ${iconAnterior} ${textoAnterior} → ${iconNuevo} <strong>${textoNuevo}</strong>
+          </div>
           <div class="note">📝 ${h.observacion}</div>
         </div>
       `;
@@ -284,9 +293,9 @@ function viewTicket(id) {
   const details = `
     <p><strong>ID:</strong> #${ticket.id}</p>
     <p><strong>Área:</strong> ${ticket.title || ticket.area}</p>
-    <p><strong>Estado:</strong> ${getStatusText(
-      ticket.status || ticket.estado
-    )}</p>
+    <p><strong>Estado:</strong> ${getStatusIcon(
+      ticket.status_id
+    )} ${getStatusText(ticket.status_id)}</p>
     <p><strong>Solicitado por:</strong> ${
       ticket.assignee || ticket.ejecutor || "Sin asignar"
     }</p>
@@ -319,28 +328,30 @@ function viewTicket(id) {
 }
 
 // Funciones auxiliares / utilitarias
-const statusMap = {
-  creado: "Creado",
-  "en ejecución": "En ejecución",
-  "pendiente por presupuesto": "Pendiente por presupuesto",
-  cancelado: "Cancelado",
-  listo: "Listo",
+const customIcons = {
+  1: '<i class="bi bi-shield-check"></i>',
+  2: '<i class="bi bi-person-check"></i>',
+  3: '<i class="bi bi-play-circle"></i>',
+  4: '<i class="bi bi-clock"></i>',
+  5: '<i class="bi bi-x-circle"></i>',
+  6: '<i class="bi bi-check-circle"></i>',
 };
 
-const iconMap = {
-  creado: '<i class="bi bi-plus-circle"></i>',
-  "en ejecución": '<i class="bi bi-play-circle"></i>',
-  "pendiente por presupuesto": '<i class="bi bi-clock"></i>',
-  cancelado: '<i class="bi bi-x-circle"></i>',
-  listo: '<i class="bi bi-check-circle"></i>',
+const customClasses = {
+  1: "pendiente-por-autorizar",
+  2: "asignado",
+  3: "en-ejecucion",
+  4: "pendiente-por-presupuesto",
+  5: "cancelado",
+  6: "listo",
 };
 
-function getStatusText(status) {
-  return statusMap[status] || status;
+function getStatusText(statusId) {
+  return statusMap[statusId] || "Desconocido";
 }
 
-function getStatusIcon(status) {
-  return iconMap[status] || "";
+function getStatusIcon(statusId) {
+  return iconMap[statusId] || "";
 }
 
 function formatDate(dateString) {
@@ -515,13 +526,13 @@ getUserIdWhenReady((userId) => {
     .then((data) => {
       tickets = data.map((t) => {
         // Obtener último estado y fecha del historial si existe
-        let ultimoEstado = t.estado;
+        let ultimoEstado = t.id_estado;
         let fechaTicket = t.fecha_creacion;
 
         if (Array.isArray(t.historial) && t.historial.length > 0) {
           const ultimoCambio = t.historial[t.historial.length - 1];
           if (ultimoCambio && ultimoCambio.nuevo_estado) {
-            ultimoEstado = ultimoCambio.nuevo_estado;
+            ultimoEstado = ultimoCambio.id_nuevo_estado;
           }
           if (ultimoCambio && ultimoCambio.fecha) {
             fechaTicket = ultimoCambio.fecha;
@@ -531,7 +542,7 @@ getUserIdWhenReady((userId) => {
         return {
           id: t.id,
           title: t.area,
-          status: ultimoEstado,
+          status_id: ultimoEstado,
           assignee: t.solicitante,
           category: t.tipo_atencion,
           description: t.observaciones,
@@ -567,7 +578,7 @@ async function loadTickets(userId) {
     tickets = data.map((t) => ({
       id: t.id,
       title: t.area,
-      status: t.estado,
+      status_id: t.id_estado,
       assignee: t.solicitante,
       category: t.tipo_atencion,
       description: t.observaciones,
@@ -584,4 +595,56 @@ async function loadTickets(userId) {
     console.error("Error recargando tickets:", err);
     showAlert("No se pudieron recargar los tickets.", "warning");
   }
+}
+
+async function fetchEstados() {
+  try {
+    const res = await fetch("https://tickets.dev-wit.com/api/estados", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    if (!res.ok) {
+      throw new Error(`Error ${res.status}: ${res.statusText}`);
+    }
+    const estados = await res.json();
+    // console.log("estados:", estados);
+    estados.forEach((estado) => {
+      estadoMap[estado.id] = estado.nombre.toLowerCase();
+      statusMap[estado.id] = capitalize(estado.nombre);
+      statusClassMap[estado.id] = customClasses[estado.id] || "sin-clase";
+      iconMap[estado.id] = customIcons[estado.id] || "";
+    });
+    populateStatusFilter(estados);
+  } catch (error) {
+    console.error("Error cargando estados:", error.message);
+  }
+}
+
+function capitalize(texto) {
+  return texto
+    .toLowerCase()
+    .split(" ")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+function populateStatusFilter(estados) {
+  const select = document.getElementById("statusFilter");
+  const selectEdit = document.getElementById("editTicketStatus");
+  select.innerHTML = '<option value="">Todos los estados</option>';
+  estados.forEach((estado) => {
+    const nombreCapitalizado = capitalize(estado.nombre);
+
+    const option1 = document.createElement("option");
+    option1.value = estado.id;
+    option1.textContent = nombreCapitalizado;
+    select.appendChild(option1);
+
+    const option2 = document.createElement("option");
+    option2.value = estado.id;
+    option2.textContent = nombreCapitalizado;
+    selectEdit.appendChild(option2);
+  });
 }

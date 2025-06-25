@@ -304,11 +304,18 @@ function formatHistorial(historial) {
         .setLocale("es")
         .toFormat("dd/MM/yyyy HH:mm");
 
+      const iconAnterior = getStatusIcon(h.estado_anterior);
+      const iconNuevo = getStatusIcon(h.nuevo_estado);
+      const textoAnterior = getStatusText(h.estado_anterior);
+      const textoNuevo = getStatusText(h.nuevo_estado);
+
       return `
         <div class="ticket-history-entry">
           <time>🕒 ${fecha}</time>
           <div class="user">👤 ${h.usuario_cambio}</div>
-          <div class="change">🔄 ${h.estado_anterior} → <strong>${h.nuevo_estado}</strong></div>
+          <div class="change">
+            🔄 ${iconAnterior} ${textoAnterior} → ${iconNuevo} <strong>${textoNuevo}</strong>
+          </div>
           <div class="note">📝 ${h.observacion}</div>
         </div>
       `;
@@ -335,9 +342,9 @@ function viewTicket(id) {
   const details = `
   <p><strong>ID:</strong> #${ticket.id}</p>
   <p><strong>Área:</strong> ${ticket.title || ticket.area}</p>
-  <p><strong>Estado:</strong> ${getStatusText(
-    ticket.status || ticket.estado
-  )}</p>
+  <p><strong>Estado:</strong> ${getStatusIcon(
+    ticket.status_id
+  )} ${getStatusText(ticket.status_id)}</p>
   <p><strong>Asignado a:</strong> ${
     ticket.assignee || ticket.ejecutor || "Sin asignar"
   }</p>
@@ -577,7 +584,7 @@ getUserIdWhenReady((userId) => {
         archivo_pdf: t.archivo_pdf,
       }));
 
-      console.log("tickets:", tickets)
+      console.log("tickets:", tickets);
       renderTickets(tickets);
       updateStats();
     })
@@ -626,8 +633,8 @@ async function fetchEstados() {
     const res = await fetch("https://tickets.dev-wit.com/api/estados", {
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json"
-      }
+        "Content-Type": "application/json",
+      },
     });
 
     if (!res.ok) {
@@ -636,7 +643,7 @@ async function fetchEstados() {
 
     const estados = await res.json();
 
-    console.log("estados:", estados)
+    console.log("estados:", estados);
 
     estados.forEach((estado) => {
       estadoMap[estado.id] = estado.nombre.toLowerCase();

@@ -294,7 +294,12 @@ body {
   letter-spacing: 0.5px;
 }
 
-.status-creado {
+.status-pendiente-por-autorizar {
+  background-color: var(--accent-light);
+  color: var(--text-dark);
+}
+
+.status-asignado {
   background-color: var(--primary-color);
 }
 
