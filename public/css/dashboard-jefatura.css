@@ -338,6 +338,25 @@ body {
   transform: translateY(-1px);
 }
 
+.logout-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 0.3rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
 /* Modal Customization */
 .modal-content {
   border: none;
@@ -500,10 +519,31 @@ body {
   .logo-pullman {
     max-width: 100px;
   }
+  
+  .logout-btn {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    gap: 0.25rem;
+  }
 }
 
 /* Tabla responsive */
 @media (max-width: 767.98px) {
+  .badge-status {
+    font-size: 0.65rem;
+    padding: 0.35rem 0.6rem;
+    white-space: normal;
+    word-break: break-word;
+    max-width: 100%;
+    width: auto;
+    display: inline-block;
+  }
+
+  .table tbody td > .badge-status {
+    max-width: 100%;
+    text-align: left;
+  }
+
   .table thead {
     display: none;
   }
@@ -848,25 +888,6 @@ body {
     background-color: var(--primary-light);
     color: white;
   }
-}
-
-.logout-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
-  padding: 0.3rem 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.3s ease;
-  font-size: 0.9rem;
-}
-
-.logout-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: translateY(-1px);
 }
 
 .card.card-status {

@@ -205,7 +205,7 @@ async function updateTicket() {
 
   try {
     const response = await fetch(
-      `https://tickets.dev-wit.comapi/tickets/autorizar-rechazar/${id}`,
+      `https://tickets.dev-wit.com/api/tickets/autorizar-rechazar/${id}`,
       {
         method: "PUT",
         headers: {

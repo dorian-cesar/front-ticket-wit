@@ -538,7 +538,7 @@ getUserIdWhenReady((userId) => {
   })
     .then((res) => res.json())
     .then((data) => {
-      console.log("tickets", data);
+      // console.log("tickets", data);
       tickets = data.map((t) => {
         let ultimoEstado = t.id_estado;
         let fechaTicket = t.fecha_creacion;
