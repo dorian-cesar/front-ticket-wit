@@ -538,7 +538,7 @@ getUserIdWhenReady((userId) => {
   })
     .then((res) => res.json())
     .then((data) => {
-      console.log("tickets" ,data)
+      console.log("tickets", data);
       tickets = data.map((t) => {
         // Obtener último estado y fecha del historial si existe
         let ultimoEstado = t.id_estado;
@@ -657,9 +657,16 @@ function populateStatusFilter(estados) {
     option1.textContent = nombreCapitalizado;
     select.appendChild(option1);
 
-    const option2 = document.createElement("option");
-    option2.value = estado.id;
-    option2.textContent = nombreCapitalizado;
-    selectEdit.appendChild(option2);
+    const nombreLower = estado.nombre.toLowerCase();
+    if (
+      nombreLower !== "pendiente por autorizar" &&
+      nombreLower !== "rechazado" &&
+      nombreLower !== "asignado"
+    ) {
+      const option2 = document.createElement("option");
+      option2.value = estado.id;
+      option2.textContent = nombreCapitalizado;
+      selectEdit.appendChild(option2);
+    }
   });
 }
