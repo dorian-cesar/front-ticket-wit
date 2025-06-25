@@ -306,7 +306,7 @@ function Login(email, password) {
 forgotPasswordLink.addEventListener("click", function (e) {
   e.preventDefault();
   showAlert(
-    "Para restablecer tu contraseña o resolver problemas de acceso, contacta al departamento de TI en la extensión 1234 o envía un email a soporte@empresa.com",
+    "Funcionalidad en desarrollo :)",
     "info"
   );
 });
