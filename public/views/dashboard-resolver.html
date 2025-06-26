@@ -286,12 +286,16 @@
           <div class="modal-body">
             <form id="editTicketForm">
               <input type="hidden" id="editTicketId" />
+
+              <!-- Estado -->
               <div class="mb-3">
                 <label for="editTicketStatus" class="form-label">Estado</label>
                 <select id="editTicketStatus" class="form-select">
                   <!-- se generan con js -->
                 </select>
               </div>
+
+              <!-- Descripción -->
               <div class="mb-3">
                 <label for="editTicketDescription" class="form-label"
                   >Descripción</label
@@ -302,12 +306,59 @@
                   rows="3"
                 ></textarea>
               </div>
+
+              <!-- Select de Actividades (solo si estado es 'listo') -->
+              <div id="actividadGroup" class="mb-3 d-none">
+                <label for="actividadSelect" class="form-label"
+                  >Actividad realizada *</label
+                >
+                <select id="actividadSelect" class="form-select">
+                  <option value="">Seleccione una actividad</option>
+                </select>
+              </div>
+
+              <!-- Modalidad de Atención -->
+              <div id="modalidadGroup" class="mb-3 d-none">
+                <label for="modalidadSelect" class="form-label"
+                  >Modalidad de atención *</label
+                >
+                <select id="modalidadSelect" class="form-select">
+                  <option value="">Seleccione modalidad</option>
+                  <option value="Remota">Remota</option>
+                  <option value="Presencial">Presencial</option>
+                </select>
+              </div>
+
+              <!-- ¿Requirió Despacho? -->
+              <div id="requiereDespachoGroup" class="mb-3 d-none">
+                <label for="requiereDespachoSelect" class="form-label"
+                  >¿Requirió despacho? *</label
+                >
+                <select id="requiereDespachoSelect" class="form-select">
+                  <option value="">Seleccione</option>
+                  <option value="Sí">Sí</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+
+              <!-- Detalle del Despacho -->
+              <div id="detalleDespachoGroup" class="mb-3 d-none">
+                <label for="detalleDespacho" class="form-label"
+                  >Detalle del despacho *</label
+                >
+                <textarea
+                  id="detalleDespacho"
+                  class="form-control"
+                  rows="3"
+                  placeholder="Detalle del despacho..."
+                ></textarea>
+              </div>
             </form>
           </div>
           <div class="modal-footer d-flex flex-column align-items-stretch">
             <div class="w-100 mb-2">
               <p class="mb-0 pb-2" style="font-size: small">
-                * Los estados <em>Cancelado</em> y <em>Listo</em> cierran los
+                Los estados <em>Cancelado</em> y <em>Listo</em> cierran los
                 tickets.
               </p>
             </div>

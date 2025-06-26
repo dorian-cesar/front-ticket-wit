@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Inicializar el panel de control (dashboard)
   setupEventListeners();
   // Traer estados de tickets
-  fetchEstados();
+  loadStatus();
   const tooltipTriggerList = [].slice.call(
     document.querySelectorAll("[title]")
   );
@@ -59,7 +59,36 @@ function setupEventListeners() {
   // Actualizar ticket
   updateTicketBtn.addEventListener("click", updateTicket);
 
+  // Condicional de despacho
+  document
+    .getElementById("requiereDespachoSelect")
+    .addEventListener("change", (e) => {
+      const requiere = e.target.value === "Sí";
+      toggleVisibility("detalleDespachoGroup", requiere);
+    });
+
+  document
+    .getElementById("editTicketStatus")
+    .addEventListener("change", (e) => {
+      const selectedEstadoId = parseInt(e.target.value);
+      handleEstadoChange(selectedEstadoId);
+    });
   // Validación del formulario
+  document
+    .getElementById("editTicketStatus")
+    .addEventListener("change", validateAdvanceForm);
+  [
+    "actividadSelect",
+    "modalidadSelect",
+    "requiereDespachoSelect",
+    "detalleDespacho",
+  ].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener("input", validateAdvanceForm);
+      el.addEventListener("change", validateAdvanceForm);
+    }
+  });
 }
 
 // Renderizar la tabla de tickets
@@ -171,8 +200,32 @@ function openAdvanceModal(id) {
   document.getElementById("editTicketStatus").value = ticket.status_id;
   document.getElementById("editTicketDescription").value = "";
 
+  handleEstadoChange(ticket.status_id); // para visibilidad condicional
+
   const modal = new bootstrap.Modal(document.getElementById("editTicketModal"));
   modal.show();
+  validateAdvanceForm();
+}
+
+function handleEstadoChange(estadoId) {
+  const estadoNombre = estadoMap[estadoId] || "";
+
+  const isListo = estadoNombre === "listo";
+
+  toggleVisibility("actividadGroup", isListo);
+  toggleVisibility("modalidadGroup", isListo);
+  toggleVisibility("requiereDespachoGroup", isListo);
+
+  if (isListo) loadActivities();
+
+  // Oculta detalle de despacho si no aplica
+  toggleVisibility("detalleDespachoGroup", false);
+}
+
+function toggleVisibility(id, show) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.toggle("d-none", !show);
 }
 
 // Actualizar estadísticas
@@ -200,7 +253,6 @@ function filterTickets() {
   const statusValue = statusFilter.value;
   const tipoAtencionValue = tipoAtencionFilter.value;
   const searchValue = searchInput.value.toLowerCase();
-
   const filteredTickets = tickets.filter((ticket) => {
     const matchesStatus = !statusValue || ticket.status_id == statusValue;
     const matchesTipoAtencion =
@@ -223,12 +275,14 @@ async function updateTicket() {
   const originalText = updateTicketBtn.innerHTML;
   updateTicketBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Actualizando...`;
 
-  const id = Number.parseInt(document.getElementById("editTicketId").value);
+  const id = parseInt(document.getElementById("editTicketId").value, 10);
   const nuevoEstado = parseInt(
     document.getElementById("editTicketStatus").value,
     10
   );
-  const observacion = document.getElementById("editTicketDescription").value;
+  const observacion = document
+    .getElementById("editTicketDescription")
+    .value.trim();
 
   const payload = {
     id_nuevo_estado: nuevoEstado,
@@ -236,11 +290,24 @@ async function updateTicket() {
     usuario_id: parseInt(userId, 10),
   };
 
-  console.log("Payload enviado:", {
-    id_nuevo_estado: nuevoEstado,
-    observacion,
-    usuario_id: parseInt(userId, 10),
-  });
+  // Si el estado es "listo", agregar campos adicionales
+  if (estadoMap[nuevoEstado] === "listo") {
+    const actividadId = document.getElementById("actividadSelect").value;
+    const modalidad = document.getElementById("modalidadSelect").value;
+    const requiereDespacho = document.getElementById(
+      "requiereDespachoSelect"
+    ).value;
+    const detalleDespacho = document
+      .getElementById("detalleDespacho")
+      .value.trim();
+    payload.actividad_id = actividadId || null;
+    payload.modalidad = modalidad || null;
+    payload.requiere_despacho = requiereDespacho || null;
+    payload.detalle_despacho =
+      requiereDespacho === "Sí" ? detalleDespacho : null;
+  }
+
+  console.log("Payload enviado:", payload);
 
   try {
     const response = await fetch(
@@ -281,7 +348,6 @@ function formatHistorial(historial) {
   if (!Array.isArray(historial) || historial.length === 0) {
     return "<p class='text-muted'><em>Sin historial disponible</em></p>";
   }
-
   return historial
     .map((h) => {
       const fecha = luxon.DateTime.fromISO(h.fecha, {
@@ -289,12 +355,10 @@ function formatHistorial(historial) {
       })
         .setLocale("es")
         .toFormat("dd/MM/yyyy HH:mm");
-
       const iconAnterior = getStatusIcon(h.estado_anterior);
       const iconNuevo = getStatusIcon(h.nuevo_estado);
       const textoAnterior = getStatusText(h.estado_anterior);
       const textoNuevo = getStatusText(h.nuevo_estado);
-
       return `
         <div class="ticket-history-entry">
           <time>🕒 ${fecha}</time>
@@ -309,13 +373,40 @@ function formatHistorial(historial) {
     .join("");
 }
 
+// Validar formulario
+function validateAdvanceForm() {
+  const estadoSelect = document.getElementById("editTicketStatus");
+  const updateBtn = document.getElementById("updateTicketBtn");
+  const estadoSeleccionado = parseInt(estadoSelect.value, 10);
+  const nombreEstado = estadoMap[estadoSeleccionado] || "";
+  let esValido = false;
+  if (
+    nombreEstado === "en ejecución" ||
+    nombreEstado === "pendiente por presupuesto" ||
+    nombreEstado === "cancelado"
+  ) {
+    esValido = true;
+  } else if (nombreEstado === "listo") {
+    const actividad = document.getElementById("actividadSelect").value;
+    const modalidad = document.getElementById("modalidadSelect").value;
+    const requiereDespacho = document.getElementById(
+      "requiereDespachoSelect"
+    ).value;
+    const detalleDespacho = document
+      .getElementById("detalleDespacho")
+      .value.trim();
+    const requiere = requiereDespacho === "Sí";
+    const detalleValido = !requiere || (requiere && detalleDespacho.length > 0);
+    esValido = actividad && modalidad && requiereDespacho && detalleValido;
+  }
+  updateBtn.disabled = !esValido;
+}
+
 // Ver detalles del ticket
 function viewTicket(id) {
   const ticket = tickets.find((t) => t.id === id);
   if (!ticket) return showAlert("Ticket no encontrado", "warning");
-
   const historialHtml = formatHistorial(ticket.historial);
-
   const historialSection = historialHtml.includes("Sin historial disponible")
     ? ""
     : `
@@ -323,7 +414,6 @@ function viewTicket(id) {
       <h5 class="mt-4 mb-3 fw-bold">Historial del Ticket</h5>
       ${historialHtml}
     `;
-
   const archivoUrl = `https://tickets.dev-wit.com/uploads/${ticket.archivo_pdf}`;
   const details = `
     <p><strong>ID:</strong> #${ticket.id}</p>
@@ -356,7 +446,6 @@ function viewTicket(id) {
     }
     ${historialSection}
   `;
-
   document.getElementById("ticketModalBody").innerHTML = details;
   const modal = new bootstrap.Modal(document.getElementById("ticketModal"));
   modal.show();
@@ -395,16 +484,6 @@ function formatDate(dateString) {
   return luxon.DateTime.fromISO(dateString, { zone: "America/Santiago" })
     .setLocale("es")
     .toFormat("d LLL yyyy");
-}
-
-// Validar formulario
-function validateForm() {
-  const description = document.getElementById("ticketDescription").value.trim();
-  const tipoAtencion = document.getElementById("ticketAssignee").value;
-  const areaSolicitante = document.getElementById("ticketCategory").value;
-
-  const isValid = description && tipoAtencion && areaSolicitante;
-  saveTicketBtn.disabled = !isValid;
 }
 
 // Alertas
@@ -613,7 +692,7 @@ async function loadTickets(userId) {
   }
 }
 
-async function fetchEstados() {
+async function loadStatus() {
   try {
     const res = await fetch("https://tickets.dev-wit.com/api/estados", {
       headers: {
@@ -646,10 +725,35 @@ function capitalize(texto) {
     .join(" ");
 }
 
+async function loadActivities() {
+  try {
+    const res = await fetch("https://tickets.dev-wit.com/api/actividades", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    const data = await res.json();
+    const actividadSelect = document.getElementById("actividadSelect");
+    actividadSelect.innerHTML =
+      '<option value="">Seleccione una actividad</option>';
+
+    data.forEach((actividad) => {
+      const option = document.createElement("option");
+      option.value = actividad.id;
+      option.textContent = actividad.nombre;
+      actividadSelect.appendChild(option);
+    });
+  } catch (err) {
+    console.error("Error al cargar actividades:", err);
+  }
+}
+
 function populateStatusFilter(estados) {
   const select = document.getElementById("statusFilter");
   const selectEdit = document.getElementById("editTicketStatus");
   select.innerHTML = '<option value="">Todos los estados</option>';
+  selectEdit.innerHTML = '<option value="">Seleccione un estado</option>';
   estados.forEach((estado) => {
     const nombreCapitalizado = capitalize(estado.nombre);
 
