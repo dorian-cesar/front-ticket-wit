@@ -351,6 +351,11 @@ function formatFinalCard(ticket) {
     ? `<p><strong>Detalles del Despacho:</strong> ${ticket.detalles_despacho}</p>`
     : "";
 
+  const huboDespacho =
+    ticket.necesita_despacho?.toLowerCase() === "si" ||
+    ticket.necesita_despacho?.toLowerCase() === "sí";
+  const textoDespacho = huboDespacho ? "Sí" : "No";
+
   return `
     <div class="ticket-history-entry final-card border border-success p-3 rounded mt-4 bg-light shadow">
       <h5 class="fw-bold text-success mb-3">✅ Ticket Cerrado</h5>
@@ -362,6 +367,7 @@ function formatFinalCard(ticket) {
         ticket.id_actividad
       )}</p>
       <p><strong>Detalle de Solución:</strong> ${ticket.detalle_solucion}</p>
+      <p><strong>¿Requirió despacho?:</strong> ${textoDespacho}</p>
       ${detallesDespachoHtml}
       ${
         archivoUrl
@@ -378,6 +384,7 @@ function formatHistorial(historial, ticket = {}) {
   if (!Array.isArray(historial) || historial.length === 0) {
     return "<p class='text-muted'><em>Sin historial disponible</em></p>";
   }
+  console.log("historial", historial)
 
   const entriesHtml = historial
     .map((h) => {
