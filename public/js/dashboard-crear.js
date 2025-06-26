@@ -3,6 +3,7 @@ let usersData = [];
 let tiposAtencion = [];
 let areas = [];
 let tickets = [];
+let actividades = [];
 let estadoMap = {};
 let statusClassMap = {};
 let statusMap = {};
@@ -332,24 +333,63 @@ async function createTicket() {
   }
 }
 
-function formatHistorial(historial) {
+function formatFinalCard(ticket) {
+  if (ticket.status_id !== 6) return "";
+
+  const fechaFinal = luxon.DateTime.fromISO(
+    ticket.historial?.at(-1)?.fecha || ticket.fecha_creacion,
+    { zone: "America/Santiago" }
+  )
+    .setLocale("es")
+    .toFormat("dd/MM/yyyy HH:mm");
+
+  const archivoUrl = ticket.archivo_solucion
+    ? `https://tickets.dev-wit.com/uploads/${ticket.archivo_solucion}`
+    : null;
+
+  const detallesDespachoHtml = ticket.detalles_despacho?.trim()
+    ? `<p><strong>Detalles del Despacho:</strong> ${ticket.detalles_despacho}</p>`
+    : "";
+
+  return `
+    <div class="ticket-history-entry final-card border border-success p-3 rounded mt-4 bg-light shadow">
+      <h5 class="fw-bold text-success mb-3">✅ Ticket Cerrado</h5>
+      <p><strong>Fecha y Hora de Cierre:</strong> ${fechaFinal}</p>
+      <p><strong>Modalidad de Atención:</strong> ${
+        capitalize(ticket.tipo_atencion_cierre) || "-"
+      }</p>
+      <p><strong>Tipo de Actividad:</strong> ${getActividadNombreById(
+        ticket.id_actividad
+      )}</p>
+      <p><strong>Detalle de Solución:</strong> ${ticket.detalle_solucion}</p>
+      ${detallesDespachoHtml}
+      ${
+        archivoUrl
+          ? `<div class="mt-2"><a class="btn btn-outline-success btn-sm" href="${archivoUrl}" target="_blank" rel="noopener">
+              <i class="bi bi-file-earmark-pdf"></i> Ver archivo de solución
+            </a></div>`
+          : ""
+      }
+    </div>
+  `;
+}
+
+function formatHistorial(historial, ticket = {}) {
   if (!Array.isArray(historial) || historial.length === 0) {
     return "<p class='text-muted'><em>Sin historial disponible</em></p>";
   }
 
-  return historial
+  const entriesHtml = historial
     .map((h) => {
       const fecha = luxon.DateTime.fromISO(h.fecha, {
         zone: "America/Santiago",
       })
         .setLocale("es")
         .toFormat("dd/MM/yyyy HH:mm");
-
       const iconAnterior = getStatusIcon(h.estado_anterior);
       const iconNuevo = getStatusIcon(h.nuevo_estado);
       const textoAnterior = getStatusText(h.estado_anterior);
       const textoNuevo = getStatusText(h.nuevo_estado);
-
       return `
         <div class="ticket-history-entry">
           <time>🕒 ${fecha}</time>
@@ -362,6 +402,10 @@ function formatHistorial(historial) {
       `;
     })
     .join("");
+
+  const finalCard = ticket.status_id === 6 ? formatFinalCard(ticket) : "";
+
+  return entriesHtml + finalCard;
 }
 
 // Funciones auxiliares / utilitarias
@@ -393,12 +437,31 @@ function getStatusIcon(statusId) {
   return iconMap[statusId] || "";
 }
 
+function getActividadNombreById(id) {
+  const actividad = actividades.find((a) => Number(a.id) === Number(id));
+  return actividad ? actividad.nombre : id;
+}
+
+function capitalize(texto) {
+  return texto
+    .toLowerCase()
+    .split(" ")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+function formatDate(dateString) {
+  return luxon.DateTime.fromISO(dateString, { zone: "America/Santiago" })
+    .setLocale("es")
+    .toFormat("d LLL yyyy");
+}
+
 // Ver detalles del ticket
 function viewTicket(id) {
   const ticket = tickets.find((t) => t.id === id);
   if (!ticket) return showAlert("Ticket no encontrado", "warning");
 
-  const historialHtml = formatHistorial(ticket.historial);
+  const historialHtml = formatHistorial(ticket.historial, ticket);
 
   const historialSection = historialHtml.includes("Sin historial disponible")
     ? ""
@@ -444,12 +507,7 @@ function viewTicket(id) {
   document.getElementById("ticketModalBody").innerHTML = details;
   const modal = new bootstrap.Modal(document.getElementById("ticketModal"));
   modal.show();
-}
-
-function formatDate(dateString) {
-  return luxon.DateTime.fromISO(dateString, { zone: "America/Santiago" })
-    .setLocale("es")
-    .toFormat("d LLL yyyy");
+  console.log("DEBUG ticket:", ticket);
 }
 
 // Validar formulario
@@ -625,6 +683,12 @@ getUserIdWhenReady((userId) => {
           .toFormat("yyyy-MM-dd"),
         historial: t.historial || [],
         archivo_pdf: t.archivo_pdf,
+        detalle_solucion: t.detalle_solucion || "",
+        tipo_atencion_cierre: t.modo_atencion || "",
+        necesita_despacho: t.necesita_despacho || "",
+        detalles_despacho: t.detalles_despacho || "",
+        archivo_solucion: t.archivo_solucion || "",
+        id_actividad: t.id_actividad || null,
       }));
       // console.log("tickets:", tickets);
       renderTickets(tickets);
@@ -660,6 +724,12 @@ async function loadTickets(userId) {
         .toFormat("yyyy-MM-dd"),
       historial: t.historial || [],
       archivo_pdf: t.archivo_pdf,
+      detalle_solucion: t.detalle_solucion || "",
+      tipo_atencion_cierre: t.modo_atencion || "",
+      necesita_despacho: t.necesita_despacho || "",
+      detalles_despacho: t.detalles_despacho || "",
+      archivo_solucion: t.archivo_solucion || "",
+      id_actividad: t.id_actividad || null,
     }));
 
     renderTickets(tickets);
@@ -695,13 +765,25 @@ async function fetchEstados() {
   }
 }
 
-function capitalize(texto) {
-  return texto
-    .toLowerCase()
-    .split(" ")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
+async function loadActivities() {
+  try {
+    const res = await fetch("https://tickets.dev-wit.com/api/actividades", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    actividades = await res.json();
+  } catch (err) {
+    console.error("Error al cargar actividades:", err);
+  }
 }
+
+async function init() {
+  await loadActivities();
+  getUserIdWhenReady((userId) => loadTickets(userId));
+}
+init();
 
 function populateStatusFilter(estados) {
   const select = document.getElementById("statusFilter");
