@@ -46,7 +46,9 @@
       <!-- Encabezado -->
       <div class="row">
         <div class="col-12">
-          <nav class="navbar navbar-expand-lg navbar-dark bg-primary rounded-bottom">
+          <nav
+            class="navbar navbar-expand-lg navbar-dark bg-primary rounded-bottom"
+          >
             <div class="container-fluid">
               <span class="navbar-brand mb-0 h1">
                 <img
@@ -55,6 +57,7 @@
                   alt="Logo Pullman"
                   class="logo-pullman"
                 />
+                Plataforma de Tickets
               </span>
               <div class="d-flex align-items-center gap-2">
                 <i class="bi bi-person-circle text-white"></i>
@@ -79,7 +82,7 @@
               class="card-body text-center d-flex justify-content-between align-items-center"
             >
               <div>
-                <h5 class="card-title text-info">Por Autorizar</h5>
+                <h5 class="card-title text-info">Autorizar</h5>
                 <h2 class="mb-0" id="pendienteAutorizarCount">0</h2>
               </div>
               <div class="text-info">
@@ -111,7 +114,7 @@
               class="card-body text-center d-flex justify-content-between align-items-center"
             >
               <div>
-                <h5 class="card-title text-accent-dark">En ejecución</h5>
+                <h5 class="card-title text-accent-dark">Ejecución</h5>
                 <h2 class="mb-0 text-accent-dark" id="ejecucionCount">0</h2>
               </div>
               <div class="text-accent-dark">
@@ -246,7 +249,8 @@
                   <thead class="table-dark">
                     <tr>
                       <th>ID</th>
-                      <th>Título</th>
+                      <th>Área Solicitante</th>
+                      <th>Tipo de Atención</th>
                       <th>Estado</th>
                       <th>Encargado</th>
                       <th>Fecha</th>
@@ -257,7 +261,10 @@
                     <!-- Los tickets serán llenados con JavaScript -->
                   </tbody>
                 </table>
-                <div id="paginationContainer" class="d-flex justify-content-center my-3"></div>
+                <div
+                  id="paginationContainer"
+                  class="d-flex justify-content-center my-3"
+                ></div>
               </div>
             </div>
           </div>

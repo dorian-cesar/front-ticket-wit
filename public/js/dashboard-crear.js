@@ -104,10 +104,12 @@ function renderTickets(ticketsToRender = tickets) {
 
     row.innerHTML = `
       <td data-label="ID"><strong>#${ticket.id}</strong></td>
-      <td data-label="Área">
-        <div class="fw-semibold">${ticket.title}</div>
-        <small class="text-muted">${ticket.category}</small>
+      <td data-label="Área Solicitante">
+        <span class="fw-semibold">${ticket.title}</span>
       </td>
+      <td data-label="Tipo de Atención"><small class="text-muted">${
+        ticket.category
+      }</small></td>
       <td data-label="Estado">
         <span class="badge status-${statusClass} badge-status">
           ${getStatusIcon(statusId)} ${getStatusText(statusId)}
