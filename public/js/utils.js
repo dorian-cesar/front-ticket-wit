@@ -1,5 +1,5 @@
 // Funciones auxiliares / utilitarias
-const iconMap = {
+export const iconMap = {
   1: '<i class="bi bi-shield-check"></i>',
   2: '<i class="bi bi-person-check"></i>',
   3: '<i class="bi bi-play-circle"></i>',
@@ -9,7 +9,7 @@ const iconMap = {
   9: '<i class="bi bi-slash-circle"></i>',
 };
 
-const statusMap = {
+export const statusMap = {
   1: "pendiente-por-autorizar",
   2: "asignado",
   3: "en-ejecucion",

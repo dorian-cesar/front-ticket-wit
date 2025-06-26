@@ -1,4 +1,9 @@
-import { getStatusText, getStatusIcon } from './utils.js';
+import {
+  iconMap as customIcons,
+  statusMap as customClasses,
+  getStatusIcon,
+  getStatusText,
+} from "./utils.js";
 
 // Inicialización de variables
 let usersData = [];
@@ -414,27 +419,6 @@ function viewTicket(id) {
   modal.show();
 }
 
-// Funciones auxiliares / utilitarias
-const customIcons = {
-  1: '<i class="bi bi-shield-check"></i>',
-  2: '<i class="bi bi-person-check"></i>',
-  3: '<i class="bi bi-play-circle"></i>',
-  4: '<i class="bi bi-clock"></i>',
-  5: '<i class="bi bi-x-circle"></i>',
-  6: '<i class="bi bi-check-circle"></i>',
-  9: '<i class="bi bi-slash-circle"></i>',
-};
-
-const customClasses = {
-  1: "pendiente-por-autorizar",
-  2: "asignado",
-  3: "en-ejecucion",
-  4: "pendiente-por-presupuesto",
-  5: "cancelado",
-  6: "listo",
-  9: "rechazado",
-};
-
 function formatDate(dateString) {
   return luxon.DateTime.fromISO(dateString, { zone: "America/Santiago" })
     .setLocale("es")
@@ -470,6 +454,7 @@ function logout() {
   sessionStorage.clear();
   window.location.href = "/index.html";
 }
+window.logout = logout;
 
 // Mostrar nombre de usuario logueado
 const userDisplay = document.getElementById("userNameDisplay");
