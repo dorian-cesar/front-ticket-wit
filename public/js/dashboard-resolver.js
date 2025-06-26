@@ -58,15 +58,7 @@ function setupEventListeners() {
   updateTicketBtn.addEventListener("click", updateTicket);
 
   // Validación del formulario
-  document
-    .getElementById("ticketDescription")
-    .addEventListener("input", validateForm);
-  document
-    .getElementById("ticketAssignee")
-    .addEventListener("change", validateForm);
-  document
-    .getElementById("ticketCategory")
-    .addEventListener("change", validateForm);
+
 }
 
 // Renderizar la tabla de tickets
@@ -411,8 +403,6 @@ if (userName && userDisplay) {
 }
 
 // Llamadas API (areas y tipos)
-const categorySelect = document.getElementById("ticketCategory");
-
 fetch("https://tickets.dev-wit.com/api/areas", {
   method: "GET",
   headers: {
@@ -428,23 +418,12 @@ fetch("https://tickets.dev-wit.com/api/areas", {
   })
   .then((data) => {
     areas = data;
-    // Limpia el select si no quieres opciones fijas
-    categorySelect.innerHTML =
-      '<option value="">Seleccionar categoría</option>';
-
-    data.forEach((area) => {
-      const option = document.createElement("option");
-      option.value = area.id;
-      option.textContent = area.nombre;
-      categorySelect.appendChild(option);
-    });
     // console.log("tiposAreas", areas);
   })
   .catch((error) => {
     console.error("Error cargando áreas:", error);
   });
 
-const tipoSelect = document.getElementById("ticketAssignee");
 const tipoAtencionFilterSelect = document.getElementById("tipoAtencionFilter");
 
 fetch("https://tickets.dev-wit.com/api/tipos", {
@@ -463,19 +442,11 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
   .then((data) => {
     tiposAtencion = data;
 
-    // Resetear selects
-    tipoSelect.innerHTML = '<option value="">Sin asignar</option>';
-    // tipoSelectEdit.innerHTML = '<option value="">Sin asignar</option>';
     tipoAtencionFilterSelect.innerHTML =
       '<option value="">Todos los tipos de atención</option>';
 
     // Agregar opciones a los tres selects
     data.forEach((tipo) => {
-      const option1 = document.createElement("option");
-      option1.value = tipo.id;
-      option1.textContent = tipo.nombre;
-      tipoSelect.appendChild(option1);
-
       const option2 = document.createElement("option");
       option2.value = tipo.id;
       option2.textContent = tipo.nombre;
