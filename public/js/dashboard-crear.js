@@ -56,9 +56,9 @@ document.getElementById("refreshTicketsBtn").addEventListener("click", () => {
 // Configurar los listeners de eventos
 function setupEventListeners() {
   // Filtros
-  statusFilter.addEventListener("change", filterTickets);
-  tipoAtencionFilter.addEventListener("change", filterTickets);
-  searchInput.addEventListener("input", filterTickets);
+  statusFilter.addEventListener("change", onFilterChange);
+  tipoAtencionFilter.addEventListener("change", onFilterChange);
+  searchInput.addEventListener("input", onFilterChange);
 
   // Crear ticket
   saveTicketBtn.addEventListener("click", createTicket);
@@ -160,7 +160,7 @@ function renderPagination(totalPages) {
     } mx-1`;
     btn.addEventListener("click", () => {
       currentPage = i;
-      filterTickets();
+      applyFilters();
     });
     paginationContainer.appendChild(btn);
   }
@@ -187,7 +187,12 @@ function updateStats() {
 }
 
 // Filtrar tickets
-function filterTickets() {
+function onFilterChange() {
+  currentPage = 1;
+  applyFilters();
+}
+
+function applyFilters() {
   const statusValue = statusFilter.value;
   const tipoAtencionValue = tipoAtencionFilter.value;
   const searchValue = searchInput.value.toLowerCase();
