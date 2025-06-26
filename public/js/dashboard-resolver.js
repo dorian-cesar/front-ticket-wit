@@ -639,7 +639,6 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
     tiposAtencion = data;
     tipoAtencionFilterSelect.innerHTML =
       '<option value="">Todos los tipos de atención</option>';
-    // Agregar opciones a los tres selects
     data.forEach((tipo) => {
       const option2 = document.createElement("option");
       option2.value = tipo.id;
