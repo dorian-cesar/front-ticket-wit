@@ -56,8 +56,19 @@ function setupEventListeners() {
   tipoAtencionFilter.addEventListener("change", filterTickets);
   searchInput.addEventListener("input", filterTickets);
 
-  // Actualizar ticket
-  updateTicketBtn.addEventListener("click", updateTicket);
+  // Actualizar o cerrar ticket
+  updateTicketBtn.addEventListener("click", () => {
+    const estadoId = parseInt(
+      document.getElementById("editTicketStatus").value,
+      10
+    );
+    const estadoNombre = estadoMap[estadoId] || "";
+    if (estadoNombre === "listo") {
+      updateTicketCierre();
+    } else {
+      updateTicket();
+    }
+  });
 
   // Condicional de despacho
   document
@@ -89,6 +100,23 @@ function setupEventListeners() {
       el.addEventListener("change", validateAdvanceForm);
     }
   });
+  document.getElementById("editTicketFile").addEventListener("change", () => {
+    const fileInput = document.getElementById("editTicketFile");
+    const removeBtn = document.getElementById("removeFileBtn");
+    removeBtn.classList.toggle("d-none", !fileInput.files.length);
+  });
+
+  document.getElementById("removeFileBtn").addEventListener("click", () => {
+    const fileInput = document.getElementById("editTicketFile");
+    fileInput.value = ""; // Limpiar archivo
+    document.getElementById("removeFileBtn").classList.add("d-none");
+  });
+  document
+    .querySelector("#editTicketModal .btn-close")
+    .addEventListener("click", clearEditTicketForm);
+  document
+    .querySelector("#editTicketModal .btn-secondary")
+    .addEventListener("click", clearEditTicketForm);
 }
 
 // Renderizar la tabla de tickets
@@ -195,13 +223,10 @@ function renderPagination(totalPages) {
 function openAdvanceModal(id) {
   const ticket = tickets.find((t) => t.id === id);
   if (!ticket) return;
-
   document.getElementById("editTicketId").value = ticket.id;
   document.getElementById("editTicketStatus").value = ticket.status_id;
   document.getElementById("editTicketDescription").value = "";
-
-  handleEstadoChange(ticket.status_id); // para visibilidad condicional
-
+  handleEstadoChange(ticket.status_id);
   const modal = new bootstrap.Modal(document.getElementById("editTicketModal"));
   modal.show();
   validateAdvanceForm();
@@ -209,16 +234,12 @@ function openAdvanceModal(id) {
 
 function handleEstadoChange(estadoId) {
   const estadoNombre = estadoMap[estadoId] || "";
-
   const isListo = estadoNombre === "listo";
-
   toggleVisibility("actividadGroup", isListo);
   toggleVisibility("modalidadGroup", isListo);
   toggleVisibility("requiereDespachoGroup", isListo);
-
+  toggleVisibility("adjuntoGroup", isListo);
   if (isListo) loadActivities();
-
-  // Oculta detalle de despacho si no aplica
   toggleVisibility("detalleDespachoGroup", false);
 }
 
@@ -226,6 +247,22 @@ function toggleVisibility(id, show) {
   const el = document.getElementById(id);
   if (!el) return;
   el.classList.toggle("d-none", !show);
+}
+
+// Limpiar formulario de avanzar ticket
+function clearEditTicketForm() {
+  document.getElementById("editTicketForm").reset();
+  toggleVisibility("actividadGroup", false);
+  toggleVisibility("modalidadGroup", false);
+  toggleVisibility("requiereDespachoGroup", false);
+  toggleVisibility("detalleDespachoGroup", false);
+  toggleVisibility("adjuntoGroup", false);
+
+  const fileInput = document.getElementById("editTicketFile");
+  if (fileInput) fileInput.value = "";
+
+  const removeFileBtn = document.getElementById("removeFileBtn");
+  if (removeFileBtn) removeFileBtn.classList.add("d-none");
 }
 
 // Actualizar estadísticas
@@ -275,14 +312,12 @@ async function updateTicket() {
   const originalText = updateTicketBtn.innerHTML;
   updateTicketBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Actualizando...`;
 
-  const id = parseInt(document.getElementById("editTicketId").value, 10);
+  const id = Number.parseInt(document.getElementById("editTicketId").value);
   const nuevoEstado = parseInt(
     document.getElementById("editTicketStatus").value,
     10
   );
-  const observacion = document
-    .getElementById("editTicketDescription")
-    .value.trim();
+  const observacion = document.getElementById("editTicketDescription").value;
 
   const payload = {
     id_nuevo_estado: nuevoEstado,
@@ -290,24 +325,11 @@ async function updateTicket() {
     usuario_id: parseInt(userId, 10),
   };
 
-  // Si el estado es "listo", agregar campos adicionales
-  if (estadoMap[nuevoEstado] === "listo") {
-    const actividadId = document.getElementById("actividadSelect").value;
-    const modalidad = document.getElementById("modalidadSelect").value;
-    const requiereDespacho = document.getElementById(
-      "requiereDespachoSelect"
-    ).value;
-    const detalleDespacho = document
-      .getElementById("detalleDespacho")
-      .value.trim();
-    payload.actividad_id = actividadId || null;
-    payload.modalidad = modalidad || null;
-    payload.requiere_despacho = requiereDespacho || null;
-    payload.detalle_despacho =
-      requiereDespacho === "Sí" ? detalleDespacho : null;
-  }
-
-  console.log("Payload enviado:", payload);
+  console.log("Payload enviado:", {
+    id_nuevo_estado: nuevoEstado,
+    observacion,
+    usuario_id: parseInt(userId, 10),
+  });
 
   try {
     const response = await fetch(
@@ -338,6 +360,75 @@ async function updateTicket() {
   } catch (error) {
     console.error("Error actualizando ticket:", error);
     showAlert("No se pudo actualizar el ticket. " + error.message, "error");
+  } finally {
+    updateTicketBtn.disabled = false;
+    updateTicketBtn.innerHTML = originalText;
+  }
+}
+
+// Actualizar y cerrar ticket
+async function updateTicketCierre() {
+  updateTicketBtn.disabled = true;
+  const originalText = updateTicketBtn.innerHTML;
+  updateTicketBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enviando...`;
+
+  const id = parseInt(document.getElementById("editTicketId").value, 10);
+  const actividadId = parseInt(
+    document.getElementById("actividadSelect").value,
+    10
+  );
+  const detalleSolucion = document
+    .getElementById("editTicketDescription")
+    .value.trim();
+  const tipoAtencion = document.getElementById("modalidadSelect").value;
+  const necesitaDespacho = document
+    .getElementById("requiereDespachoSelect")
+    .value.toLowerCase();
+  const detallesDespacho =
+    necesitaDespacho === "si"
+      ? document.getElementById("detalleDespacho").value.trim()
+      : "";
+
+  const payload = {
+    id_actividad: actividadId,
+    detalle_solucion: detalleSolucion,
+    tipo_atencion: tipoAtencion,
+    necesita_despacho: necesitaDespacho,
+    detalles_despacho: detallesDespacho,
+    usuario_id: parseInt(userId, 10),
+  };
+
+  console.log("payload cerrar ticket:", payload);
+
+  try {
+    const response = await fetch(
+      `https://tickets.dev-wit.com/api/tickets/${id}/cerrar`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Error al cerrar el ticket");
+    }
+
+    getUserIdWhenReady((userId) => loadTickets(userId));
+
+    const modal = bootstrap.Modal.getInstance(
+      document.getElementById("editTicketModal")
+    );
+    modal.hide();
+
+    showAlert("Ticket cerrado exitosamente!", "success");
+  } catch (error) {
+    console.error("Error al cerrar ticket:", error);
+    showAlert("No se pudo cerrar el ticket. " + error.message, "error");
   } finally {
     updateTicketBtn.disabled = false;
     updateTicketBtn.innerHTML = originalText;

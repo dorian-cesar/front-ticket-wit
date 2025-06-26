@@ -353,6 +353,29 @@
                   placeholder="Detalle del despacho..."
                 ></textarea>
               </div>
+
+              <!-- Adjuntar archivo PDF (solo si estado es "listo") -->
+              <div id="adjuntoGroup" class="mb-3 d-none">
+                <label for="editTicketFile" class="form-label"
+                  >Adjuntar PDF (máx. 10MB)</label
+                >
+                <div class="d-flex align-items-center gap-2">
+                  <input
+                    type="file"
+                    class="form-control"
+                    id="editTicketFile"
+                    accept="application/pdf"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-outline-danger btn-sm d-none"
+                    id="removeFileBtn"
+                    title="Quitar archivo seleccionado"
+                  >
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </div>
+              </div>
             </form>
           </div>
           <div class="modal-footer d-flex flex-column align-items-stretch">
