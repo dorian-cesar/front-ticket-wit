@@ -100,6 +100,10 @@ body {
   border-left: 4px solid var(--primary-bootstrap) !important; /* creado */
 }
 
+.card.border-secondary {
+  border-left: 4px solid var(--secondary-color) !important; /* rechazado */
+}
+
 .card.border-accent {
   border-left: 4px solid var(--accent-dark) !important; /* en ejecución */
 }
@@ -886,6 +890,10 @@ body {
   .btn-pdf:focus {
     background-color: var(--primary-light);
     color: white;
+  }
+
+  .card.border-secondary {
+    border-left: 4px solid #8b8b8b !important;
   }
 }
 

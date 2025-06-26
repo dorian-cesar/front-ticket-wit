@@ -100,6 +100,10 @@ body {
   border-left: 4px solid var(--primary-bootstrap) !important; /* creado */
 }
 
+.card.border-secondary {
+  border-left: 4px solid var(--secondary-color) !important; /* rechazado */
+}
+
 .card.border-accent {
   border-left: 4px solid var(--accent-dark) !important; /* en ejecución */
 }
@@ -519,7 +523,7 @@ body {
   .logo-pullman {
     max-width: 100px;
   }
-    
+
   .logout-btn {
     font-size: 0.75rem;
     padding: 0.25rem 0.75rem;
@@ -707,7 +711,6 @@ body {
 }
 
 /* Sweetalert */
-
 .swal2-icon {
   transform: scale(0.75) !important;
 }
@@ -727,7 +730,6 @@ body {
 }
 
 /* Tickets modal history */
-
 .ticket-history-entry {
   background-color: #ffffff;
   border-left: 4px solid var(--accent-color);
@@ -887,6 +889,10 @@ body {
   .btn-pdf:focus {
     background-color: var(--primary-light);
     color: white;
+  }
+
+  .card.border-secondary {
+    border-left: 4px solid #8b8b8b !important;
   }
 }
 
