@@ -1,3 +1,5 @@
+import { getStatusText, getStatusIcon } from './utils.js';
+
 // Inicialización de variables
 let usersData = [];
 let tiposAtencion = [];
@@ -432,14 +434,6 @@ const customClasses = {
   6: "listo",
   9: "rechazado",
 };
-
-function getStatusText(statusId) {
-  return statusMap[statusId] || "Desconocido";
-}
-
-function getStatusIcon(statusId) {
-  return iconMap[statusId] || "";
-}
 
 function formatDate(dateString) {
   return luxon.DateTime.fromISO(dateString, { zone: "America/Santiago" })

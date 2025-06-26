@@ -195,7 +195,6 @@ function renderTickets(ticketsToRender = tickets) {
 
     ticketsTableBody.appendChild(row);
   });
-
   renderPagination(Math.ceil(ticketsToRender.length / rowsPerPage));
 }
 
@@ -203,11 +202,8 @@ function renderTickets(ticketsToRender = tickets) {
 function renderPagination(totalPages) {
   const paginationContainer = document.getElementById("paginationContainer");
   if (!paginationContainer) return;
-
   paginationContainer.innerHTML = "";
-
   if (totalPages <= 1) return;
-
   for (let i = 1; i <= totalPages; i++) {
     const btn = document.createElement("button");
     btn.textContent = i;
@@ -260,10 +256,8 @@ function clearEditTicketForm() {
   toggleVisibility("requiereDespachoGroup", false);
   toggleVisibility("detalleDespachoGroup", false);
   toggleVisibility("adjuntoGroup", false);
-
   const fileInput = document.getElementById("editTicketFile");
   if (fileInput) fileInput.value = "";
-
   const removeFileBtn = document.getElementById("removeFileBtn");
   if (removeFileBtn) removeFileBtn.classList.add("d-none");
 }
@@ -629,7 +623,6 @@ fetch("https://tickets.dev-wit.com/api/areas", {
   });
 
 const tipoAtencionFilterSelect = document.getElementById("tipoAtencionFilter");
-
 fetch("https://tickets.dev-wit.com/api/tipos", {
   method: "GET",
   headers: {
@@ -645,10 +638,8 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
   })
   .then((data) => {
     tiposAtencion = data;
-
     tipoAtencionFilterSelect.innerHTML =
       '<option value="">Todos los tipos de atención</option>';
-
     // Agregar opciones a los tres selects
     data.forEach((tipo) => {
       const option2 = document.createElement("option");
@@ -705,7 +696,6 @@ function getUserIdWhenReady(callback) {
 // Llamada tickets con la id del usuario
 getUserIdWhenReady((userId) => {
   const endpoint = `https://tickets.dev-wit.com/api/tickets/ejecutor/${userId}`;
-
   fetch(endpoint, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -717,7 +707,6 @@ getUserIdWhenReady((userId) => {
       tickets = data.map((t) => {
         let ultimoEstado = t.id_estado;
         let fechaTicket = t.fecha_creacion;
-
         if (Array.isArray(t.historial) && t.historial.length > 0) {
           const ultimoCambio = t.historial[t.historial.length - 1];
           if (ultimoCambio && ultimoCambio.id_nuevo_estado) {
@@ -727,7 +716,6 @@ getUserIdWhenReady((userId) => {
             fechaTicket = ultimoCambio.fecha;
           }
         }
-
         return {
           id: t.id,
           title: t.area,
@@ -742,7 +730,6 @@ getUserIdWhenReady((userId) => {
           archivo_pdf: t.archivo_pdf || null,
         };
       });
-
       renderTickets(tickets);
       updateStats();
     })
@@ -755,7 +742,6 @@ getUserIdWhenReady((userId) => {
 // Llamada para recargar tabla de tickets
 async function loadTickets(userId) {
   const endpoint = `https://tickets.dev-wit.com/api/tickets/ejecutor/${userId}`;
-
   try {
     const response = await fetch(endpoint, {
       headers: {
@@ -777,7 +763,6 @@ async function loadTickets(userId) {
       historial: t.historial || [],
       archivo_pdf: t.archivo_pdf || null,
     }));
-
     renderTickets(tickets);
     updateStats();
   } catch (err) {
@@ -831,7 +816,6 @@ async function loadActivities() {
     const actividadSelect = document.getElementById("actividadSelect");
     actividadSelect.innerHTML =
       '<option value="">Seleccione una actividad</option>';
-
     data.forEach((actividad) => {
       const option = document.createElement("option");
       option.value = actividad.id;
@@ -850,12 +834,10 @@ function populateStatusFilter(estados) {
   selectEdit.innerHTML = '<option value="">Seleccione un estado</option>';
   estados.forEach((estado) => {
     const nombreCapitalizado = capitalize(estado.nombre);
-
     const option1 = document.createElement("option");
     option1.value = estado.id;
     option1.textContent = nombreCapitalizado;
     select.appendChild(option1);
-
     const nombreLower = estado.nombre.toLowerCase();
     if (
       nombreLower !== "pendiente por autorizar" &&
