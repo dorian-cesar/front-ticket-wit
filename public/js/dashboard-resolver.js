@@ -222,10 +222,15 @@ function renderPagination(totalPages) {
 function openAdvanceModal(id) {
   const ticket = tickets.find((t) => t.id === id);
   if (!ticket) return;
+  const nombreEstado = estadoMap[ticket.status_id]?.toLowerCase() || "";
   document.getElementById("editTicketId").value = ticket.id;
-  document.getElementById("editTicketStatus").value = ticket.status_id;
+  if (nombreEstado === "asignado") {
+    document.getElementById("editTicketStatus").value = "";
+  } else {
+    document.getElementById("editTicketStatus").value = ticket.status_id;
+  }
   document.getElementById("editTicketDescription").value = "";
-  handleEstadoChange(ticket.status_id);
+  handleEstadoChange(document.getElementById("editTicketStatus").value);
   const modal = new bootstrap.Modal(document.getElementById("editTicketModal"));
   modal.show();
   validateAdvanceForm();
@@ -370,43 +375,39 @@ async function updateTicketCierre() {
   updateTicketBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enviando...`;
 
   const id = parseInt(document.getElementById("editTicketId").value, 10);
-  const actividadId = parseInt(
-    document.getElementById("actividadSelect").value,
-    10
-  );
-  const detalleSolucion = document
-    .getElementById("editTicketDescription")
-    .value.trim();
+  const actividadId = parseInt(document.getElementById("actividadSelect").value, 10);
+  const detalleSolucion = document.getElementById("editTicketDescription").value.trim();
   const tipoAtencion = document.getElementById("modalidadSelect").value;
-  const necesitaDespacho = document
-    .getElementById("requiereDespachoSelect")
-    .value.toLowerCase();
-  const detallesDespacho =
-    necesitaDespacho === "si"
-      ? document.getElementById("detalleDespacho").value.trim()
-      : "";
+  const necesitaDespacho = document.getElementById("requiereDespachoSelect").value.toLowerCase();
+  const detallesDespacho = necesitaDespacho === "sí"
+    ? document.getElementById("detalleDespacho").value.trim()
+    : "";
+  const archivoInput = document.getElementById("editTicketFile");
+  const archivo = archivoInput.files[0];
 
-  const payload = {
-    id_actividad: actividadId,
-    detalle_solucion: detalleSolucion,
-    tipo_atencion: tipoAtencion,
-    necesita_despacho: necesitaDespacho,
-    detalles_despacho: detallesDespacho,
-    usuario_id: parseInt(userId, 10),
-  };
+  const formData = new FormData();
+  formData.append("id_actividad", actividadId);
+  formData.append("detalle_solucion", detalleSolucion);
+  formData.append("tipo_atencion", tipoAtencion);
+  formData.append("necesita_despacho", necesitaDespacho);
+  formData.append("detalles_despacho", detallesDespacho);
+  formData.append("usuario_id", parseInt(userId, 10));
 
-  console.log("payload cerrar ticket:", payload);
+  if (archivo) {
+    formData.append("archivo_solucion", archivo);
+  }
+
+  console.log("payload cerrar ticket:", Object.fromEntries(formData.entries()));
 
   try {
     const response = await fetch(
       `https://tickets.dev-wit.com/api/tickets/${id}/cerrar`,
       {
-        method: "PUT",
+        method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(payload),
+        body: formData,
       }
     );
 
@@ -417,9 +418,7 @@ async function updateTicketCierre() {
 
     getUserIdWhenReady((userId) => loadTickets(userId));
 
-    const modal = bootstrap.Modal.getInstance(
-      document.getElementById("editTicketModal")
-    );
+    const modal = bootstrap.Modal.getInstance(document.getElementById("editTicketModal"));
     modal.hide();
 
     showAlert("Ticket cerrado exitosamente!", "success");
@@ -430,35 +429,6 @@ async function updateTicketCierre() {
     updateTicketBtn.disabled = false;
     updateTicketBtn.innerHTML = originalText;
   }
-}
-
-function formatHistorial(historial) {
-  if (!Array.isArray(historial) || historial.length === 0) {
-    return "<p class='text-muted'><em>Sin historial disponible</em></p>";
-  }
-  return historial
-    .map((h) => {
-      const fecha = luxon.DateTime.fromISO(h.fecha, {
-        zone: "America/Santiago",
-      })
-        .setLocale("es")
-        .toFormat("dd/MM/yyyy HH:mm");
-      const iconAnterior = getStatusIcon(h.estado_anterior);
-      const iconNuevo = getStatusIcon(h.nuevo_estado);
-      const textoAnterior = getStatusText(h.estado_anterior);
-      const textoNuevo = getStatusText(h.nuevo_estado);
-      return `
-        <div class="ticket-history-entry">
-          <time>🕒 ${fecha}</time>
-          <div class="user">👤 ${h.usuario_cambio}</div>
-          <div class="change">
-            🔄 ${iconAnterior} ${textoAnterior} → ${iconNuevo} <strong>${textoNuevo}</strong>
-          </div>
-          <div class="note">📝 ${h.observacion}</div>
-        </div>
-      `;
-    })
-    .join("");
 }
 
 // Validar formulario
@@ -488,6 +458,35 @@ function validateAdvanceForm() {
     esValido = actividad && modalidad && requiereDespacho && detalleValido;
   }
   updateBtn.disabled = !esValido;
+}
+
+function formatHistorial(historial) {
+  if (!Array.isArray(historial) || historial.length === 0) {
+    return "<p class='text-muted'><em>Sin historial disponible</em></p>";
+  }
+  return historial
+    .map((h) => {
+      const fecha = luxon.DateTime.fromISO(h.fecha, {
+        zone: "America/Santiago",
+      })
+        .setLocale("es")
+        .toFormat("dd/MM/yyyy HH:mm");
+      const iconAnterior = getStatusIcon(h.estado_anterior);
+      const iconNuevo = getStatusIcon(h.nuevo_estado);
+      const textoAnterior = getStatusText(h.estado_anterior);
+      const textoNuevo = getStatusText(h.nuevo_estado);
+      return `
+        <div class="ticket-history-entry">
+          <time>🕒 ${fecha}</time>
+          <div class="user">👤 ${h.usuario_cambio}</div>
+          <div class="change">
+            🔄 ${iconAnterior} ${textoAnterior} → ${iconNuevo} <strong>${textoNuevo}</strong>
+          </div>
+          <div class="note">📝 ${h.observacion}</div>
+        </div>
+      `;
+    })
+    .join("");
 }
 
 // Ver detalles del ticket
