@@ -574,7 +574,6 @@ fetch("https://tickets.dev-wit.com/api/areas", {
   })
   .then((data) => {
     areas = data;
-    // Limpia el select si no quieres opciones fijas
     categorySelect.innerHTML =
       '<option value="">Seleccionar categoría</option>';
 
@@ -609,12 +608,10 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
   .then((data) => {
     tiposAtencion = data;
 
-    // Resetear selects
     tipoSelect.innerHTML = '<option value="">Sin asignar</option>';
     tipoAtencionFilterSelect.innerHTML =
       '<option value="">Todos los tipos de atención</option>';
 
-    // Agregar opciones a los tres selects
     data.forEach((tipo) => {
       const option1 = document.createElement("option");
       option1.value = tipo.id;

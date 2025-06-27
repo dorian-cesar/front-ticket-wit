@@ -13,7 +13,6 @@ const forgotPasswordLink = document.getElementById("forgotPasswordLink");
 const APP_CONFIG = {
   maxLoginAttempts: 5,
   lockoutTime: 300000, // 5 minutos en milisegundos
-  // lockoutTime: 3000, // prueba
 };
 
 // Estado de la aplicación
