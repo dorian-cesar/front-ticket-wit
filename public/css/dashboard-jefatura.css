@@ -10,6 +10,8 @@
   --light-gray: #ecf0f1;
   --dark-gray: #7f8c8d;
   --primary-bootstrap: #0d6efd;
+  --rechazar-color: #ebb1b1;
+  --rechazar-text-color: #ebb1b1;
 
   /* Colores adicionales derivados */
   --primary-light: #34495e;
@@ -101,7 +103,7 @@ body {
 }
 
 .card.border-secondary {
-  border-left: 4px solid var(--dark-gray) !important; /* rechazado */
+  border-left: 4px solid var(--rechazar-color) !important; /* rechazar */
 }
 
 .card.border-accent {
@@ -118,6 +120,10 @@ body {
 
 .text-success {
   color: var(--success-color) !important;
+}
+
+.text-secondary {
+  color: var(--rechazar-text-color) !important;
 }
 
 .text-warning {
@@ -325,7 +331,7 @@ body {
 }
 
 .status-rechazado {
-  background-color: #6c757d;
+  background-color: var(--rechazar-color);
   color: #fff;
 }
 
@@ -892,10 +898,6 @@ body {
 .btn-pdf:focus {
   background-color: var(--primary-light);
   color: white;
-}
-
-.card.border-secondary {
-  border-left: 4px solid #8b8b8b !important;
 }
 
 .final-card {
