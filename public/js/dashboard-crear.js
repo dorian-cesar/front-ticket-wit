@@ -62,6 +62,7 @@ function setupEventListeners() {
   statusFilter.addEventListener("change", onFilterChange);
   tipoAtencionFilter.addEventListener("change", onFilterChange);
   searchInput.addEventListener("input", onFilterChange);
+  document.getElementById("idSearchInput").addEventListener("input", applyFilters);
 
   // Crear ticket
   saveTicketBtn.addEventListener("click", createTicket);
@@ -200,6 +201,7 @@ function applyFilters() {
   const statusValue = statusFilter.value;
   const tipoAtencionValue = tipoAtencionFilter.value;
   const searchValue = searchInput.value.toLowerCase();
+  const idSearchValue = document.getElementById("idSearchInput").value.trim();
 
   const filteredTickets = tickets.filter((ticket) => {
     const matchesStatus = !statusValue || ticket.status_id == statusValue;
@@ -210,8 +212,10 @@ function applyFilters() {
       ticket.title.toLowerCase().includes(searchValue) ||
       ticket.description.toLowerCase().includes(searchValue) ||
       ticket.assignee.toLowerCase().includes(searchValue);
+    const matchesId =
+      !idSearchValue || String(ticket.id).includes(idSearchValue);
 
-    return matchesStatus && matchesTipoAtencion && matchesSearch;
+    return matchesStatus && matchesTipoAtencion && matchesSearch && matchesId;
   });
 
   renderTickets(filteredTickets);

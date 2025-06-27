@@ -239,14 +239,22 @@
             </div>
             <div class="card-body">
               <!-- Filtros -->
-              <div class="row mb-3">
-                <div class="col-md-4">
+              <div class="row mb-3 align-items-center">
+                <div class="col-md-2">
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="idSearchInput"
+                    placeholder="Buscar ticket..."
+                  />
+                </div>
+                <div class="col-md-3">
                   <select id="statusFilter" class="form-select">
                     <option value="">Todos los estados</option>
                     <!-- se llenan con js -->
                   </select>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                   <select class="form-select" id="tipoAtencionFilter">
                     <option value="">Todos los tipos de atención</option>
                     <!-- se llenan con js -->
@@ -257,7 +265,7 @@
                     type="text"
                     class="form-control"
                     id="searchInput"
-                    placeholder="Buscar tickets..."
+                    placeholder="Buscar por área, tipo de atención o encargado..."
                   />
                 </div>
               </div>
