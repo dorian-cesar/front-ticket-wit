@@ -293,9 +293,9 @@ async function createTicket() {
   }
 
   // console.log para debug
-  for (const [key, value] of formData.entries()) {
-    console.log(`${key}:`, value);
-  }
+  // for (const [key, value] of formData.entries()) {
+  //   console.log(`${key}:`, value);
+  // }
 
   try {
     const response = await fetch(
@@ -517,7 +517,7 @@ function viewTicket(id) {
   document.getElementById("ticketModalBody").innerHTML = details;
   const modal = new bootstrap.Modal(document.getElementById("ticketModal"));
   modal.show();
-  console.log("DEBUG ticket:", ticket);
+  // console.log("DEBUG ticket:", ticket);
 }
 
 // Validar formulario
@@ -584,7 +584,7 @@ fetch("https://tickets.dev-wit.com/api/areas", {
       option.textContent = area.nombre;
       categorySelect.appendChild(option);
     });
-    console.log("tiposAreas", areas);
+    // console.log("tiposAreas", areas);
   })
   .catch((error) => {
     console.error("Error cargando áreas:", error);
@@ -630,7 +630,7 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
       option3.textContent = tipo.nombre;
       tipoAtencionFilterSelect.appendChild(option3);
     });
-    console.log("tiposAtencion", tiposAtencion);
+    // console.log("tiposAtencion", tiposAtencion);
   })
   .catch((error) => {
     console.error("Error cargando tipos de atención:", error);
@@ -650,7 +650,7 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
     }
     const data = await response.json();
     usersData = data;
-    console.log("usersData", usersData);
+    // console.log("usersData", usersData);
   } catch (error) {
     console.error("Error al obtener usuarios:", error);
   }
@@ -762,7 +762,7 @@ async function fetchEstados() {
       throw new Error(`Error ${res.status}: ${res.statusText}`);
     }
     const estados = await res.json();
-    console.log("estados:", estados);
+    // console.log("estados:", estados);
     estados.forEach((estado) => {
       estadoMap[estado.id] = estado.nombre.toLowerCase();
       statusMap[estado.id] = capitalize(estado.nombre);
@@ -784,7 +784,7 @@ async function loadActivities() {
       },
     });
     actividades = await res.json();
-    console.log("actividades", actividades)
+    // console.log("actividades", actividades)
   } catch (err) {
     console.error("Error al cargar actividades:", err);
   }

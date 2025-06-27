@@ -255,7 +255,7 @@ async function updateTicket() {
     usuario_id: parseInt(userId, 10),
   };
 
-  console.log("payload asignar/rechazar:", payload);
+  // console.log("payload asignar/rechazar:", payload);
 
   try {
     const response = await fetch(
@@ -418,7 +418,7 @@ function viewTicket(id) {
   document.getElementById("ticketModalBody").innerHTML = details;
   const modal = new bootstrap.Modal(document.getElementById("ticketModal"));
   modal.show();
-  console.log("DEBUG ticket:", ticket);
+  // console.log("DEBUG ticket:", ticket);
 }
 
 // Validar formulario

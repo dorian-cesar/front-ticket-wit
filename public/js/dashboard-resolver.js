@@ -417,7 +417,7 @@ async function updateTicketCierre() {
     formData.append("archivo_solucion", archivo);
   }
 
-  console.log("payload cerrar ticket:", Object.fromEntries(formData.entries()));
+  // console.log("payload cerrar ticket:", Object.fromEntries(formData.entries()));
 
   try {
     const response = await fetch(
