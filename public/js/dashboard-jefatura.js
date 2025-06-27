@@ -110,7 +110,10 @@ function renderTickets(ticketsToRender = tickets) {
         <span class="fw-semibold">${ticket.title}</span>
       </td>
       <td data-label="Solicitante">
-        <span>${ticket.solicitante || ""}</span>
+        <div class="d-flex align-items-center">
+          <i class="bi bi-person-circle me-2"></i>
+          ${ticket.solicitante}
+        </div>
       </td>
       <td data-label="Tipo de Atención"><small class="text-muted">${
         ticket.category
@@ -609,7 +612,7 @@ getUserIdWhenReady((userId) => {
   })
     .then((res) => res.json())
     .then((data) => {
-      console.log("tickets", data);
+      // console.log("tickets", data);
       tickets = data.map((t) => {
         let ultimoEstado = t.id_estado;
         let fechaTicket = t.fecha_creacion;
