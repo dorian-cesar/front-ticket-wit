@@ -73,7 +73,7 @@ function renderTickets(ticketsToRender = tickets) {
   if (!Array.isArray(ticketsToRender) || ticketsToRender.length === 0) {
     ticketsTableBody.innerHTML = `
       <tr class="no-tickets-row">
-        <td colspan="7" class="text-center text-muted py-4">
+        <td colspan="8" class="text-center text-muted py-4">
           <i class="bi bi-inbox display-4 d-block mb-2"></i>
           No se encontraron tickets
         </td>
@@ -108,6 +108,9 @@ function renderTickets(ticketsToRender = tickets) {
       <td data-label="ID"><strong>#${ticket.id}</strong></td>
       <td data-label="Área Solicitante">
         <span class="fw-semibold">${ticket.title}</span>
+      </td>
+      <td data-label="Solicitante">
+        <span>${ticket.solicitante || ""}</span>
       </td>
       <td data-label="Tipo de Atención"><small class="text-muted">${
         ticket.category
@@ -193,7 +196,8 @@ function updateStats() {
   const total = tickets.length;
 
   document.getElementById("asignadoCount").textContent = asignado;
-  document.getElementById("pendienteAutorizarCount").textContent = pendienteAutorizar;
+  document.getElementById("pendienteAutorizarCount").textContent =
+    pendienteAutorizar;
   document.getElementById("ejecucionCount").textContent = enEjecucion;
   document.getElementById("pendienteCount").textContent = pendientePresupuesto;
   document.getElementById("rechazadoCount").textContent = rechazado;
@@ -384,7 +388,7 @@ function viewTicket(id) {
       ticket.status_id
     )} ${getStatusText(ticket.status_id)}</p>
     <p><strong>Solicitado por:</strong> ${
-      ticket.assignee || ticket.ejecutor || "Sin asignar"
+      ticket.solicitante || "Sin asignar"
     }</p>
     <p><strong>Tipo de Atención:</strong> ${
       ticket.category || ticket.tipo_atencion
@@ -605,7 +609,7 @@ getUserIdWhenReady((userId) => {
   })
     .then((res) => res.json())
     .then((data) => {
-      // console.log("tickets" ,data)
+      console.log("tickets", data);
       tickets = data.map((t) => {
         let ultimoEstado = t.id_estado;
         let fechaTicket = t.fecha_creacion;
@@ -624,6 +628,7 @@ getUserIdWhenReady((userId) => {
           title: t.area,
           status_id: ultimoEstado,
           assignee: t.ejecutor,
+          solicitante: t.solicitante,
           category: t.tipo_atencion,
           description: t.observaciones,
           date: luxon.DateTime.fromISO(fechaTicket)
@@ -663,6 +668,7 @@ async function loadTickets(userId) {
       title: t.area,
       status_id: t.id_estado,
       assignee: t.ejecutor,
+      solicitante: t.solicitante,
       category: t.tipo_atencion,
       description: t.observaciones,
       date: luxon.DateTime.fromISO(t.fecha_creacion)
