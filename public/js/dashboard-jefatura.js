@@ -95,7 +95,7 @@ function renderTickets(ticketsToRender = tickets) {
       "listo",
       "cancelado",
       "asignado",
-      "pendiente por presupuesto",
+      "pendiente pp",
       "en ejecución",
       "rechazado",
     ].includes(estadoNombre)

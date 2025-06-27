@@ -150,7 +150,7 @@ function renderTickets(ticketsToRender = tickets) {
     const avanzarBtn = ![
       "listo",
       "cancelado",
-      "pendiente por autorizar",
+      "pendiente pa",
       "rechazado",
     ].includes(estadoNombre)
       ? `<button class="btn btn-outline-secondary btn-action" onclick="openAdvanceModal(${ticket.id})" title="Avanzar Ticket">
@@ -462,7 +462,7 @@ function validateAdvanceForm() {
   let esValido = false;
   if (
     nombreEstado === "en ejecución" ||
-    nombreEstado === "pendiente por presupuesto" ||
+    nombreEstado === "pendiente pp" ||
     nombreEstado === "cancelado"
   ) {
     esValido = true;
