@@ -540,7 +540,7 @@ body {
 }
 
 /* Tabla responsive */
-@media (max-width: 1013.98px) {
+@media (max-width: 1025px) {
   .badge-status {
     font-size: 0.65rem;
     padding: 0.35rem 0.6rem;
@@ -806,7 +806,7 @@ body {
   color: #fff !important;
 }
 
-@media (max-width: 1013.98px) {
+@media (max-width: 1025px) {
   .table tbody tr {
     background-color: white !important;
     box-shadow: 0 4px 15px rgba(44, 62, 80, 0.1) !important;
