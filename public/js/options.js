@@ -36,7 +36,7 @@ function navigateTo(option) {
         sessionStorage.getItem("authToken");
 
       if (token) {
-        const mantenedorWindow = window.location.href(
+        const mantenedorWindow = window.open(
           "https://mantenedor-ticket.netlify.app/dashboard.html"
         );
 
