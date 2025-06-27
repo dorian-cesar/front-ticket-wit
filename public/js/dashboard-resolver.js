@@ -19,8 +19,8 @@ const searchInput = document.getElementById("searchInput");
 const createTicketForm = document.getElementById("createTicketForm");
 const saveTicketBtn = document.getElementById("saveTicketBtn");
 const updateTicketBtn = document.getElementById("updateTicketBtn");
-
-// Obtener data de storage
+const total = tickets.length;
+document.getElementById("totalCount").textContent = total;
 const token =
   localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
 const userMail =
@@ -277,15 +277,16 @@ function updateStats() {
   const rechazado = tickets.filter((t) => t.status_id === 9).length;
   const cancelado = tickets.filter((t) => t.status_id === 5).length;
   const listo = tickets.filter((t) => t.status_id === 6).length;
+  const total = tickets.length;
 
   document.getElementById("asignadoCount").textContent = asignado;
-  document.getElementById("pendienteAutorizarCount").textContent =
-    pendienteAutorizar;
+  document.getElementById("pendienteAutorizarCount").textContent = pendienteAutorizar;
   document.getElementById("ejecucionCount").textContent = enEjecucion;
   document.getElementById("pendienteCount").textContent = pendientePresupuesto;
   document.getElementById("rechazadoCount").textContent = rechazado;
   document.getElementById("canceladoCount").textContent = cancelado;
   document.getElementById("listoCount").textContent = listo;
+  document.getElementById("totalCount").textContent = total;
 }
 
 // Filtrar tickets
@@ -298,7 +299,6 @@ function applyFilters() {
   const statusValue = statusFilter.value;
   const tipoAtencionValue = tipoAtencionFilter.value;
   const searchValue = searchInput.value.toLowerCase();
-
   const filteredTickets = tickets.filter((ticket) => {
     const matchesStatus = !statusValue || ticket.status_id == statusValue;
     const matchesTipoAtencion =
@@ -308,10 +308,8 @@ function applyFilters() {
       ticket.title.toLowerCase().includes(searchValue) ||
       ticket.description.toLowerCase().includes(searchValue) ||
       ticket.assignee.toLowerCase().includes(searchValue);
-
     return matchesStatus && matchesTipoAtencion && matchesSearch;
   });
-
   renderTickets(filteredTickets);
 }
 

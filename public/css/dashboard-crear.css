@@ -10,6 +10,7 @@
   --light-gray: #ecf0f1;
   --dark-gray: #7f8c8d;
   --primary-bootstrap: #0d6efd;
+  --total-color: #e0e0e0;
 
   /* Colores adicionales derivados */
   --primary-light: #34495e;
@@ -112,6 +113,10 @@ body {
   border-left: 4px solid var(--danger-color) !important; /* cancelado */
 }
 
+.card.border-total {
+  border-left: 4px solid var(--primary-color) !important;
+}
+
 .text-success {
   color: var(--success-color) !important;
 }
@@ -126,6 +131,10 @@ body {
 
 .text-accent-dark {
   color: var(--accent-dark) !important;
+}
+
+.text-total {
+  color: var(--primary-color) !important;
 }
 
 /* Botones personalizados */
@@ -899,26 +908,37 @@ body {
     background-color: #415061 !important;
     border-left: 5px solid #28a745;
   }
+
+  .card.border-total {
+    border-left: 4px solid var(--total-color) !important;
+  }
+
+  .text-total {
+    color: var(--total-color) !important;
+  }
 }
 
 .card.card-status {
-  padding: 0.5rem 0.75rem;
-  box-shadow: 0 2px 8px var(--shadow-light);
+  padding: 0.3rem 0.5rem;
+  box-shadow: 0 1px 4px var(--shadow-light);
 }
 
 .card.card-status .card-body {
-  padding: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  min-height: auto;
 }
 
 .card.card-status .card-title {
-  font-size: 1rem;
+  font-size: 0.9rem;
+  margin-bottom: 0.3rem;
 }
 
 .card.card-status h2 {
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   margin: 0;
+  line-height: 1;
 }
 
 .card.card-status i {
-  font-size: 2.2rem !important;
+  font-size: 1.6rem !important;
 }
