@@ -101,7 +101,7 @@ body {
 }
 
 .card.border-secondary {
-  border-left: 4px solid var(--secondary-color) !important; /* rechazado */
+  border-left: 4px solid var(--dark-gray) !important; /* rechazado */
 }
 
 .card.border-accent {
@@ -113,7 +113,7 @@ body {
 }
 
 .card.border-total {
-  border-left: 4px solid var(--primary-color) !important;
+  border-left: 4px solid var(--primary-color) !important; /* total */
 }
 
 .text-success {
@@ -889,6 +889,10 @@ body {
 
 /* Modo oscuro */
 @media (prefers-color-scheme: dark) {
+  :root {
+    --total-color: #ececec;
+  }
+
   .btn-pdf {
     color: var(--text-dark);
     background-color: var(--primary-dark);
@@ -899,10 +903,6 @@ body {
   .btn-pdf:focus {
     background-color: var(--primary-light);
     color: white;
-  }
-
-  .card.border-secondary {
-    border-left: 4px solid #8b8b8b !important;
   }
 
   .final-card {
