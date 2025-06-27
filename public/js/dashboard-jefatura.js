@@ -470,9 +470,10 @@ function getActividadNombreById(id) {
 
 function capitalize(texto) {
   return texto
-    .toLowerCase()
     .split(" ")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .map((w) =>
+      w === w.toUpperCase() ? w : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
+    )
     .join(" ");
 }
 

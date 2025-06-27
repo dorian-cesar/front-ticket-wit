@@ -453,9 +453,10 @@ function getActividadNombreById(id) {
 
 function capitalize(texto) {
   return texto
-    .toLowerCase()
     .split(" ")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .map((w) =>
+      w === w.toUpperCase() ? w : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
+    )
     .join(" ");
 }
 
@@ -583,7 +584,7 @@ fetch("https://tickets.dev-wit.com/api/areas", {
       option.textContent = area.nombre;
       categorySelect.appendChild(option);
     });
-    // console.log("tiposAreas", areas);
+    console.log("tiposAreas", areas);
   })
   .catch((error) => {
     console.error("Error cargando áreas:", error);
@@ -629,7 +630,7 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
       option3.textContent = tipo.nombre;
       tipoAtencionFilterSelect.appendChild(option3);
     });
-    // console.log("tiposAtencion", tiposAtencion);
+    console.log("tiposAtencion", tiposAtencion);
   })
   .catch((error) => {
     console.error("Error cargando tipos de atención:", error);
@@ -649,7 +650,7 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
     }
     const data = await response.json();
     usersData = data;
-    // console.log("usersData", usersData);
+    console.log("usersData", usersData);
   } catch (error) {
     console.error("Error al obtener usuarios:", error);
   }
@@ -761,7 +762,7 @@ async function fetchEstados() {
       throw new Error(`Error ${res.status}: ${res.statusText}`);
     }
     const estados = await res.json();
-    // console.log("estados:", estados);
+    console.log("estados:", estados);
     estados.forEach((estado) => {
       estadoMap[estado.id] = estado.nombre.toLowerCase();
       statusMap[estado.id] = capitalize(estado.nombre);
@@ -783,6 +784,7 @@ async function loadActivities() {
       },
     });
     actividades = await res.json();
+    console.log("actividades", actividades)
   } catch (err) {
     console.error("Error al cargar actividades:", err);
   }
