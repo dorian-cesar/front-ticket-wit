@@ -37,12 +37,12 @@ function navigateTo(option) {
 
       if (token) {
         const mantenedorWindow = window.open(
-          "https://localhost:3000/dashboard.html"
+          "https://mantenedor-ticket.netlify.app/dashboard.html"
         );
 
         function sendTokenListener(e) {
           if (
-            e.origin === "https://localhost:3000" &&
+            e.origin === "https://mantenedor-ticket.netlify.app" &&
             e.data === "READY_FOR_TOKEN"
           ) {
             mantenedorWindow.postMessage(
