@@ -659,33 +659,30 @@ body {
   }
 }
 
-/* Dark mode support (opcional) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --light-gray: #2c3e50;
-    --text-dark: #ecf0f1;
-    --border-color: #34495e;
-  }
+:root {
+  --light-gray: #2c3e50;
+  --text-dark: #ecf0f1;
+  --border-color: #34495e;
+}
 
-  body {
-    background-color: #1a252f;
-    color: var(--text-dark);
-  }
+body {
+  background-color: #1a252f;
+  color: var(--text-dark);
+}
 
-  .card,
-  .card-tickets {
-    background-color: var(--secondary-color);
-    color: var(--text-dark);
-  }
+.card,
+.card-tickets {
+  background-color: var(--secondary-color);
+  color: var(--text-dark);
+}
 
-  .table {
-    color: var(--text-dark);
-  }
+.table {
+  color: var(--text-dark);
+}
 
-  .modal-content {
-    background-color: var(--secondary-color);
-    color: var(--text-dark);
-  }
+.modal-content {
+  background-color: var(--secondary-color);
+  color: var(--text-dark);
 }
 
 /* Accessibility improvements */
@@ -776,28 +773,26 @@ body {
   color: var(--primary-color);
 }
 
-@media (prefers-color-scheme: dark) {
-  .ticket-history-entry {
-    background-color: #415061;
-    border-left: 4px solid var(--accent-light);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    color: var(--text-dark);
-  }
+.ticket-history-entry {
+  background-color: #415061;
+  border-left: 4px solid var(--accent-light);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  color: var(--text-dark);
+}
 
-  .ticket-history-entry time,
-  .ticket-history-entry .note,
-  .ticket-history-entry .change {
-    color: #dce3ea;
-  }
+.ticket-history-entry time,
+.ticket-history-entry .note,
+.ticket-history-entry .change {
+  color: #dce3ea;
+}
 
-  .ticket-history-entry .user {
-    color: #ebebeb;
-    font-weight: bold;
-  }
+.ticket-history-entry .user {
+  color: #ebebeb;
+  font-weight: bold;
+}
 
-  .ticket-history-entry .change {
-    color: #ffffff;
-  }
+.ticket-history-entry .change {
+  color: #ffffff;
 }
 
 .refresh-btn {
@@ -887,36 +882,33 @@ body {
   outline: none;
 }
 
-/* Modo oscuro */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --total-color: #ececec;
-  }
+.btn-pdf {
+  color: var(--text-dark);
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
 
-  .btn-pdf {
-    color: var(--text-dark);
-    background-color: var(--primary-dark);
-    border-color: var(--primary-dark);
-  }
+.btn-pdf:hover,
+.btn-pdf:focus {
+  background-color: var(--primary-light);
+  color: white;
+}
 
-  .btn-pdf:hover,
-  .btn-pdf:focus {
-    background-color: var(--primary-light);
-    color: white;
-  }
+.card.border-secondary {
+  border-left: 4px solid #8b8b8b !important;
+}
 
-  .final-card {
-    background-color: #415061 !important;
-    border-left: 5px solid #28a745;
-  }
+.final-card {
+  background-color: #415061 !important;
+  border-left: 5px solid #28a745;
+}
 
-  .card.border-total {
-    border-left: 4px solid var(--total-color) !important;
-  }
+.card.border-total {
+  border-left: 4px solid var(--total-color) !important;
+}
 
-  .text-total {
-    color: var(--total-color) !important;
-  }
+.text-total {
+  color: var(--total-color) !important;
 }
 
 .card.card-status {

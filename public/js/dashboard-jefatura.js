@@ -756,8 +756,8 @@ function populateStatusFilter(estados) {
       nombreLower !== "cancelado" &&
       nombreLower !== "listo" &&
       nombreLower !== "en ejecución" &&
-      nombreLower !== "pendiente por presupuesto" &&
-      nombreLower !== "pendiente por autorizar"
+      nombreLower !== "pendiente pp" &&
+      nombreLower !== "pendiente pa"
     ) {
       const option2 = document.createElement("option");
       option2.value = estado.id;

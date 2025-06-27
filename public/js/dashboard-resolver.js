@@ -934,7 +934,7 @@ function populateStatusFilter(estados) {
     select.appendChild(option1);
     const nombreLower = estado.nombre.toLowerCase();
     if (
-      nombreLower !== "pendiente por autorizar" &&
+      nombreLower !== "pendiente pa" &&
       nombreLower !== "rechazado" &&
       nombreLower !== "asignado"
     ) {
