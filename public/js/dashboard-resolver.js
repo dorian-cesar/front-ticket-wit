@@ -280,7 +280,8 @@ function updateStats() {
   const total = tickets.length;
 
   document.getElementById("asignadoCount").textContent = asignado;
-  document.getElementById("pendienteAutorizarCount").textContent = pendienteAutorizar;
+  document.getElementById("pendienteAutorizarCount").textContent =
+    pendienteAutorizar;
   document.getElementById("ejecucionCount").textContent = enEjecucion;
   document.getElementById("pendienteCount").textContent = pendientePresupuesto;
   document.getElementById("rechazadoCount").textContent = rechazado;
@@ -332,11 +333,11 @@ async function updateTicket() {
     usuario_id: parseInt(userId, 10),
   };
 
-  console.log("Payload enviado:", {
-    id_nuevo_estado: nuevoEstado,
-    observacion,
-    usuario_id: parseInt(userId, 10),
-  });
+  // console.log("Payload enviado:", {
+  //   id_nuevo_estado: nuevoEstado,
+  //   observacion,
+  //   usuario_id: parseInt(userId, 10),
+  // });
 
   try {
     const response = await fetch(
@@ -578,7 +579,7 @@ function viewTicket(id) {
     <p><strong>Estado:</strong> ${getStatusIcon(
       ticket.status_id
     )} ${getStatusText(ticket.status_id)}</p>
-    <p><strong>Solicitado por:</strong> ${
+    <p><strong>Solicitado por:</strong> <i class="bi bi-person-circle me-2"></i>${
       ticket.assignee || ticket.ejecutor || "Sin asignar"
     }</p>
     <p><strong>Tipo de Atención:</strong> ${
@@ -606,7 +607,7 @@ function viewTicket(id) {
   document.getElementById("ticketModalBody").innerHTML = details;
   const modal = new bootstrap.Modal(document.getElementById("ticketModal"));
   modal.show();
-  console.log("DEBUG ticket:", ticket);
+  // console.log("DEBUG ticket:", ticket);
 }
 
 // Funciones auxiliares / utilitarias

@@ -390,7 +390,7 @@ function viewTicket(id) {
     <p><strong>Estado:</strong> ${getStatusIcon(
       ticket.status_id
     )} ${getStatusText(ticket.status_id)}</p>
-    <p><strong>Solicitado por:</strong> ${
+    <p><strong>Solicitado por:</strong> <i class="bi bi-person-circle me-2"></i>${
       ticket.solicitante || "Sin asignar"
     }</p>
     <p><strong>Tipo de Atención:</strong> ${

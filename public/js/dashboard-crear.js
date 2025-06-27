@@ -487,7 +487,7 @@ function viewTicket(id) {
   <p><strong>Estado:</strong> ${getStatusIcon(
     ticket.status_id
   )} ${getStatusText(ticket.status_id)}</p>
-  <p><strong>Asignado a:</strong> ${
+  <p><strong>Asignado a:</strong> <i class="bi bi-person-circle me-2"></i>${
     ticket.assignee || ticket.ejecutor || "Sin asignar"
   }</p>
   <p><strong>Tipo de Atención:</strong> ${
