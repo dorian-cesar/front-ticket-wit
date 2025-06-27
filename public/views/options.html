@@ -18,8 +18,13 @@
       <header class="header">
         <div class="header-content">
           <div class="logo">
-            <img src="/img/logo-pullman-min.png" alt="Logo Pullman" />
-            <h1>Mesa de Ayuda Pullman Bus</h1>
+            <img
+              style="width: 25px"
+              src="/img/logo-wit.svg"
+              alt="Logo Pullman"
+              class="logo-pullman pb-1"
+            />
+            <h1>Plataforma de Tickets</h1>
           </div>
           <div class="user-info">
             <span class="welcome-text">Bienvenido(a), Usuario</span>
@@ -88,6 +93,62 @@
               </div>
               <div class="card-action">
                 <span class="action-text">Gestionar</span>
+                <i class="fas fa-arrow-right"></i>
+              </div>
+            </div>
+
+            <!-- Gestionar Tickets -->
+            <div
+              class="option-card manage-card"
+              onclick="navigateTo('gestionar')"
+            >
+              <div class="card-icon">
+                <i class="fas fa-tasks"></i>
+              </div>
+              <div class="card-content">
+                <h3>Gestionar Tickets</h3>
+                <p>
+                  Autoriza, rechaza y visualiza tickets para un mejor control y
+                  seguimiento.
+                </p>
+                <ul class="feature-list">
+                  <li><i class="fas fa-check"></i> Autorizar tickets</li>
+                  <li><i class="fas fa-check"></i> Rechazar tickets</li>
+                  <li>
+                    <i class="fas fa-check"></i> Visualizar todos los tickets
+                  </li>
+                </ul>
+              </div>
+              <div class="card-action">
+                <span class="action-text">Gestionar</span>
+                <i class="fas fa-arrow-right"></i>
+              </div>
+            </div>
+
+            <!-- Mantenedor -->
+            <div
+              class="option-card maintainer-card"
+              onclick="navigateTo('mantenedor')"
+            >
+              <div class="card-icon">
+                <i class="fas fa-cogs"></i>
+              </div>
+              <div class="card-content">
+                <h3>Mantenedor</h3>
+                <p>
+                  Administra estados, tipos de atención, áreas y otros
+                  parámetros del sistema.
+                </p>
+                <ul class="feature-list">
+                  <li><i class="fas fa-check"></i> Editar estados</li>
+                  <li>
+                    <i class="fas fa-check"></i> Modificar tipos de atención
+                  </li>
+                  <li><i class="fas fa-check"></i> Gestionar áreas</li>
+                </ul>
+              </div>
+              <div class="card-action">
+                <span class="action-text">Administrar</span>
                 <i class="fas fa-arrow-right"></i>
               </div>
             </div>

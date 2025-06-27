@@ -11,7 +11,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Inicializar la página
 function initializePage() {
-  console.log("Sistema de Tickets - Página de Selección Cargada");
 
   // Agregar efectos de hover adicionales
   addHoverEffects();
@@ -29,6 +28,12 @@ function navigateTo(option) {
     case "resolver":
       window.location.href = "dashboard-resolver.html";
       break;
+    case "gestionar":
+      window.location.href = "dashboard-jefatura.html";
+      break;
+    case "mantenedor":
+      window.location.href = "https://mantenedor-ticket.netlify.app/";
+      break;
     default:
       console.error("Opción no válida:", option);
   }
@@ -38,25 +43,7 @@ function navigateTo(option) {
 function logout() {
   localStorage.clear();
   sessionStorage.clear();
-
   window.location.href = "../index.html";
-}
-
-// Navegación por teclado
-function handleKeyboardNavigation(event) {
-  switch (event.key) {
-    case "1":
-      navigateTo("crear");
-      break;
-    case "2":
-      navigateTo("resolver");
-      break;
-    case "Escape":
-      if (confirm("¿Deseas cerrar sesión?")) {
-        logout();
-      }
-      break;
-  }
 }
 
 // Agregar animaciones a los elementos
