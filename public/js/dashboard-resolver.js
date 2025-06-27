@@ -579,7 +579,7 @@ function viewTicket(id) {
   const archivoUrl = `https://tickets.dev-wit.com/uploads/${ticket.archivo_pdf}`;
   const details = `
     <p><strong>ID:</strong> #${ticket.id}</p>
-    <p><strong>Área:</strong> ${ticket.title || ticket.area}</p>
+    <p><strong>Área:</strong> ${ticket.title}</p>
     <p><strong>Estado:</strong> ${getStatusIcon(
       ticket.status_id
     )} ${getStatusText(ticket.status_id)}</p>

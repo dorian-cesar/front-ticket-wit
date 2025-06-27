@@ -18,6 +18,7 @@ const searchInput = document.getElementById("searchInput");
 const createTicketForm = document.getElementById("createTicketForm");
 const saveTicketBtn = document.getElementById("saveTicketBtn");
 const updateTicketBtn = document.getElementById("updateTicketBtn");
+const tipoAtencionFilterSelect = document.getElementById("tipoAtencionFilter");
 
 // Obtener data de storage
 const token =
@@ -35,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Inicializar el panel de control (dashboard)
   setupEventListeners();
   // Traer estados de tickets
-  fetchEstados();
+  loadStatus();
   const tooltipTriggerList = [].slice.call(
     document.querySelectorAll("[title]")
   );
@@ -277,24 +278,70 @@ async function updateTicket() {
   }
 }
 
-function formatHistorial(historial) {
+// Ver historial en ticket
+function formatFinalCard(ticket) {
+  if (ticket.status_id !== 6) return "";
+
+  const fechaFinal = luxon.DateTime.fromISO(
+    ticket.historial?.at(-1)?.fecha || ticket.fecha_creacion,
+    { zone: "America/Santiago" }
+  )
+    .setLocale("es")
+    .toFormat("dd/MM/yyyy HH:mm");
+
+  const archivoUrl = ticket.archivo_solucion
+    ? `https://tickets.dev-wit.com/uploads/${ticket.archivo_solucion}`
+    : null;
+
+  const detallesDespachoHtml = ticket.detalles_despacho?.trim()
+    ? `<p><strong>Detalles del Despacho:</strong> ${ticket.detalles_despacho}</p>`
+    : "";
+
+  const huboDespacho =
+    ticket.necesita_despacho?.toLowerCase() === "si" ||
+    ticket.necesita_despacho?.toLowerCase() === "sí";
+  const textoDespacho = huboDespacho ? "Sí" : "No";
+
+  return `
+    <div class="ticket-history-entry final-card border border-success p-3 rounded mt-4 bg-light shadow">
+      <h5 class="fw-bold text-success mb-3">✅ Ticket Cerrado</h5>
+      <p><strong>Fecha y Hora de Cierre:</strong> ${fechaFinal}</p>
+      <p><strong>Modalidad de Atención:</strong> ${
+        capitalize(ticket.tipo_atencion_cierre) || "-"
+      }</p>
+      <p><strong>Tipo de Actividad:</strong> ${getActividadNombreById(
+        ticket.id_actividad
+      )}</p>
+      <p><strong>Detalle de Solución:</strong> ${ticket.detalle_solucion}</p>
+      <p><strong>¿Requirió despacho?:</strong> ${textoDespacho}</p>
+      ${detallesDespachoHtml}
+      ${
+        archivoUrl
+          ? `<div class="mt-2"><a class="btn btn-outline-success btn-sm" href="${archivoUrl}" target="_blank" rel="noopener">
+              <i class="bi bi-file-earmark-pdf"></i> Ver archivo de solución
+            </a></div>`
+          : ""
+      }
+    </div>
+  `;
+}
+
+function formatHistorial(historial, ticket = {}) {
   if (!Array.isArray(historial) || historial.length === 0) {
     return "<p class='text-muted'><em>Sin historial disponible</em></p>";
   }
 
-  return historial
+  const entriesHtml = historial
     .map((h) => {
       const fecha = luxon.DateTime.fromISO(h.fecha, {
         zone: "America/Santiago",
       })
         .setLocale("es")
         .toFormat("dd/MM/yyyy HH:mm");
-
       const iconAnterior = getStatusIcon(h.estado_anterior);
       const iconNuevo = getStatusIcon(h.nuevo_estado);
       const textoAnterior = getStatusText(h.estado_anterior);
       const textoNuevo = getStatusText(h.nuevo_estado);
-
       return `
         <div class="ticket-history-entry">
           <time>🕒 ${fecha}</time>
@@ -307,6 +354,10 @@ function formatHistorial(historial) {
       `;
     })
     .join("");
+
+  const finalCard = ticket.status_id === 6 ? formatFinalCard(ticket) : "";
+
+  return entriesHtml + finalCard;
 }
 
 // Ver detalles del ticket
@@ -327,7 +378,7 @@ function viewTicket(id) {
   const archivoUrl = `https://tickets.dev-wit.com/uploads/${ticket.archivo_pdf}`;
   const details = `
     <p><strong>ID:</strong> #${ticket.id}</p>
-    <p><strong>Área:</strong> ${ticket.title || ticket.area}</p>
+    <p><strong>Área:</strong> ${ticket.title}</p>
     <p><strong>Estado:</strong> ${getStatusIcon(
       ticket.status_id
     )} ${getStatusText(ticket.status_id)}</p>
@@ -404,6 +455,11 @@ function getStatusIcon(statusId) {
   return iconMap[statusId] || "";
 }
 
+function getActividadNombreById(id) {
+  const actividad = actividades.find((a) => Number(a.id) === Number(id));
+  return actividad ? actividad.nombre : id;
+}
+
 function capitalize(texto) {
   return texto
     .toLowerCase()
@@ -445,7 +501,6 @@ if (userName && userDisplay) {
 }
 
 // Llamadas API (areas y tipos)
-
 fetch("https://tickets.dev-wit.com/api/areas", {
   method: "GET",
   headers: {
@@ -466,8 +521,6 @@ fetch("https://tickets.dev-wit.com/api/areas", {
   .catch((error) => {
     console.error("Error cargando áreas:", error);
   });
-
-const tipoAtencionFilterSelect = document.getElementById("tipoAtencionFilter");
 
 fetch("https://tickets.dev-wit.com/api/tipos", {
   method: "GET",
@@ -583,7 +636,7 @@ getUserIdWhenReady((userId) => {
       });
 
       renderTickets(tickets);
-      // updateStats();
+      updateStats();
     })
     .catch((err) => {
       console.error("Error cargando tickets:", err);
@@ -625,7 +678,7 @@ async function loadTickets(userId) {
   }
 }
 
-async function fetchEstados() {
+async function loadStatus() {
   try {
     const res = await fetch("https://tickets.dev-wit.com/api/estados", {
       headers: {
@@ -649,6 +702,35 @@ async function fetchEstados() {
     console.error("Error cargando estados:", error.message);
   }
 }
+
+async function loadActivities() {
+  try {
+    const res = await fetch("https://tickets.dev-wit.com/api/actividades", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    actividades = await res.json();
+    const actividadSelect = document.getElementById("actividadSelect");
+    actividadSelect.innerHTML =
+      '<option value="">Seleccione una actividad</option>';
+    actividades.forEach((actividad) => {
+      const option = document.createElement("option");
+      option.value = actividad.id;
+      option.textContent = actividad.nombre;
+      actividadSelect.appendChild(option);
+    });
+  } catch (err) {
+    console.error("Error al cargar actividades:", err);
+  }
+}
+
+async function init() {
+  await loadActivities();
+  getUserIdWhenReady((userId) => loadTickets(userId));
+}
+init();
 
 function populateStatusFilter(estados) {
   const select = document.getElementById("statusFilter");
