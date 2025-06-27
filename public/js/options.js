@@ -11,7 +11,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Inicializar la página
 function initializePage() {
-
   // Agregar efectos de hover adicionales
   addHoverEffects();
 
@@ -32,7 +31,32 @@ function navigateTo(option) {
       window.location.href = "dashboard-jefatura.html";
       break;
     case "mantenedor":
-      window.location.href = "https://mantenedor-ticket.netlify.app/";
+      const token =
+        localStorage.getItem("authToken") ||
+        sessionStorage.getItem("authToken");
+
+      if (token) {
+        const mantenedorWindow = window.open(
+          "https://mantenedor-ticket.netlify.app/dashboard.html"
+        );
+
+        function sendTokenListener(e) {
+          if (
+            e.origin === "https://mantenedor-ticket.netlify.app" &&
+            e.data === "READY_FOR_TOKEN"
+          ) {
+            mantenedorWindow.postMessage(
+              { type: "token", token: token },
+              e.origin
+            );
+            window.removeEventListener("message", sendTokenListener);
+          }
+        }
+
+        window.addEventListener("message", sendTokenListener);
+      } else {
+        showNotification("No se encontró un token de sesión", "error");
+      }
       break;
     default:
       console.error("Opción no válida:", option);
