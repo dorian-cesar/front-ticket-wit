@@ -534,7 +534,6 @@ function formatHistorial(historial, ticket = {}) {
   if (!Array.isArray(historial) || historial.length === 0) {
     return "<p class='text-muted'><em>Sin historial disponible</em></p>";
   }
-
   const entriesHtml = historial
     .map((h) => {
       const fecha = luxon.DateTime.fromISO(h.fecha, {
@@ -558,9 +557,7 @@ function formatHistorial(historial, ticket = {}) {
       `;
     })
     .join("");
-
   const finalCard = ticket.status_id === 6 ? formatFinalCard(ticket) : "";
-
   return entriesHtml + finalCard;
 }
 

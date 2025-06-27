@@ -86,16 +86,23 @@ function renderTickets(ticketsToRender = tickets) {
   const start = (currentPage - 1) * rowsPerPage;
   const end = start + rowsPerPage;
   const paginatedTickets = ticketsToRender.slice(start, end);
-
   paginatedTickets.forEach((ticket) => {
     const row = document.createElement("tr");
     row.className = "new-ticket";
-
     const statusClass = statusClassMap[ticket.status_id];
-
-    const avanzarBtn = `<button class="btn btn-outline-secondary btn-action" onclick="openAdvanceModal(${ticket.id})" title="Avanzar Ticket">
-        <i class="bi bi-forward-fill text-success"></i>
-      </button>`;
+    const estadoNombre = estadoMap[ticket.status_id] || "";
+    const avanzarBtn = ![
+      "listo",
+      "cancelado",
+      "asignado",
+      "pendiente por presupuesto",
+      "en ejecución",
+      "rechazado",
+    ].includes(estadoNombre)
+      ? `<button class="btn btn-outline-secondary btn-action" onclick="openAdvanceModal(${ticket.id})" title="Avanzar Ticket">
+          <i class="bi bi-forward-fill text-success"></i>
+        </button>`
+      : "";
 
     row.innerHTML = `
       <td data-label="ID"><strong>#${ticket.id}</strong></td>
@@ -134,7 +141,6 @@ function renderTickets(ticketsToRender = tickets) {
 
     ticketsTableBody.appendChild(row);
   });
-
   renderPagination(Math.ceil(ticketsToRender.length / rowsPerPage));
 }
 
@@ -330,7 +336,6 @@ function formatHistorial(historial, ticket = {}) {
   if (!Array.isArray(historial) || historial.length === 0) {
     return "<p class='text-muted'><em>Sin historial disponible</em></p>";
   }
-
   const entriesHtml = historial
     .map((h) => {
       const fecha = luxon.DateTime.fromISO(h.fecha, {
@@ -354,9 +359,7 @@ function formatHistorial(historial, ticket = {}) {
       `;
     })
     .join("");
-
   const finalCard = ticket.status_id === 6 ? formatFinalCard(ticket) : "";
-
   return entriesHtml + finalCard;
 }
 
@@ -364,9 +367,7 @@ function formatHistorial(historial, ticket = {}) {
 function viewTicket(id) {
   const ticket = tickets.find((t) => t.id === id);
   if (!ticket) return showAlert("Ticket no encontrado", "warning");
-
-  const historialHtml = formatHistorial(ticket.historial);
-
+  const historialHtml = formatHistorial(ticket.historial, ticket);
   const historialSection = historialHtml.includes("Sin historial disponible")
     ? ""
     : `
@@ -374,7 +375,6 @@ function viewTicket(id) {
       <h5 class="mt-4 mb-3 fw-bold">Historial del Ticket</h5>
       ${historialHtml}
     `;
-
   const archivoUrl = `https://tickets.dev-wit.com/uploads/${ticket.archivo_pdf}`;
   const details = `
     <p><strong>ID:</strong> #${ticket.id}</p>
@@ -407,10 +407,10 @@ function viewTicket(id) {
     }
     ${historialSection}
   `;
-
   document.getElementById("ticketModalBody").innerHTML = details;
   const modal = new bootstrap.Modal(document.getElementById("ticketModal"));
   modal.show();
+  console.log("DEBUG ticket:", ticket);
 }
 
 // Validar formulario
@@ -597,7 +597,6 @@ function getUserIdWhenReady(callback) {
 // Llamada tickets con la id del usuario
 getUserIdWhenReady((userId) => {
   const endpoint = `https://tickets.dev-wit.com/api/tickets/pendientes/jefatura/${userId}`;
-
   fetch(endpoint, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -619,12 +618,11 @@ getUserIdWhenReady((userId) => {
             fechaTicket = ultimoCambio.fecha;
           }
         }
-
         return {
           id: t.id,
           title: t.area,
           status_id: ultimoEstado,
-          assignee: t.nombre_solicitante,
+          assignee: t.ejecutor,
           category: t.tipo_atencion,
           description: t.observaciones,
           date: luxon.DateTime.fromISO(fechaTicket)
@@ -632,9 +630,14 @@ getUserIdWhenReady((userId) => {
             .toFormat("yyyy-MM-dd"),
           historial: t.historial || [],
           archivo_pdf: t.archivo_pdf || null,
+          detalle_solucion: t.detalle_solucion || "",
+          tipo_atencion_cierre: t.modo_atencion || "",
+          necesita_despacho: t.necesita_despacho || "",
+          detalles_despacho: t.detalles_despacho || "",
+          archivo_solucion: t.archivo_solucion || "",
+          id_actividad: t.id_actividad || null,
         };
       });
-
       renderTickets(tickets);
       updateStats();
     })
@@ -647,7 +650,6 @@ getUserIdWhenReady((userId) => {
 // Llamada para recargar tabla de tickets
 async function loadTickets(userId) {
   const endpoint = `https://tickets.dev-wit.com/api/tickets/pendientes/jefatura/${userId}`;
-
   try {
     const response = await fetch(endpoint, {
       headers: {
@@ -655,12 +657,11 @@ async function loadTickets(userId) {
       },
     });
     const data = await response.json();
-
     tickets = data.map((t) => ({
       id: t.id,
       title: t.area,
       status_id: t.id_estado,
-      assignee: t.nombre_solicitante,
+      assignee: t.ejecutor,
       category: t.tipo_atencion,
       description: t.observaciones,
       date: luxon.DateTime.fromISO(t.fecha_creacion)
@@ -668,10 +669,15 @@ async function loadTickets(userId) {
         .toFormat("yyyy-MM-dd"),
       historial: t.historial || [],
       archivo_pdf: t.archivo_pdf || null,
+      detalle_solucion: t.detalle_solucion || "",
+      tipo_atencion_cierre: t.modo_atencion || "",
+      necesita_despacho: t.necesita_despacho || "",
+      detalles_despacho: t.detalles_despacho || "",
+      archivo_solucion: t.archivo_solucion || "",
+      id_actividad: t.id_actividad || null,
     }));
-
     renderTickets(tickets);
-    // updateStats();
+    updateStats();
   } catch (err) {
     console.error("Error recargando tickets:", err);
     showAlert("No se pudieron recargar los tickets.", "warning");
@@ -712,15 +718,6 @@ async function loadActivities() {
       },
     });
     actividades = await res.json();
-    const actividadSelect = document.getElementById("actividadSelect");
-    actividadSelect.innerHTML =
-      '<option value="">Seleccione una actividad</option>';
-    actividades.forEach((actividad) => {
-      const option = document.createElement("option");
-      option.value = actividad.id;
-      option.textContent = actividad.nombre;
-      actividadSelect.appendChild(option);
-    });
   } catch (err) {
     console.error("Error al cargar actividades:", err);
   }
@@ -739,12 +736,10 @@ function populateStatusFilter(estados) {
   selectEdit.innerHTML = '<option value="">Seleccione un estado</option>';
   estados.forEach((estado) => {
     const nombreCapitalizado = capitalize(estado.nombre);
-
     const option1 = document.createElement("option");
     option1.value = estado.id;
     option1.textContent = nombreCapitalizado;
     select.appendChild(option1);
-
     const nombreLower = estado.nombre.toLowerCase();
     if (
       nombreLower !== "cancelado" &&
@@ -763,7 +758,6 @@ function populateStatusFilter(estados) {
       } else {
         option2.textContent = nombreCapitalizado;
       }
-
       selectEdit.appendChild(option2);
     }
   });
