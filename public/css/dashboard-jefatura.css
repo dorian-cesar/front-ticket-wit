@@ -646,7 +646,7 @@ body {
 /* Extra Large Screens */
 @media (min-width: 1200px) {
   .container-fluid {
-    max-width: 2400px;
+    max-width: 88vw;
     margin: 0 auto;
   }
 }
@@ -895,6 +895,11 @@ body {
 
   .card.border-secondary {
     border-left: 4px solid #8b8b8b !important;
+  }
+
+  .final-card {
+    background-color: #415061 !important;
+    border-left: 5px solid #28a745;
   }
 }
 
