@@ -175,24 +175,24 @@ function openAdvanceModal(id) {
 }
 
 // Actualizar estadísticas
-// function updateStats() {
-//   const asignado = tickets.filter((t) => t.status_id === 2).length;
-//   const pendienteAutorizar = tickets.filter((t) => t.status_id === 1).length;
-//   const enEjecucion = tickets.filter((t) => t.status_id === 3).length;
-//   const pendientePresupuesto = tickets.filter((t) => t.status_id === 4).length;
-//   const rechazado = tickets.filter((t) => t.status_id === 9).length;
-//   const cancelado = tickets.filter((t) => t.status_id === 5).length;
-//   const listo = tickets.filter((t) => t.status_id === 6).length;
+function updateStats() {
+  const asignado = tickets.filter((t) => t.status_id === 2).length;
+  const pendienteAutorizar = tickets.filter((t) => t.status_id === 1).length;
+  const enEjecucion = tickets.filter((t) => t.status_id === 3).length;
+  const pendientePresupuesto = tickets.filter((t) => t.status_id === 4).length;
+  const rechazado = tickets.filter((t) => t.status_id === 9).length;
+  const cancelado = tickets.filter((t) => t.status_id === 5).length;
+  const listo = tickets.filter((t) => t.status_id === 6).length;
 
-//   document.getElementById("asignadoCount").textContent = asignado;
-//   document.getElementById("pendienteAutorizarCount").textContent =
-//     pendienteAutorizar;
-//   document.getElementById("ejecucionCount").textContent = enEjecucion;
-//   document.getElementById("pendienteCount").textContent = pendientePresupuesto;
-//   document.getElementById("rechazadoCount").textContent = rechazado;
-//   document.getElementById("canceladoCount").textContent = cancelado;
-//   document.getElementById("listoCount").textContent = listo;
-// }
+  document.getElementById("asignadoCount").textContent = asignado;
+  document.getElementById("pendienteAutorizarCount").textContent =
+    pendienteAutorizar;
+  document.getElementById("ejecucionCount").textContent = enEjecucion;
+  document.getElementById("pendienteCount").textContent = pendientePresupuesto;
+  document.getElementById("rechazadoCount").textContent = rechazado;
+  document.getElementById("canceladoCount").textContent = cancelado;
+  document.getElementById("listoCount").textContent = listo;
+}
 
 // Filtrar tickets
 function onFilterChange() {
@@ -402,6 +402,14 @@ function getStatusText(statusId) {
 
 function getStatusIcon(statusId) {
   return iconMap[statusId] || "";
+}
+
+function capitalize(texto) {
+  return texto
+    .toLowerCase()
+    .split(" ")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
 }
 
 function formatDate(dateString) {
@@ -640,14 +648,6 @@ async function fetchEstados() {
   } catch (error) {
     console.error("Error cargando estados:", error.message);
   }
-}
-
-function capitalize(texto) {
-  return texto
-    .toLowerCase()
-    .split(" ")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
 }
 
 function populateStatusFilter(estados) {
