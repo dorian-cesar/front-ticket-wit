@@ -1,7 +1,13 @@
-const userRole =
-  localStorage.getItem("userRole") || sessionStorage.getItem("userRole");
+const token =
+  localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+const userId =
+  localStorage.getItem("userId") || sessionStorage.getItem("userId");
 const userName =
   localStorage.getItem("userName") || sessionStorage.getItem("userName");
+const userRole =
+  localStorage.getItem("userRole") || sessionStorage.getItem("userRole");
+const userMail =
+  localStorage.getItem("userMail") || sessionStorage.getItem("userMail");
 
 document.addEventListener("DOMContentLoaded", () => {
   initializePage();
@@ -31,10 +37,6 @@ function navigateTo(option) {
       window.location.href = "dashboard-jefatura.html";
       break;
     case "mantenedor":
-      const token =
-        localStorage.getItem("authToken") ||
-        sessionStorage.getItem("authToken");
-
       if (token) {
         const mantenedorWindow = window.open(
           "https://mantenedor-ticket.netlify.app/dashboard.html"
@@ -46,7 +48,14 @@ function navigateTo(option) {
             e.data === "READY_FOR_TOKEN"
           ) {
             mantenedorWindow.postMessage(
-              { type: "token", token: token },
+              {
+                type: "token",
+                token,
+                userId,
+                userName,
+                userRole,
+                userMail,
+              },
               e.origin
             );
             window.removeEventListener("message", sendTokenListener);
