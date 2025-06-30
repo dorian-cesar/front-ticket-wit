@@ -226,7 +226,7 @@ function updateStats() {
   document.getElementById("totalCount").textContent = total;
 }
 
-// Filtrar tickets
+// Filtrar tickets en pág 1
 function onFilterChange() {
   currentPage = 1;
   applyFilters();
@@ -375,6 +375,7 @@ async function createTicket() {
   }
 }
 
+// Card para ticket cerrado
 function formatFinalCard(ticket) {
   if (ticket.status_id !== 6) return "";
 
@@ -422,6 +423,7 @@ function formatFinalCard(ticket) {
   `;
 }
 
+// Historial de ticket
 function formatHistorial(historial, ticket = {}) {
   if (!Array.isArray(historial) || historial.length === 0) {
     return "<p class='text-muted'><em>Sin historial disponible</em></p>";
