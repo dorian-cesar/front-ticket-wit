@@ -52,10 +52,10 @@ function navigateTo(option) {
                 type: "token",
                 token,
                 usuario: {
-                  userId,
-                  userName,
-                  userRole,
-                  userMail,
+                  id: userId,
+                  nombre: userName,
+                  rol: userRole,
+                  email: userMail,
                 },
               },
               e.origin
