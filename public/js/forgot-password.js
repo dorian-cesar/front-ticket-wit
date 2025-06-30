@@ -96,13 +96,20 @@ document.addEventListener("DOMContentLoaded", () => {
       );
 
       if (response.ok) {
+        const successTitle =
+          origin === "change" ? "¡Enlace enviado!" : "¡Instrucciones enviadas!";
+        const successMessage =
+          origin === "change"
+            ? `Hemos enviado un enlace para cambiar tu contraseña a <strong>${email}</strong>.`
+            : `Hemos enviado un enlace de recuperación a <strong>${email}</strong>.`;
+
         showAlert(
           `
-                    <i class="bi bi-check-circle me-2"></i>
-                    <strong>¡Instrucciones enviadas!</strong><br>
-                    Hemos enviado un enlace de recuperación a <strong>${email}</strong>.<br>
-                    Revisa tu bandeja de entrada y spam.
-                `,
+      <i class="bi bi-check-circle me-2"></i>
+      <strong>${successTitle}</strong><br>
+      ${successMessage}<br>
+      Revisa tu bandeja de entrada.
+    `,
           "success"
         );
         forgotPasswordForm.reset();
