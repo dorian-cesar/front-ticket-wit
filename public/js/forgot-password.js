@@ -89,9 +89,9 @@ document.addEventListener("DOMContentLoaded", () => {
         );
         forgotPasswordForm.reset();
         emailInput.classList.remove("is-valid", "is-invalid");
-        // setTimeout(() => {
-        //   window.location.href = "../index.html";
-        // }, 5000);
+        setTimeout(() => {
+          window.location.href = "../index.html";
+        }, 8000);
       } else {
         const errorData = await response.json();
         showAlert(

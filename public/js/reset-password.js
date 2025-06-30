@@ -26,16 +26,10 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // Verificar token al cargar la página
-//   verifyToken(token);
-
   // Elementos de requisitos
   const requirements = {
     length: document.getElementById("req-length"),
-    uppercase: document.getElementById("req-uppercase"),
-    lowercase: document.getElementById("req-lowercase"),
-    number: document.getElementById("req-number"),
-    special: document.getElementById("req-special"),
+    basic: document.getElementById("req-basic"),
   };
 
   // Función para mostrar token inválido
@@ -43,26 +37,6 @@ document.addEventListener("DOMContentLoaded", () => {
     resetPasswordForm.style.display = "none";
     invalidTokenContainer.classList.remove("d-none");
   }
-
-  // Función para verificar token
-//   async function verifyToken(token) {
-//     try {
-//       const response = await fetch("/api/verify-reset-token", {
-//         method: "POST",
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//         body: JSON.stringify({ token }),
-//       });
-
-//       if (!response.ok) {
-//         showInvalidToken();
-//       }
-//     } catch (error) {
-//       console.error("Error verificando token:", error);
-//       showInvalidToken();
-//     }
-//   }
 
   // Función para mostrar alertas
   function showAlert(message, type = "info") {
@@ -105,13 +79,9 @@ document.addEventListener("DOMContentLoaded", () => {
   function checkPasswordStrength(password) {
     const checks = {
       length: password.length >= 8,
-      uppercase: /[A-Z]/.test(password),
-      lowercase: /[a-z]/.test(password),
-      number: /\d/.test(password),
-      special: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+      basic: /[a-zA-Z]/.test(password) && /\d/.test(password),
     };
 
-    // Actualizar requisitos visuales
     Object.keys(checks).forEach((key) => {
       const element = requirements[key];
       if (checks[key]) {
@@ -124,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // Calcular puntuación
+    // Indicador simplificado
     const score = Object.values(checks).filter(Boolean).length;
     let strength = "";
     let barClass = "";
@@ -133,39 +103,23 @@ document.addEventListener("DOMContentLoaded", () => {
     switch (score) {
       case 0:
       case 1:
-        strength = "Muy débil";
-        barClass = "bg-danger";
-        width = 20;
-        break;
-      case 2:
         strength = "Débil";
         barClass = "bg-danger";
-        width = 40;
+        width = 50;
         break;
-      case 3:
-        strength = "Regular";
-        barClass = "bg-warning";
-        width = 60;
-        break;
-      case 4:
-        strength = "Buena";
-        barClass = "bg-info";
-        width = 80;
-        break;
-      case 5:
-        strength = "Muy fuerte";
+      case 2:
+        strength = "Fuerte";
         barClass = "bg-success";
         width = 100;
         break;
     }
 
-    // Actualizar barra de progreso
     strengthBar.className = `progress-bar ${barClass}`;
     strengthBar.style.width = `${width}%`;
     strengthText.textContent = `Fortaleza: ${strength}`;
     strengthText.className = `form-text ${barClass.replace("bg-", "text-")}`;
 
-    return score >= 4; // Requiere al menos 4 de 5 criterios
+    return score === 2;
   }
 
   // Validación en tiempo real
@@ -243,15 +197,18 @@ document.addEventListener("DOMContentLoaded", () => {
     submitBtn.disabled = true;
 
     try {
-      const response = await fetch(`https://tickets.dev-wit.com/api/auth/reset-password/${token}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          newPassword: password
-        }),
-      });
+      const response = await fetch(
+        `https://tickets.dev-wit.com/api/auth/reset-password/${token}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            newPassword: password,
+          }),
+        }
+      );
 
       if (response.ok) {
         showAlert(
