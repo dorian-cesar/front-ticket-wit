@@ -56,7 +56,9 @@ function setupEventListeners() {
   statusFilter.addEventListener("change", onFilterChange);
   tipoAtencionFilter.addEventListener("change", onFilterChange);
   searchInput.addEventListener("input", onFilterChange);
-  document.getElementById("idSearchInput").addEventListener("input", applyFilters);
+  document
+    .getElementById("idSearchInput")
+    .addEventListener("input", applyFilters);
 
   // Actualizar o cerrar ticket
   updateTicketBtn.addEventListener("click", () => {
@@ -206,18 +208,53 @@ function renderPagination(totalPages) {
   if (!paginationContainer) return;
   paginationContainer.innerHTML = "";
   if (totalPages <= 1) return;
-  for (let i = 1; i <= totalPages; i++) {
+  const maxVisible = 3;
+  const createButton = (text, page, disabled = false, active = false) => {
     const btn = document.createElement("button");
-    btn.textContent = i;
-    btn.className = `btn btn-sm ${
-      i === currentPage ? "btn-primary" : "btn-outline-primary"
-    } mx-1`;
-    btn.addEventListener("click", () => {
-      currentPage = i;
-      applyFilters();
-    });
-    paginationContainer.appendChild(btn);
+    btn.textContent = text;
+    btn.className = `btn btn-sm mx-1`;
+    if (disabled) {
+      btn.classList.add("btn-outline-secondary", "disabled");
+      btn.disabled = true;
+    } else if (active) {
+      btn.classList.add("btn-primary");
+    } else {
+      btn.classList.add("btn-outline-primary");
+      btn.addEventListener("click", () => {
+        currentPage = page;
+        applyFilters();
+      });
+    }
+    return btn;
+  };
+
+  paginationContainer.appendChild(
+    createButton("«", currentPage - 1, currentPage === 1)
+  );
+  paginationContainer.appendChild(
+    createButton("1", 1, false, currentPage === 1)
+  );
+  if (currentPage - maxVisible > 2) {
+    paginationContainer.appendChild(createButton("...", null, true));
   }
+  const start = Math.max(2, currentPage - maxVisible);
+  const end = Math.min(totalPages - 1, currentPage + maxVisible);
+  for (let i = start; i <= end; i++) {
+    paginationContainer.appendChild(
+      createButton(i, i, false, i === currentPage)
+    );
+  }
+  if (currentPage + maxVisible < totalPages - 1) {
+    paginationContainer.appendChild(createButton("...", null, true));
+  }
+  if (totalPages > 1) {
+    paginationContainer.appendChild(
+      createButton(totalPages, totalPages, false, currentPage === totalPages)
+    );
+  }
+  paginationContainer.appendChild(
+    createButton("»", currentPage + 1, currentPage === totalPages)
+  );
 }
 
 // Avanzar ticket
@@ -894,7 +931,9 @@ function capitalize(texto) {
   return texto
     .split(" ")
     .map((w) =>
-      w === w.toUpperCase() ? w : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
+      w === w.toUpperCase()
+        ? w
+        : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
     )
     .join(" ");
 }
