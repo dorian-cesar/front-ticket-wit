@@ -112,7 +112,7 @@ function setupEventListeners() {
 
   document.getElementById("removeFileBtn").addEventListener("click", () => {
     const fileInput = document.getElementById("editTicketFile");
-    fileInput.value = ""; // Limpiar archivo
+    fileInput.value = "";
     document.getElementById("removeFileBtn").classList.add("d-none");
   });
   document
