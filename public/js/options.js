@@ -51,10 +51,12 @@ function navigateTo(option) {
               {
                 type: "token",
                 token,
-                userId,
-                userName,
-                userRole,
-                userMail,
+                usuario: {
+                  userId,
+                  userName,
+                  userRole,
+                  userMail,
+                },
               },
               e.origin
             );
