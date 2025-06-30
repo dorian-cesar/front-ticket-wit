@@ -356,7 +356,7 @@ async function createTicket() {
     }
 
     // Recargar tabla de tickets
-    await loadTickets(solicitante.id);
+    getUserIdWhenReady((userId) => loadTickets(userId));
 
     createTicketForm.reset();
     const modalElement = document.getElementById("createTicketModal");
