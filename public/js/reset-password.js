@@ -94,7 +94,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // Indicador simplificado
     const score = Object.values(checks).filter(Boolean).length;
     let strength = "";
     let barClass = "";
@@ -102,9 +101,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     switch (score) {
       case 0:
+        strength = "Muy débil";
+        barClass = "bg-danger";
+        width = 0;
+        break;
       case 1:
         strength = "Débil";
-        barClass = "bg-danger";
+        barClass = "bg-warning";
         width = 50;
         break;
       case 2:
