@@ -19,7 +19,11 @@ body {
 }
 
 body {
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--primary-color) 0%,
+    var(--secondary-color) 100%
+  );
   min-height: 100vh;
   display: flex;
   justify-content: center;
@@ -111,7 +115,11 @@ body {
 }
 
 .btn-login {
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--primary-color) 0%,
+    var(--secondary-color) 100%
+  );
   border: none;
   border-radius: 8px;
   padding: 0.75rem 1.5rem;
@@ -125,7 +133,11 @@ body {
 .btn-login:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(44, 62, 80, 0.3);
-  background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--secondary-color) 0%,
+    var(--primary-color) 100%
+  );
 }
 
 .btn-login:disabled {
@@ -260,4 +272,125 @@ body {
 .swal2-confirm,
 .swal2-cancel {
   border-radius: 10px !important;
+}
+
+/* Formulario nueva contraseña */
+/* Estilos adicionales para el formulario de reset password */
+.password-strength {
+  margin-top: 0.5rem;
+}
+
+.progress {
+  background-color: #e9ecef;
+  border-radius: 4px;
+}
+
+.progress-bar {
+  transition: all 0.3s ease;
+  border-radius: 4px;
+}
+
+.progress-bar.bg-danger {
+  background-color: var(--danger-color) !important;
+}
+
+.progress-bar.bg-warning {
+  background-color: var(--warning-color) !important;
+}
+
+.progress-bar.bg-info {
+  background-color: var(--accent-color) !important;
+}
+
+.progress-bar.bg-success {
+  background-color: var(--success-color) !important;
+}
+
+.requirements-list {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 0;
+}
+
+.requirement {
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.requirement i {
+  font-size: 0.8rem;
+  transition: all 0.3s ease;
+}
+
+.requirement.valid i {
+  color: var(--success-color) !important;
+}
+
+.requirement.valid i::before {
+  content: "\f26b"; /* bi-check-circle-fill */
+}
+
+.password-requirements {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 1rem;
+  border-left: 4px solid var(--accent-color);
+}
+
+.btn-outline-secondary {
+  border-color: #e9ecef;
+  color: var(--dark-gray);
+}
+
+.btn-outline-secondary:hover {
+  background-color: var(--light-gray);
+  border-color: var(--accent-color);
+  color: var(--primary-color);
+}
+
+.btn-outline-secondary:focus {
+  box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+/* Animación para los requisitos */
+@keyframes checkmark {
+  0% {
+    transform: scale(0.8);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.requirement.valid i {
+  animation: checkmark 0.3s ease;
+}
+
+/* Estados del botón submit */
+.btn-login:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn-login:disabled:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .password-requirements {
+    padding: 0.75rem;
+  }
+
+  .requirement {
+    font-size: 0.8rem;
+  }
 }
