@@ -8,6 +8,7 @@ const loginSpinner = document.getElementById("loginSpinner");
 const loginText = document.getElementById("loginText");
 const alertContainer = document.getElementById("alertContainer");
 const forgotPasswordLink = document.getElementById("forgotPasswordLink");
+const changePasswordLink = document.getElementById("changePasswordLink");
 
 // Configuración de la aplicación
 const APP_CONFIG = {
@@ -299,10 +300,15 @@ function Login(email, password) {
   });
 }
 
-// Manejar enlace de "¿Olvidaste la contraseña?"
+// Manejar enlace de "¿Olvidaste la contraseña?" y Cambiar contraseña
 forgotPasswordLink.addEventListener("click", function (e) {
   e.preventDefault();
   window.location.href = "/views/forgot-password.html";
+});
+
+changePasswordLink.addEventListener("click", function (e) {
+  e.preventDefault();
+  window.location.href = "/views/forgot-password.html?origin=change";
 });
 
 // Verificar lockout al cargar la página

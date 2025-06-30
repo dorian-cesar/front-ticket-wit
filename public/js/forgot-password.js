@@ -5,6 +5,24 @@ document.addEventListener("DOMContentLoaded", () => {
   const resetText = document.getElementById("resetText");
   const alertContainer = document.getElementById("alertContainer");
 
+  // Cambiar título y subtítulo si proviene de "changePasswordLink"
+  const urlParams = new URLSearchParams(window.location.search);
+  const origin = urlParams.get("origin");
+
+  if (origin === "change") {
+    const title = document.getElementById("forgotTitle");
+    const subtitle = document.getElementById("forgotSubtitle");
+    const emailInfo = document.getElementById("emailInfoText");
+
+    title.textContent = "Cambiar Contraseña";
+    subtitle.textContent =
+      "Ingresa tu email para recibir instrucciones y cambiar tu contraseña";
+    emailInfo.innerHTML = `
+    <i class="bi bi-info-circle me-1"></i>
+    Te enviaremos un enlace para cambiar tu contraseña
+  `;
+  }
+
   // Función para mostrar alertas
   function showAlert(message, type = "info") {
     const alertDiv = document.createElement("div");
