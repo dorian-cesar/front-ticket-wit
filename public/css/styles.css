@@ -19,11 +19,7 @@ body {
 }
 
 body {
-  background: linear-gradient(
-    135deg,
-    var(--primary-color) 0%,
-    var(--secondary-color) 100%
-  );
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
   min-height: 100vh;
   display: flex;
   justify-content: center;
@@ -115,11 +111,7 @@ body {
 }
 
 .btn-login {
-  background: linear-gradient(
-    135deg,
-    var(--primary-color) 0%,
-    var(--secondary-color) 100%
-  );
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
   border: none;
   border-radius: 8px;
   padding: 0.75rem 1.5rem;
@@ -133,11 +125,7 @@ body {
 .btn-login:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(44, 62, 80, 0.3);
-  background: linear-gradient(
-    135deg,
-    var(--secondary-color) 0%,
-    var(--primary-color) 100%
-  );
+  background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
 }
 
 .btn-login:disabled {
@@ -210,6 +198,11 @@ body {
   opacity: 0.7;
 }
 
+.form-text {
+  color: var(--dark-gray);
+  font-size: 0.85rem;
+}
+
 /* Móvil */
 @media (max-width: 576px) {
   .login-container {
@@ -239,26 +232,6 @@ body {
   .company-logo {
     padding-top: 20px;
   }
-}
-
-/* Animación de carga personalizada */
-.loading-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(105, 133, 160, 0.856);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
-
-.loading-overlay > div {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
 .loading-spinner {
