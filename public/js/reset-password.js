@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Verificar token al cargar la página
-  verifyToken(token);
+//   verifyToken(token);
 
   // Elementos de requisitos
   const requirements = {
