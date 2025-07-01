@@ -178,7 +178,7 @@ loginForm.addEventListener("submit", async function (e) {
       window.location.href = "/views/dashboard-crear.html";
     } else if (rolLower === "ejecutor") {
       window.location.href = "/views/dashboard-resolver.html";
-    } else if (rolLower === "jefatura" || "admin") {
+    } else if (rolLower === "jefatura") {
       window.location.href = "/views/dashboard-jefatura.html";
     } else {
       window.location.href = "/views/options.html";
