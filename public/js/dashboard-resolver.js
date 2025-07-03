@@ -914,24 +914,40 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
   })
   .then((data) => {
     tiposAtencion = data;
+    // console.log("tipos de atención:", tiposAtencion)
+    tipoSelect.innerHTML = '<option value="">Sin asignar</option>';
     tipoAtencionFilterSelect.innerHTML =
       '<option value="">Todos los tipos de atención</option>';
+
+    const categorias = {};
     data.forEach((tipo) => {
-      const option1 = document.createElement("option");
-      option1.value = tipo.id;
-      option1.textContent = tipo.nombre;
-      tipoSelect.appendChild(option1);
-
-      const option2 = document.createElement("option");
-      option2.value = tipo.id;
-      option2.textContent = tipo.nombre;
-
-      const option3 = document.createElement("option");
-      option3.value = tipo.nombre;
-      option3.textContent = tipo.nombre;
-      tipoAtencionFilterSelect.appendChild(option3);
+      if (!categorias[tipo.categoria]) {
+        categorias[tipo.categoria] = [];
+      }
+      categorias[tipo.categoria].push(tipo);
     });
-    // console.log("tiposAtencion", tiposAtencion);
+
+    for (const categoria in categorias) {
+      const optgroup1 = document.createElement("optgroup");
+      optgroup1.label = categoria;
+
+      const optgroup2 = document.createElement("optgroup");
+      optgroup2.label = categoria;
+
+      categorias[categoria].forEach((tipo) => {
+        const option1 = document.createElement("option");
+        option1.value = tipo.id;
+        option1.textContent = tipo.nombre;
+        optgroup1.appendChild(option1);
+
+        const option2 = document.createElement("option");
+        option2.value = tipo.nombre;
+        option2.textContent = tipo.nombre;
+        optgroup2.appendChild(option2);
+      });
+      tipoSelect.appendChild(optgroup1);
+      tipoAtencionFilterSelect.appendChild(optgroup2);
+    }
   })
   .catch((error) => {
     console.error("Error cargando tipos de atención:", error);
