@@ -180,6 +180,8 @@ loginForm.addEventListener("submit", async function (e) {
       window.location.href = "/views/dashboard-resolver.html";
     } else if (rolLower === "jefatura") {
       window.location.href = "/views/dashboard-jefatura.html";
+    } else if (rolLower === "admin") {
+      window.location.href = "/views/dashboard-admin.html";
     } else {
       window.location.href = "/views/options.html";
     }
