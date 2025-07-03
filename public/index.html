@@ -37,6 +37,8 @@
           window.location.href = "/views/dashboard-resolver.html";
         } else if (rolLower === "jefatura") {
           window.location.href = "/views/dashboard-jefatura.html";
+        } else if (rolLower === "superuser") {
+          window.location.href = "/views/dashboard-admin.html";
         } else if (rolLower === "null") {
           window.location.href = "index.html";
         } else {
@@ -146,13 +148,17 @@
                 <span id="loginText">Iniciar Sesión</span>
               </button>
 
-              <div class="text-center ">
+              <div class="text-center">
                 <a href="#" class="forgot-password" id="changePasswordLink">
                   Cambiar contraseña
                 </a>
               </div>
               <div class="text-center">
-                <a href="#" class="forgot-password mt-1" id="forgotPasswordLink">
+                <a
+                  href="#"
+                  class="forgot-password mt-1"
+                  id="forgotPasswordLink"
+                >
                   ¿Olvidaste tu contraseña?
                 </a>
               </div>

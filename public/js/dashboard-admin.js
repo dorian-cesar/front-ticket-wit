@@ -110,22 +110,20 @@ function renderTickets(ticketsToRender = tickets) {
   const start = (currentPage - 1) * rowsPerPage;
   const end = start + rowsPerPage;
   const paginatedTickets = ticketsToRender.slice(start, end);
+
   paginatedTickets.forEach((ticket) => {
     const row = document.createElement("tr");
     row.className = "new-ticket";
     const statusClass = statusClassMap[ticket.status_id];
     const estadoNombre = estadoMap[ticket.status_id] || "";
-    const avanzarBtn = ![
-      "listo",
-      "cancelado",
-      "asignado",
-      "pendiente pp",
-      "en ejecución",
-      "rechazado",
-    ].includes(estadoNombre)
-      ? `<button class="btn btn-outline-secondary btn-action" onclick="openAdvanceModal(${ticket.id})" title="Avanzar Ticket">
-          <i class="bi bi-forward-fill text-success"></i>
-        </button>`
+
+    // Mostrar botón de avanzar solo para Pendiente PA (1) y Asignado (2)
+    const avanzarBtn = [1, 2].includes(ticket.status_id)
+      ? `<button class="btn btn-outline-secondary btn-action" 
+                 onclick="openAdvanceModal(${ticket.id})" 
+                 title="Avanzar Ticket">
+           <i class="bi bi-forward-fill text-success"></i>
+         </button>`
       : "";
 
     row.innerHTML = `
@@ -234,12 +232,43 @@ function openAdvanceModal(id) {
   const ticket = tickets.find((t) => t.id === id);
   if (!ticket) return;
 
+  // Resetear el formulario
   document.getElementById("editTicketId").value = ticket.id;
-  document.getElementById("editTicketStatus").value = "";
   document.getElementById("editTicketDescription").value = "";
 
+  // Configurar opciones según estado actual
+  const editStatusSelect = document.getElementById("editTicketStatus");
+  editStatusSelect.innerHTML =
+    '<option value="">Seleccione una acción</option>';
+
+  if (ticket.status_id === 1) {
+    // Pendiente PA
+    editStatusSelect.innerHTML += `
+      <option value="2">Autorizar</option>
+      <option value="9">Rechazar</option>
+    `;
+  } else if (ticket.status_id === 2) {
+    // Asignado
+    editStatusSelect.innerHTML += `
+      <option value="3">En Ejecución</option>
+      <option value="4">Pendiente por Presupuesto</option>
+      <option value="5">Cancelado</option>
+      <option value="6">Listo</option>
+    `;
+  }
+
+  // Ocultar campos adicionales (para cuando el estado es "Listo")
+  document.getElementById("actividadGroup").classList.add("d-none");
+  document.getElementById("modalidadGroup").classList.add("d-none");
+  document.getElementById("requiereDespachoGroup").classList.add("d-none");
+  document.getElementById("detalleDespachoGroup").classList.add("d-none");
+  document.getElementById("adjuntoGroup").classList.add("d-none");
+
+  // Mostrar modal
   const modal = new bootstrap.Modal(document.getElementById("editTicketModal"));
   modal.show();
+
+  // Validar solo que se seleccione un estado
   validateAdvanceForm();
 }
 
@@ -425,41 +454,51 @@ async function updateTicket() {
     document.getElementById("editTicketStatus").value,
     10
   );
-  const observacion = document.getElementById("editTicketDescription").value;
-
-  const payload = {
-    id_estado: nuevoEstado,
-    observacion,
-    usuario_id: parseInt(userId, 10),
-  };
-
-  // console.log("payload asignar/rechazar:", payload);
+  const observacion =
+    document.getElementById("editTicketDescription").value || ""; // Descripción opcional
 
   try {
-    const response = await fetch(
-      `https://tickets.dev-wit.com/api/tickets/autorizar-rechazar/${id}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      }
-    );
+    let endpoint, payload;
+    const ticket = tickets.find((t) => t.id === id);
+
+    if (!ticket) throw new Error("Ticket no encontrado");
+
+    // Configurar payload según estado actual
+    payload = {
+      id_estado: nuevoEstado,
+      observacion, // Puede estar vacío
+      usuario_id: parseInt(userId, 10),
+    };
+
+    // Determinar el endpoint según el estado actual
+    if (ticket.status_id === 1) {
+      // Pendiente PA
+      endpoint = `https://tickets.dev-wit.com/api/tickets/autorizar-rechazar/${id}`;
+    } else {
+      // Asignado u otros
+      endpoint = `https://tickets.dev-wit.com/api/tickets/estado/${id}`;
+    }
+
+    const response = await fetch(endpoint, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
 
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.message || "Error al actualizar el ticket");
     }
 
+    // Recargar tickets y cerrar modal
     getUserIdWhenReady((userId) => loadTickets(userId));
-
     const modal = bootstrap.Modal.getInstance(
       document.getElementById("editTicketModal")
     );
     modal.hide();
-
     showAlert("Ticket actualizado exitosamente!", "success");
   } catch (error) {
     console.error("Error actualizando ticket:", error);
@@ -794,13 +833,10 @@ function validateAdvanceForm() {
   const estadoSelect = document.getElementById("editTicketStatus");
   const updateBtn = document.getElementById("updateTicketBtn");
 
-  const estadoSeleccionado = parseInt(estadoSelect.value, 10);
-  const nombreEstado = estadoMap[estadoSeleccionado] || "";
-
-  const esValido = nombreEstado === "asignado" || nombreEstado === "rechazado";
-
-  updateBtn.disabled = !esValido;
+  // Solo validamos que se haya seleccionado un estado
+  updateBtn.disabled = !estadoSelect.value;
 }
+
 // Funciones auxiliares / utilitarias
 const customIcons = {
   1: '<i class="bi bi-shield-check"></i>',
@@ -1016,7 +1052,7 @@ function getUserIdWhenReady(callback) {
 
 // Llamada tickets con la id del usuario
 getUserIdWhenReady((userId) => {
-  const endpoint = `https://tickets.dev-wit.com/api/tickets/pendientes/jefatura/${userId}`;
+  const endpoint = `https://tickets.dev-wit.com/api/tickets/`;
   fetch(endpoint, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -1073,7 +1109,7 @@ getUserIdWhenReady((userId) => {
 
 // Llamada para recargar tabla de tickets
 async function loadTickets(userId) {
-  const endpoint = `https://tickets.dev-wit.com/api/tickets/pendientes/jefatura/${userId}`;
+  const endpoint = `https://tickets.dev-wit.com/api/tickets/`;
   try {
     const response = await fetch(endpoint, {
       headers: {
@@ -1160,33 +1196,29 @@ init();
 function populateStatusFilter(estados) {
   const select = document.getElementById("statusFilter");
   const selectEdit = document.getElementById("editTicketStatus");
+
   select.innerHTML = '<option value="">Todos los estados</option>';
-  selectEdit.innerHTML = '<option value="">Seleccione un estado</option>';
+  selectEdit.innerHTML = '<option value="">Seleccione una acción</option>';
+  console.log("estados:", estados);
   estados.forEach((estado) => {
     const nombreCapitalizado = capitalize(estado.nombre);
     const option1 = document.createElement("option");
     option1.value = estado.id;
     option1.textContent = nombreCapitalizado;
     select.appendChild(option1);
-    const nombreLower = estado.nombre.toLowerCase();
-    if (
-      nombreLower !== "cancelado" &&
-      nombreLower !== "listo" &&
-      nombreLower !== "en ejecución" &&
-      nombreLower !== "pendiente pp" &&
-      nombreLower !== "pendiente pa"
-    ) {
-      const option2 = document.createElement("option");
-      option2.value = estado.id;
+  });
 
-      if (nombreLower === "asignado") {
-        option2.textContent = "Autorizar";
-      } else if (nombreLower === "rechazado") {
-        option2.textContent = "Rechazar";
-      } else {
-        option2.textContent = nombreCapitalizado;
-      }
-      selectEdit.appendChild(option2);
-    }
+  // Solo agregar opciones relevantes para avanzar desde "asignado"
+  const opcionesAvance = [
+    { id: 3, nombre: "En Ejecución" },
+    { id: 4, nombre: "Pendiente por Presupuesto" },
+    { id: 9, nombre: "Rechazar" },
+  ];
+
+  opcionesAvance.forEach((estado) => {
+    const option = document.createElement("option");
+    option.value = estado.id;
+    option.textContent = estado.nombre;
+    selectEdit.appendChild(option);
   });
 }
