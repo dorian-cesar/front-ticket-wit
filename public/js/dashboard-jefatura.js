@@ -494,9 +494,56 @@ function formatFinalCard(ticket) {
     ticket.necesita_despacho?.toLowerCase() === "sí";
   const textoDespacho = huboDespacho ? "Sí" : "No";
 
+  const yaEvaluado =
+    ticket.aprobacion_solucion === "si" || ticket.aprobacion_solucion === "no";
+  const esAprobado = ticket.aprobacion_solucion === "si";
+  const esDesaprobado = ticket.aprobacion_solucion === "no";
+
+  const puedeEvaluar =
+    userId && String(ticket?.id_solicitante) === String(userId);
+
+  let accionesHtml = "";
+  if (!yaEvaluado && puedeEvaluar) {
+    accionesHtml = `
+      <div class="mt-3 d-flex gap-2">
+        <button id="btn-aprobar-${ticket.id}" class="btn btn-primary btn-sm" onclick="aprobarTicket('${ticket.id}')">
+          ✅ Aprobado
+        </button>
+        <button id="btn-desaprobar-${ticket.id}" class="btn btn-outline-danger btn-sm" onclick="mostrarCampoDesaprobado('${ticket.id}')">
+          Desaprobado
+        </button>
+      </div>
+      <div class="mt-2" id="desaprobado-section-${ticket.id}" style="display: none;">
+        <textarea id="desaprobado-textarea-${ticket.id}" class="form-control mt-2" rows="3" placeholder="Describe el motivo de desaprobación..."></textarea>
+        <button class="btn btn-danger btn-sm mt-2" onclick="desaprobarTicket(event, '${ticket.id}')">
+          Confirmar Desaprobación
+        </button>
+      </div>
+    `;
+  }
+
+  const observacionHtml =
+    esDesaprobado && ticket.solucion_observacion
+      ? `<p><strong>Motivo de Desaprobación:</strong> ${ticket.solucion_observacion}</p>`
+      : "";
+
   return `
-    <div class="ticket-history-entry final-card border border-success p-3 rounded mt-4 bg-light shadow">
-      <h5 class="fw-bold text-success mb-3">✅ Ticket Cerrado</h5>
+    <div id="ticket-card-${
+      ticket.id
+    }" class="ticket-history-entry final-card border ${
+    esDesaprobado ? "border-danger" : "border-success"
+  } p-3 rounded mt-4 bg-light shadow">
+      <h5 class="fw-bold ${
+        esDesaprobado ? "text-danger" : "text-success"
+      } mb-3">
+        ${
+          esDesaprobado
+            ? "❌ Ticket Desaprobado"
+            : esAprobado
+            ? "✅ Ticket Aprobado"
+            : "Ticket Cerrado"
+        }
+      </h5>
       <p><strong>Fecha y Hora de Cierre:</strong> ${fechaFinal}</p>
       <p><strong>Modalidad de Atención:</strong> ${
         capitalize(ticket.tipo_atencion_cierre) || "-"
@@ -507,11 +554,18 @@ function formatFinalCard(ticket) {
       <p><strong>Detalle de Solución:</strong> ${ticket.detalle_solucion}</p>
       <p><strong>¿Requirió despacho?:</strong> ${textoDespacho}</p>
       ${detallesDespachoHtml}
+      ${observacionHtml}
       ${
         archivoUrl
           ? `<div class="mt-2"><a class="btn btn-outline-success btn-sm" href="${archivoUrl}" target="_blank" rel="noopener">
-              <i class="bi bi-file-earmark-pdf"></i> Ver archivo de solución
+              <i class="bi bi-file-earmark-pdf"></i> Ver archivo
             </a></div>`
+          : ""
+      }
+      ${accionesHtml}
+      ${
+        esDesaprobado
+          ? `<div class="mt-3 small fw-semibold fst-italic">Por favor genere un nuevo ticket con el problema.</div>`
           : ""
       }
     </div>
@@ -547,6 +601,132 @@ function formatHistorial(historial, ticket = {}) {
     .join("");
   const finalCard = ticket.status_id === 6 ? formatFinalCard(ticket) : "";
   return entriesHtml + finalCard;
+}
+
+async function aprobarTicket(ticketId) {
+  const btnAprobar = document.getElementById(`btn-aprobar-${ticketId}`);
+  const btnDesaprobar = document.getElementById(`btn-desaprobar-${ticketId}`);
+  const originalHTML = btnAprobar?.innerHTML;
+  if (btnAprobar) {
+    btnAprobar.disabled = true;
+    btnAprobar.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Aprobando...`;
+  }
+  if (btnDesaprobar) {
+    btnDesaprobar.disabled = true;
+  }
+  try {
+    const response = await fetch(
+      `https://tickets.dev-wit.com/api/tickets/aprobar-solucion/${ticketId}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          aprobacion_solucion: "si",
+          solucion_observacion: "",
+        }),
+      }
+    );
+    if (!response.ok) throw new Error("Error al aprobar el ticket");
+    getUserIdWhenReady((userId) => loadTickets(userId));
+    showAlert("Ticket aprobado correctamente!", "success");
+    ocultarAccionesFinales(ticketId, true);
+  } catch (error) {
+    console.error("Error al aprobar:", error);
+    showAlert("Hubo un problema al aprobar el ticket.", "error");
+  } finally {
+    if (btnAprobar) {
+      btnAprobar.disabled = false;
+      btnAprobar.innerHTML = originalHTML;
+    }
+    if (btnDesaprobar) {
+      btnDesaprobar.disabled = false;
+    }
+  }
+}
+
+function mostrarCampoDesaprobado(ticketId) {
+  const section = document.getElementById(`desaprobado-section-${ticketId}`);
+  if (section) section.style.display = "block";
+}
+
+async function desaprobarTicket(event, ticketId) {
+  const textarea = document.getElementById(`desaprobado-textarea-${ticketId}`);
+  const descripcion = textarea?.value.trim();
+  if (!descripcion) {
+    showAlert("Por favor ingresa una descripción para desaprobar.", "warning");
+    return;
+  }
+  const btnDesaprobar = event.target;
+  const btnAprobar = document.getElementById(`btn-aprobar-${ticketId}`);
+  const originalHTML = btnDesaprobar.innerHTML;
+  btnDesaprobar.disabled = true;
+  btnDesaprobar.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Confirmando...`;
+  if (btnAprobar) {
+    btnAprobar.disabled = true;
+  }
+  try {
+    const response = await fetch(
+      `https://tickets.dev-wit.com/api/tickets/aprobar-solucion/${ticketId}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          aprobacion_solucion: "no",
+          solucion_observacion: descripcion,
+        }),
+      }
+    );
+    if (!response.ok) throw new Error("Error al desaprobar el ticket");
+    getUserIdWhenReady((userId) => loadTickets(userId));
+    ocultarAccionesFinales(ticketId, false);
+    mostrarMensajeDesaprobacion(ticketId);
+  } catch (error) {
+    console.error("Error al desaprobar:", error);
+    showAlert("Hubo un problema al desaprobar el ticket.", "error");
+  } finally {
+    btnDesaprobar.disabled = false;
+    btnDesaprobar.innerHTML = originalHTML;
+    if (btnAprobar) {
+      btnAprobar.disabled = false;
+    }
+  }
+}
+
+function mostrarMensajeDesaprobacion(ticketId) {
+  const card = document.getElementById(`ticket-card-${ticketId}`);
+  if (!card) return;
+  const mensaje = document.createElement("div");
+  mensaje.className = "mt-3 small fw-semibold fst-italic";
+  mensaje.textContent = "Por favor genere un nuevo ticket con el problema.";
+  card.appendChild(mensaje);
+}
+
+function ocultarAccionesFinales(ticketId, aprobado) {
+  const btnAprobar = document.getElementById(`btn-aprobar-${ticketId}`);
+  const btnDesaprobar = document.getElementById(`btn-desaprobar-${ticketId}`);
+  const seccionDesaprobado = document.getElementById(
+    `desaprobado-section-${ticketId}`
+  );
+  if (btnAprobar) btnAprobar.style.display = "none";
+  if (btnDesaprobar) btnDesaprobar.style.display = "none";
+  if (seccionDesaprobado) seccionDesaprobado.style.display = "none";
+  const card = document.getElementById(`ticket-card-${ticketId}`);
+  if (card) {
+    const title = card.querySelector("h5");
+    if (title && title.textContent.includes("Ticket")) {
+      title.textContent = aprobado
+        ? "✅ Ticket Aprobado"
+        : "❌ Ticket Desaprobado";
+      title.classList.remove("text-success", "text-danger");
+      title.classList.add(aprobado ? "text-success" : "text-danger");
+    }
+  }
 }
 
 // Ver detalles del ticket
@@ -852,6 +1032,7 @@ getUserIdWhenReady((userId) => {
           status_id: ultimoEstado,
           assignee: t.ejecutor,
           solicitante: t.solicitante,
+          id_solicitante: t.id_solicitante,
           category: t.tipo_atencion,
           description: t.observaciones,
           date: luxon.DateTime.fromISO(fechaTicket)
@@ -865,6 +1046,8 @@ getUserIdWhenReady((userId) => {
           detalles_despacho: t.detalles_despacho || "",
           archivo_solucion: t.archivo_solucion || "",
           id_actividad: t.id_actividad || null,
+          aprobacion_solucion: t.aprobacion_solucion,
+          solucion_observacion: t.solucion_observacion,
         };
       });
       renderTickets(tickets);
@@ -892,6 +1075,7 @@ async function loadTickets(userId) {
       status_id: t.id_estado,
       assignee: t.ejecutor,
       solicitante: t.solicitante,
+      id_solicitante: t.id_solicitante,
       category: t.tipo_atencion,
       description: t.observaciones,
       date: luxon.DateTime.fromISO(t.fecha_creacion)
@@ -905,6 +1089,8 @@ async function loadTickets(userId) {
       detalles_despacho: t.detalles_despacho || "",
       archivo_solucion: t.archivo_solucion || "",
       id_actividad: t.id_actividad || null,
+      aprobacion_solucion: t.aprobacion_solucion,
+      solucion_observacion: t.solucion_observacion,
     }));
     renderTickets(tickets);
     updateStats();
