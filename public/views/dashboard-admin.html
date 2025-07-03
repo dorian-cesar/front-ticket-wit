@@ -32,7 +32,7 @@
           return;
         }
         const rolNormalizado = role.toLowerCase();
-        const rolesPermitidos = ["admin"];
+        const rolesPermitidos = ["superuser"];
         if (!rolesPermitidos.includes(rolNormalizado)) {
           window.location.href = "/index.html";
         }
