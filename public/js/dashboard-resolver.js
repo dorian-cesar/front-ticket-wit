@@ -121,6 +121,20 @@ function setupEventListeners() {
   document
     .querySelector("#editTicketModal .btn-secondary")
     .addEventListener("click", clearEditTicketForm);
+
+  // Crear ticket
+  saveTicketBtn.addEventListener("click", createTicket);
+
+  // Validación del formulario
+  document
+    .getElementById("ticketDescription")
+    .addEventListener("input", validateForm);
+  document
+    .getElementById("ticketAssignee")
+    .addEventListener("change", validateForm);
+  document
+    .getElementById("ticketCategory")
+    .addEventListener("change", validateForm);
 }
 
 // Renderizar la tabla de tickets
@@ -356,6 +370,125 @@ function applyFilters() {
   });
 
   renderTickets(filteredTickets);
+}
+
+// Crear nuevo ticket
+async function createTicket() {
+  const saveBtn = document.getElementById("saveTicketBtn");
+  const btnSpinner = document.getElementById("btnSpinner");
+  const btnIcon = document.getElementById("btnIcon");
+  const btnText = document.getElementById("btnText");
+
+  btnSpinner.classList.remove("d-none");
+  btnIcon.classList.add("d-none");
+  btnText.textContent = "Creando...";
+  saveBtn.disabled = true;
+
+  const areaSolicitante = parseInt(
+    document.getElementById("ticketAssignee").value,
+    10
+  );
+  const tipoAtencion = parseInt(
+    document.getElementById("ticketCategory").value,
+    10
+  );
+  const description = document.getElementById("ticketDescription").value.trim();
+  const attachmentInput = document.getElementById("ticketAttachment");
+
+  if (!description || !tipoAtencion || !areaSolicitante) {
+    showAlert("Por favor, completa todos los campos obligatorios.", "warning");
+    btnSpinner.classList.add("d-none");
+    btnIcon.classList.remove("d-none");
+    btnText.textContent = "Crear Ticket";
+    saveBtn.disabled = false;
+    return;
+  }
+
+  const solicitante = usersData.find((u) => u.email === userMail);
+  if (!solicitante) {
+    showAlert(
+      "No se encontró el usuario logueado en los datos de usuarios.",
+      "error"
+    );
+    btnSpinner.classList.add("d-none");
+    btnIcon.classList.remove("d-none");
+    btnText.textContent = "Crear Ticket";
+    saveBtn.disabled = false;
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("solicitante_id", solicitante.id);
+  formData.append("area_id", tipoAtencion);
+  formData.append("tipo_atencion_id", areaSolicitante);
+  formData.append("observaciones", description);
+
+  if (attachmentInput.files.length > 0) {
+    const file = attachmentInput.files[0];
+
+    if (file.size > 10 * 1024 * 1024) {
+      showAlert("El archivo adjunto no debe superar los 10MB", "warning");
+      btnSpinner.classList.add("d-none");
+      btnIcon.classList.remove("d-none");
+      btnText.textContent = "Crear Ticket";
+      saveBtn.disabled = false;
+      return;
+    }
+
+    if (file.type !== "application/pdf") {
+      showAlert("Solo se permiten archivos en formato PDF", "warning");
+      btnSpinner.classList.add("d-none");
+      btnIcon.classList.remove("d-none");
+      btnText.textContent = "Crear Ticket";
+      saveBtn.disabled = false;
+      return;
+    }
+
+    formData.append("archivo_pdf", file);
+  }
+
+  // console.log para debug
+  // for (const [key, value] of formData.entries()) {
+  //   console.log(`${key}:`, value);
+  // }
+
+  try {
+    const response = await fetch(
+      "https://tickets.dev-wit.com/api/tickets/crear",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Detalle del error:", errorData);
+      const message = errorData.message || "Error al crear el ticket";
+      throw new Error(message);
+    }
+
+    // Recargar tabla de tickets
+    getUserIdWhenReady((userId) => loadTickets(userId));
+
+    createTicketForm.reset();
+    const modalElement = document.getElementById("createTicketModal");
+    const modal = bootstrap.Modal.getInstance(modalElement);
+    modal.hide();
+
+    showAlert("Ticket creado exitosamente!", "success");
+  } catch (error) {
+    console.error("Error al crear ticket:", error);
+    showAlert("No se pudo crear el ticket. " + error.message, "error");
+  } finally {
+    btnSpinner.classList.add("d-none");
+    btnIcon.classList.remove("d-none");
+    btnText.textContent = "Crear Ticket";
+    saveBtn.disabled = false;
+  }
 }
 
 // Actualizar ticket
@@ -654,6 +787,16 @@ function viewTicket(id) {
   // console.log("DEBUG ticket:", ticket);
 }
 
+// Validar formulario crear ticket
+function validateForm() {
+  const description = document.getElementById("ticketDescription").value.trim();
+  const tipoAtencion = document.getElementById("ticketAssignee").value;
+  const areaSolicitante = document.getElementById("ticketCategory").value;
+
+  const isValid = description && tipoAtencion && areaSolicitante;
+  saveTicketBtn.disabled = !isValid;
+}
+
 // Funciones auxiliares / utilitarias
 const customIcons = {
   1: '<i class="bi bi-shield-check"></i>',
@@ -721,6 +864,8 @@ if (userName && userDisplay) {
 }
 
 // Llamadas API (areas y tipos)
+const categorySelect = document.getElementById("ticketCategory");
+
 fetch("https://tickets.dev-wit.com/api/areas", {
   method: "GET",
   headers: {
@@ -736,13 +881,24 @@ fetch("https://tickets.dev-wit.com/api/areas", {
   })
   .then((data) => {
     areas = data;
+    categorySelect.innerHTML =
+      '<option value="">Seleccionar categoría</option>';
+
+    data.forEach((area) => {
+      const option = document.createElement("option");
+      option.value = area.id;
+      option.textContent = area.nombre;
+      categorySelect.appendChild(option);
+    });
     // console.log("tiposAreas", areas);
   })
   .catch((error) => {
     console.error("Error cargando áreas:", error);
   });
 
+const tipoSelect = document.getElementById("ticketAssignee");
 const tipoAtencionFilterSelect = document.getElementById("tipoAtencionFilter");
+
 fetch("https://tickets.dev-wit.com/api/tipos", {
   method: "GET",
   headers: {
@@ -761,6 +917,11 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
     tipoAtencionFilterSelect.innerHTML =
       '<option value="">Todos los tipos de atención</option>';
     data.forEach((tipo) => {
+      const option1 = document.createElement("option");
+      option1.value = tipo.id;
+      option1.textContent = tipo.nombre;
+      tipoSelect.appendChild(option1);
+
       const option2 = document.createElement("option");
       option2.value = tipo.id;
       option2.textContent = tipo.nombre;
