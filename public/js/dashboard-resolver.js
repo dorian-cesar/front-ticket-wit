@@ -1142,6 +1142,18 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
         "Content-Type": "application/json",
       },
     });
+    if (response.status === 401) {
+      localStorage.clear();
+      sessionStorage.clear();
+      showAlert(
+        "Sesión expirada. Por favor, vuelve a iniciar sesión.",
+        "error"
+      );
+      setTimeout(() => {
+        window.location.href = "/index.html";
+      }, 2500);
+      throw new Error("No autorizado");
+    }
     if (!response.ok) {
       throw new Error(`Error HTTP: ${response.status}`);
     }
