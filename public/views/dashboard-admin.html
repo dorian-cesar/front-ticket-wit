@@ -307,59 +307,6 @@
       </div>
     </div>
 
-    <!-- Modal para Editar Ticket -->
-    <div class="modal fade" id="editTicketModal" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">
-              <i class="bi bi-pencil-square me-2"></i>
-              Editar Ticket
-            </h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-            ></button>
-          </div>
-          <div class="modal-body">
-            <form id="editTicketForm">
-              <input type="hidden" id="editTicketId" />
-              <div class="mb-3">
-                <label for="editTicketStatus" class="form-label">Estado</label>
-                <select id="editTicketStatus" class="form-select">
-                  <!-- se generan con js -->
-                </select>
-              </div>
-              <div class="mb-3">
-                <label for="editTicketDescription" class="form-label"
-                  >Descripción</label
-                >
-                <textarea
-                  class="form-control"
-                  id="editTicketDescription"
-                  rows="3"
-                ></textarea>
-              </div>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              Cancelar
-            </button>
-            <button type="button" class="btn btn-primary" id="updateTicketBtn">
-              <i class="bi bi-check-lg me-2"></i>
-              Actualizar
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- Modal para Crear Ticket -->
     <div class="modal fade" id="createTicketModal" tabindex="-1">
       <div class="modal-dialog modal-lg">

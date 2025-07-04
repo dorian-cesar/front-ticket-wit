@@ -500,7 +500,7 @@ async function aprobarTicket(ticketId) {
   const originalHTML = btnAprobar?.innerHTML;
   if (btnAprobar) {
     btnAprobar.disabled = true;
-    btnAprobar.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Aprobado...`;
+    btnAprobar.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Aprobando...`;
   }
   if (btnDesaprobar) {
     btnDesaprobar.disabled = true;

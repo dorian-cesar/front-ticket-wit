@@ -3,6 +3,8 @@ let usersData = [];
 let tiposAtencion = [];
 let areas = [];
 let tickets = [];
+let actividades = [];
+let estadosAll = [];
 let estadoMap = {};
 let statusClassMap = {};
 let statusMap = {};
@@ -18,7 +20,6 @@ const searchInput = document.getElementById("searchInput");
 const createTicketForm = document.getElementById("createTicketForm");
 const saveTicketBtn = document.getElementById("saveTicketBtn");
 const updateTicketBtn = document.getElementById("updateTicketBtn");
-const categorySelect = document.getElementById("ticketCategory");
 const total = tickets.length;
 document.getElementById("totalCount").textContent = total;
 const token =
@@ -43,13 +44,6 @@ document.addEventListener("DOMContentLoaded", () => {
   tooltipTriggerList.map(
     (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
   );
-
-  // Manejo de archivo adjunto
-  const attachmentInput = document.getElementById("ticketAttachment");
-  const clearAttachmentBtn = document.getElementById("clearAttachmentBtn");
-  clearAttachmentBtn.addEventListener("click", () => {
-    attachmentInput.value = "";
-  });
 });
 
 // Recargar los tickets
@@ -67,13 +61,69 @@ function setupEventListeners() {
     .getElementById("idSearchInput")
     .addEventListener("input", applyFilters);
 
-  // Actualizar ticket
-  updateTicketBtn.addEventListener("click", updateTicket);
+  // Actualizar o cerrar ticket
+  updateTicketBtn.addEventListener("click", () => {
+    const estadoId = parseInt(
+      document.getElementById("editTicketStatus").value,
+      10
+    );
+    const estadoNombre = estadoMap[estadoId] || "";
+    if (estadoNombre === "listo") {
+      updateTicketCierre();
+    } else if (estadoNombre === "asignado" || estadoNombre === "rechazado") {
+      updateTicketJefatura();
+    } else {
+      updateTicket();
+    }
+  });
 
-  // Validación del formulario de avanzar ticket
+  // Condicional de despacho
+  document
+    .getElementById("requiereDespachoSelect")
+    .addEventListener("change", (e) => {
+      const requiere = e.target.value === "Sí";
+      toggleVisibility("detalleDespachoGroup", requiere);
+    });
+
+  document
+    .getElementById("editTicketStatus")
+    .addEventListener("change", (e) => {
+      const selectedEstadoId = parseInt(e.target.value);
+      handleEstadoChange(selectedEstadoId);
+    });
+  // Validación del formulario
   document
     .getElementById("editTicketStatus")
     .addEventListener("change", validateAdvanceForm);
+  [
+    "actividadSelect",
+    "modalidadSelect",
+    "requiereDespachoSelect",
+    "detalleDespacho",
+  ].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener("input", validateAdvanceForm);
+      el.addEventListener("change", validateAdvanceForm);
+    }
+  });
+  document.getElementById("editTicketFile").addEventListener("change", () => {
+    const fileInput = document.getElementById("editTicketFile");
+    const removeBtn = document.getElementById("removeFileBtn");
+    removeBtn.classList.toggle("d-none", !fileInput.files.length);
+  });
+
+  document.getElementById("removeFileBtn").addEventListener("click", () => {
+    const fileInput = document.getElementById("editTicketFile");
+    fileInput.value = "";
+    document.getElementById("removeFileBtn").classList.add("d-none");
+  });
+  document
+    .querySelector("#editTicketModal .btn-close")
+    .addEventListener("click", clearEditTicketForm);
+  document
+    .querySelector("#editTicketModal .btn-secondary")
+    .addEventListener("click", clearEditTicketForm);
 
   // Crear ticket
   saveTicketBtn.addEventListener("click", createTicket);
@@ -110,20 +160,17 @@ function renderTickets(ticketsToRender = tickets) {
   const start = (currentPage - 1) * rowsPerPage;
   const end = start + rowsPerPage;
   const paginatedTickets = ticketsToRender.slice(start, end);
-
   paginatedTickets.forEach((ticket) => {
     const row = document.createElement("tr");
     row.className = "new-ticket";
     const statusClass = statusClassMap[ticket.status_id];
     const estadoNombre = estadoMap[ticket.status_id] || "";
-
-    // Mostrar botón de avanzar solo para Pendiente PA (1) y Asignado (2)
-    const avanzarBtn = [1, 2].includes(ticket.status_id)
-      ? `<button class="btn btn-outline-secondary btn-action" 
-                 onclick="openAdvanceModal(${ticket.id})" 
-                 title="Avanzar Ticket">
-           <i class="bi bi-forward-fill text-success"></i>
-         </button>`
+    const avanzarBtn = !["listo", "cancelado", "rechazado"].includes(
+      estadoNombre
+    )
+      ? `<button class="btn btn-outline-secondary btn-action" onclick="openAdvanceModal(${ticket.id})" title="Avanzar Ticket">
+          <i class="bi bi-forward-fill text-success"></i>
+        </button>`
       : "";
 
     row.innerHTML = `
@@ -227,49 +274,49 @@ function renderPagination(totalPages) {
   );
 }
 
-// Avanzar ticket
+// // Avanzar ticket
 function openAdvanceModal(id) {
   const ticket = tickets.find((t) => t.id === id);
   if (!ticket) return;
-
-  // Resetear el formulario
+  const estadoActual = estadoMap[ticket.status_id]?.toLowerCase() || "";
   document.getElementById("editTicketId").value = ticket.id;
   document.getElementById("editTicketDescription").value = "";
-
-  // Configurar opciones según estado actual
-  const editStatusSelect = document.getElementById("editTicketStatus");
-  editStatusSelect.innerHTML =
-    '<option value="">Seleccione una acción</option>';
-
-  if (ticket.status_id === 1) {
-    // Pendiente PA
-    editStatusSelect.innerHTML += `
-      <option value="2">Autorizar</option>
-      <option value="9">Rechazar</option>
-    `;
-  } else if (ticket.status_id === 2) {
-    // Asignado
-    editStatusSelect.innerHTML += `
-      <option value="3">En Ejecución</option>
-      <option value="4">Pendiente por Presupuesto</option>
-      <option value="5">Cancelado</option>
-      <option value="6">Listo</option>
-    `;
-  }
-
-  // Ocultar campos adicionales (para cuando el estado es "Listo")
-  document.getElementById("actividadGroup").classList.add("d-none");
-  document.getElementById("modalidadGroup").classList.add("d-none");
-  document.getElementById("requiereDespachoGroup").classList.add("d-none");
-  document.getElementById("detalleDespachoGroup").classList.add("d-none");
-  document.getElementById("adjuntoGroup").classList.add("d-none");
-
-  // Mostrar modal
+  populateStatusFilterUpdate(estadosAll, estadoActual);
+  handleEstadoChange(document.getElementById("editTicketStatus").value);
   const modal = new bootstrap.Modal(document.getElementById("editTicketModal"));
   modal.show();
-
-  // Validar solo que se seleccione un estado
   validateAdvanceForm();
+}
+
+function handleEstadoChange(estadoId) {
+  const estadoNombre = estadoMap[estadoId] || "";
+  const isListo = estadoNombre === "listo";
+  toggleVisibility("actividadGroup", isListo);
+  toggleVisibility("modalidadGroup", isListo);
+  toggleVisibility("requiereDespachoGroup", isListo);
+  toggleVisibility("adjuntoGroup", isListo);
+  if (isListo) loadActivities();
+  toggleVisibility("detalleDespachoGroup", false);
+}
+
+function toggleVisibility(id, show) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.toggle("d-none", !show);
+}
+
+// Limpiar formulario de avanzar ticket
+function clearEditTicketForm() {
+  document.getElementById("editTicketForm").reset();
+  toggleVisibility("actividadGroup", false);
+  toggleVisibility("modalidadGroup", false);
+  toggleVisibility("requiereDespachoGroup", false);
+  toggleVisibility("detalleDespachoGroup", false);
+  toggleVisibility("adjuntoGroup", false);
+  const fileInput = document.getElementById("editTicketFile");
+  if (fileInput) fileInput.value = "";
+  const removeFileBtn = document.getElementById("removeFileBtn");
+  if (removeFileBtn) removeFileBtn.classList.add("d-none");
 }
 
 // Actualizar estadísticas
@@ -443,6 +490,62 @@ async function createTicket() {
   }
 }
 
+// Actualizar ticket aprobado/rechazado
+async function updateTicketJefatura() {
+  updateTicketBtn.disabled = true;
+  const originalText = updateTicketBtn.innerHTML;
+  updateTicketBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Actualizando...`;
+
+  const id = Number.parseInt(document.getElementById("editTicketId").value);
+  const nuevoEstado = parseInt(
+    document.getElementById("editTicketStatus").value,
+    10
+  );
+  const observacion = document.getElementById("editTicketDescription").value;
+
+  const payload = {
+    id_estado: nuevoEstado,
+    observacion,
+    usuario_id: parseInt(userId, 10),
+  };
+
+  // console.log("payload asignar/rechazar:", payload);
+
+  try {
+    const response = await fetch(
+      `https://tickets.dev-wit.com/api/tickets/autorizar-rechazar/${id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Error al actualizar el ticket");
+    }
+
+    getUserIdWhenReady((userId) => loadTickets(userId));
+
+    const modal = bootstrap.Modal.getInstance(
+      document.getElementById("editTicketModal")
+    );
+    modal.hide();
+
+    showAlert("Ticket actualizado exitosamente!", "success");
+  } catch (error) {
+    console.error("Error actualizando ticket:", error);
+    showAlert("No se pudo actualizar el ticket. " + error.message, "error");
+  } finally {
+    updateTicketBtn.disabled = false;
+    updateTicketBtn.innerHTML = originalText;
+  }
+}
+
 // Actualizar ticket
 async function updateTicket() {
   updateTicketBtn.disabled = true;
@@ -454,51 +557,49 @@ async function updateTicket() {
     document.getElementById("editTicketStatus").value,
     10
   );
-  const observacion =
-    document.getElementById("editTicketDescription").value || ""; // Descripción opcional
+  const observacion = document.getElementById("editTicketDescription").value;
+  const ticket = tickets.find((t) => t.id === id);
+
+  if (!ticket) {
+    showAlert("No se encontró el ticket a actualizar.", "error");
+    updateTicketBtn.disabled = false;
+    updateTicketBtn.innerHTML = originalText;
+    return;
+  }
+
+  const payload = {
+    id_nuevo_estado: nuevoEstado,
+    observacion,
+    usuario_id: ticket.id_ejecutor,
+  };
+
+  // console.log("payload updateTicket:", payload);
 
   try {
-    let endpoint, payload;
-    const ticket = tickets.find((t) => t.id === id);
-
-    if (!ticket) throw new Error("Ticket no encontrado");
-
-    // Configurar payload según estado actual
-    payload = {
-      id_estado: nuevoEstado,
-      observacion, // Puede estar vacío
-      usuario_id: parseInt(userId, 10),
-    };
-
-    // Determinar el endpoint según el estado actual
-    if (ticket.status_id === 1) {
-      // Pendiente PA
-      endpoint = `https://tickets.dev-wit.com/api/tickets/autorizar-rechazar/${id}`;
-    } else {
-      // Asignado u otros
-      endpoint = `https://tickets.dev-wit.com/api/tickets/estado/${id}`;
-    }
-
-    const response = await fetch(endpoint, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(payload),
-    });
+    const response = await fetch(
+      `https://tickets.dev-wit.com/api/tickets/estado/${id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.message || "Error al actualizar el ticket");
     }
 
-    // Recargar tickets y cerrar modal
     getUserIdWhenReady((userId) => loadTickets(userId));
+
     const modal = bootstrap.Modal.getInstance(
       document.getElementById("editTicketModal")
     );
     modal.hide();
+
     showAlert("Ticket actualizado exitosamente!", "success");
   } catch (error) {
     console.error("Error actualizando ticket:", error);
@@ -509,7 +610,116 @@ async function updateTicket() {
   }
 }
 
-// Ver historial en ticket
+// Actualizar y cerrar ticket
+async function updateTicketCierre() {
+  updateTicketBtn.disabled = true;
+  const originalText = updateTicketBtn.innerHTML;
+  updateTicketBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enviando...`;
+
+  const id = parseInt(document.getElementById("editTicketId").value, 10);
+  const actividadId = parseInt(
+    document.getElementById("actividadSelect").value,
+    10
+  );
+  const detalleSolucion = document
+    .getElementById("editTicketDescription")
+    .value.trim();
+  const tipoAtencion = document.getElementById("modalidadSelect").value;
+
+  const necesitaDespachoRaw = document
+    .getElementById("requiereDespachoSelect")
+    .value.toLowerCase();
+
+  const necesitaDespacho =
+    necesitaDespachoRaw === "sí" ? "si" : necesitaDespachoRaw;
+
+  const detallesDespacho =
+    necesitaDespachoRaw === "sí"
+      ? document.getElementById("detalleDespacho").value.trim()
+      : "";
+
+  const archivoInput = document.getElementById("editTicketFile");
+  const archivo = archivoInput.files[0];
+
+  const formData = new FormData();
+  formData.append("id_actividad", actividadId);
+  formData.append("detalle_solucion", detalleSolucion);
+  formData.append("tipo_atencion", tipoAtencion);
+  formData.append("necesita_despacho", necesitaDespacho);
+  formData.append("detalles_despacho", detallesDespacho);
+  formData.append("usuario_id", parseInt(userId, 10));
+
+  if (archivo) {
+    formData.append("archivo_solucion", archivo);
+  }
+
+  // console.log("payload cerrar ticket:", Object.fromEntries(formData.entries()));
+
+  try {
+    const response = await fetch(
+      `https://tickets.dev-wit.com/api/tickets/${id}/cerrar`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Error al cerrar el ticket");
+    }
+
+    getUserIdWhenReady((userId) => loadTickets(userId));
+
+    const modal = bootstrap.Modal.getInstance(
+      document.getElementById("editTicketModal")
+    );
+    modal.hide();
+
+    showAlert("Ticket cerrado exitosamente!", "success");
+  } catch (error) {
+    console.error("Error al cerrar ticket:", error);
+    showAlert("No se pudo cerrar el ticket. " + error.message, "error");
+  } finally {
+    updateTicketBtn.disabled = false;
+    updateTicketBtn.innerHTML = originalText;
+  }
+}
+
+// Validar formulario
+function validateAdvanceForm() {
+  const estadoSelect = document.getElementById("editTicketStatus");
+  const updateBtn = document.getElementById("updateTicketBtn");
+  const estadoSeleccionado = parseInt(estadoSelect.value, 10);
+  const nombreEstado = estadoMap[estadoSeleccionado] || "";
+  let esValido = false;
+  if (
+    nombreEstado === "asignado" ||
+    nombreEstado === "rechazado" ||
+    nombreEstado === "en ejecución" ||
+    nombreEstado === "pendiente pp" ||
+    nombreEstado === "cancelado"
+  ) {
+    esValido = true;
+  } else if (nombreEstado === "listo") {
+    const actividad = document.getElementById("actividadSelect").value;
+    const modalidad = document.getElementById("modalidadSelect").value;
+    const requiereDespacho = document.getElementById(
+      "requiereDespachoSelect"
+    ).value;
+    const detalleDespacho = document
+      .getElementById("detalleDespacho")
+      .value.trim();
+    const requiere = requiereDespacho === "Sí";
+    const detalleValido = !requiere || (requiere && detalleDespacho.length > 0);
+    esValido = actividad && modalidad && requiereDespacho && detalleValido;
+  }
+  updateBtn.disabled = !esValido;
+}
+
 function formatFinalCard(ticket) {
   if (ticket.status_id !== 6) return "";
 
@@ -642,6 +852,56 @@ function formatHistorial(historial, ticket = {}) {
   return entriesHtml + finalCard;
 }
 
+// Ver detalles del ticket
+function viewTicket(id) {
+  const ticket = tickets.find((t) => t.id === id);
+  if (!ticket) return showAlert("Ticket no encontrado", "warning");
+  const historialHtml = formatHistorial(ticket.historial, ticket);
+  const historialSection = historialHtml.includes("Sin historial disponible")
+    ? ""
+    : `
+      <hr>
+      <h5 class="mt-4 mb-3 fw-bold">Historial del Ticket</h5>
+      ${historialHtml}
+    `;
+  const archivoUrl = `https://tickets.dev-wit.com/uploads/${ticket.archivo_pdf}`;
+  const details = `
+    <p><strong>ID:</strong> #${ticket.id}</p>
+    <p><strong>Área:</strong> ${ticket.title}</p>
+    <p><strong>Estado:</strong> ${getStatusIcon(
+      ticket.status_id
+    )} ${getStatusText(ticket.status_id)}</p>
+    <p><strong>Solicitado por:</strong> <i class="bi bi-person-circle me-2"></i>${
+      ticket.assignee || ticket.ejecutor || "Sin asignar"
+    }</p>
+    <p><strong>Tipo de Atención:</strong> ${
+      ticket.category || ticket.tipo_atencion
+    }</p>
+    <p><strong>Fecha:</strong> ${formatDate(
+      ticket.date || ticket.fecha_creacion
+    )}</p>
+    <p><strong>Descripción:</strong> ${
+      ticket.description || ticket.observaciones
+    }</p>
+    ${
+      ticket.archivo_pdf
+        ? `
+        <p><strong>Archivo Adjunto:</strong></p>
+        <div style="margin-bottom: 1rem;">
+          <a href="${archivoUrl}" target="_blank" rel="noopener noreferrer" class="btn-pdf">
+            <i class="bi bi-file-earmark-pdf" style="margin-right: 0.4rem;"></i> Ver PDF
+          </a>
+        </div>`
+        : ""
+    }
+    ${historialSection}
+  `;
+  document.getElementById("ticketModalBody").innerHTML = details;
+  const modal = new bootstrap.Modal(document.getElementById("ticketModal"));
+  modal.show();
+  // console.log("DEBUG ticket:", ticket);
+}
+
 async function aprobarTicket(ticketId) {
   const btnAprobar = document.getElementById(`btn-aprobar-${ticketId}`);
   const btnDesaprobar = document.getElementById(`btn-desaprobar-${ticketId}`);
@@ -768,56 +1028,6 @@ function ocultarAccionesFinales(ticketId, aprobado) {
   }
 }
 
-// Ver detalles del ticket
-function viewTicket(id) {
-  const ticket = tickets.find((t) => t.id === id);
-  if (!ticket) return showAlert("Ticket no encontrado", "warning");
-  const historialHtml = formatHistorial(ticket.historial, ticket);
-  const historialSection = historialHtml.includes("Sin historial disponible")
-    ? ""
-    : `
-      <hr>
-      <h5 class="mt-4 mb-3 fw-bold">Historial del Ticket</h5>
-      ${historialHtml}
-    `;
-  const archivoUrl = `https://tickets.dev-wit.com/uploads/${ticket.archivo_pdf}`;
-  const details = `
-    <p><strong>ID:</strong> #${ticket.id}</p>
-    <p><strong>Área:</strong> ${ticket.title}</p>
-    <p><strong>Estado:</strong> ${getStatusIcon(
-      ticket.status_id
-    )} ${getStatusText(ticket.status_id)}</p>
-    <p><strong>Solicitado por:</strong> <i class="bi bi-person-circle me-2"></i>${
-      ticket.solicitante || "Sin asignar"
-    }</p>
-    <p><strong>Tipo de Atención:</strong> ${
-      ticket.category || ticket.tipo_atencion
-    }</p>
-    <p><strong>Fecha:</strong> ${formatDate(
-      ticket.date || ticket.fecha_creacion
-    )}</p>
-    <p><strong>Descripción:</strong> ${
-      ticket.description || ticket.observaciones
-    }</p>
-    ${
-      ticket.archivo_pdf
-        ? `
-        <p><strong>Archivo Adjunto:</strong></p>
-        <div style="margin-bottom: 1rem;">
-          <a href="${archivoUrl}" target="_blank" rel="noopener noreferrer" class="btn-pdf">
-            <i class="bi bi-file-earmark-pdf" style="margin-right: 0.4rem;"></i> Ver PDF
-          </a>
-        </div>`
-        : ""
-    }
-    ${historialSection}
-  `;
-  document.getElementById("ticketModalBody").innerHTML = details;
-  const modal = new bootstrap.Modal(document.getElementById("ticketModal"));
-  modal.show();
-  // console.log("DEBUG ticket:", ticket);
-}
-
 // Validar formulario crear ticket
 function validateForm() {
   const description = document.getElementById("ticketDescription").value.trim();
@@ -826,15 +1036,6 @@ function validateForm() {
 
   const isValid = description && tipoAtencion && areaSolicitante;
   saveTicketBtn.disabled = !isValid;
-}
-
-// Validar formulario avanzar ticket
-function validateAdvanceForm() {
-  const estadoSelect = document.getElementById("editTicketStatus");
-  const updateBtn = document.getElementById("updateTicketBtn");
-
-  // Solo validamos que se haya seleccionado un estado
-  updateBtn.disabled = !estadoSelect.value;
 }
 
 // Funciones auxiliares / utilitarias
@@ -871,17 +1072,6 @@ function getActividadNombreById(id) {
   return actividad ? actividad.nombre : id;
 }
 
-function capitalize(texto) {
-  return texto
-    .split(" ")
-    .map((w) =>
-      w === w.toUpperCase()
-        ? w
-        : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
-    )
-    .join(" ");
-}
-
 function formatDate(dateString) {
   return luxon.DateTime.fromISO(dateString, { zone: "America/Santiago" })
     .setLocale("es")
@@ -915,6 +1105,8 @@ if (userName && userDisplay) {
 }
 
 // Llamadas API (areas y tipos)
+const categorySelect = document.getElementById("ticketCategory");
+
 fetch("https://tickets.dev-wit.com/api/areas", {
   method: "GET",
   headers: {
@@ -1079,6 +1271,7 @@ getUserIdWhenReady((userId) => {
           title: t.area,
           status_id: ultimoEstado,
           assignee: t.ejecutor,
+          id_ejecutor: t.id_ejecutor,
           solicitante: t.solicitante,
           id_solicitante: t.id_solicitante,
           category: t.tipo_atencion,
@@ -1122,6 +1315,7 @@ async function loadTickets(userId) {
       title: t.area,
       status_id: t.id_estado,
       assignee: t.ejecutor,
+      id_ejecutor: t.id_ejecutor,
       solicitante: t.solicitante,
       id_solicitante: t.id_solicitante,
       category: t.tipo_atencion,
@@ -1160,6 +1354,7 @@ async function loadStatus() {
       throw new Error(`Error ${res.status}: ${res.statusText}`);
     }
     const estados = await res.json();
+    estadosAll = estados;
     // console.log("estados:", estados);
     estados.forEach((estado) => {
       estadoMap[estado.id] = estado.nombre.toLowerCase();
@@ -1173,6 +1368,17 @@ async function loadStatus() {
   }
 }
 
+function capitalize(texto) {
+  return texto
+    .split(" ")
+    .map((w) =>
+      w === w.toUpperCase()
+        ? w
+        : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
+    )
+    .join(" ");
+}
+
 async function loadActivities() {
   try {
     const res = await fetch("https://tickets.dev-wit.com/api/actividades", {
@@ -1182,6 +1388,15 @@ async function loadActivities() {
       },
     });
     actividades = await res.json();
+    const actividadSelect = document.getElementById("actividadSelect");
+    actividadSelect.innerHTML =
+      '<option value="">Seleccione una actividad</option>';
+    actividades.forEach((actividad) => {
+      const option = document.createElement("option");
+      option.value = actividad.id;
+      option.textContent = actividad.nombre;
+      actividadSelect.appendChild(option);
+    });
   } catch (err) {
     console.error("Error al cargar actividades:", err);
   }
@@ -1196,10 +1411,8 @@ init();
 function populateStatusFilter(estados) {
   const select = document.getElementById("statusFilter");
   const selectEdit = document.getElementById("editTicketStatus");
-
   select.innerHTML = '<option value="">Todos los estados</option>';
-  selectEdit.innerHTML = '<option value="">Seleccione una acción</option>';
-  console.log("estados:", estados);
+  selectEdit.innerHTML = '<option value="">Seleccione un estado</option>';
   estados.forEach((estado) => {
     const nombreCapitalizado = capitalize(estado.nombre);
     const option1 = document.createElement("option");
@@ -1207,18 +1420,44 @@ function populateStatusFilter(estados) {
     option1.textContent = nombreCapitalizado;
     select.appendChild(option1);
   });
+}
 
-  // Solo agregar opciones relevantes para avanzar desde "asignado"
-  const opcionesAvance = [
-    { id: 3, nombre: "En Ejecución" },
-    { id: 4, nombre: "Pendiente por Presupuesto" },
-    { id: 9, nombre: "Rechazar" },
-  ];
-
-  opcionesAvance.forEach((estado) => {
-    const option = document.createElement("option");
-    option.value = estado.id;
-    option.textContent = estado.nombre;
-    selectEdit.appendChild(option);
-  });
+function populateStatusFilterUpdate(estados, estadoActual) {
+  const selectEdit = document.getElementById("editTicketStatus");
+  selectEdit.innerHTML = '<option value="">Seleccione un estado</option>';
+  const estadoActualLower = estadoActual.toLowerCase();
+  if (estadoActualLower === "pendiente pa") {
+    // Solo mostrar "Autorizar" (asignado) y "Rechazar" (rechazado)
+    const asignado = estados.find((e) => e.nombre.toLowerCase() === "asignado");
+    const rechazado = estados.find(
+      (e) => e.nombre.toLowerCase() === "rechazado"
+    );
+    if (asignado) {
+      const option = document.createElement("option");
+      option.value = asignado.id;
+      option.textContent = "Autorizar";
+      selectEdit.appendChild(option);
+    }
+    if (rechazado) {
+      const option = document.createElement("option");
+      option.value = rechazado.id;
+      option.textContent = "Rechazar";
+      selectEdit.appendChild(option);
+    }
+  } else {
+    // Para otros estados, mostrar todos menos "asignado", "rechazado" y "pendiente pa"
+    estados.forEach((estado) => {
+      const nombreLower = estado.nombre.toLowerCase();
+      if (
+        nombreLower !== "asignado" &&
+        nombreLower !== "rechazado" &&
+        nombreLower !== "pendiente pa"
+      ) {
+        const option = document.createElement("option");
+        option.value = estado.id;
+        option.textContent = capitalize(estado.nombre);
+        selectEdit.appendChild(option);
+      }
+    });
+  }
 }
