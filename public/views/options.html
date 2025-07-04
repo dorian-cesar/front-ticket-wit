@@ -44,83 +44,30 @@
             <p>Selecciona una opción para continuar</p>
           </div>
 
-          <div class="options-grid">
-            <!-- Crear Tickets -->
-            <div class="option-card create-card" onclick="navigateTo('crear')">
+          <div class="options-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+            <!-- Card única que junta Crear, Resolver y Gestionar Tickets -->
+            <div
+              class="option-card combined-card"
+              onclick="navigateTo('tickets')"
+              style="cursor:pointer;"
+            >
               <div class="card-icon">
-                <i class="fas fa-plus-circle"></i>
+                <i class="fas fa-ticket-alt"></i>
               </div>
               <div class="card-content">
-                <h3>Crear Tickets</h3>
+                <h3>Gestión de Tickets</h3>
                 <p>
-                  Reporta nuevos problemas, solicitudes o incidencias que
-                  requieran atención.
+                  Crea, resuelve y administra tickets para mantener el control y seguimiento adecuado.
                 </p>
                 <ul class="feature-list">
                   <li><i class="fas fa-check"></i> Crear nuevos tickets</li>
-                  <li><i class="fas fa-check"></i> Revisar estados</li>
-                  <li><i class="fas fa-check"></i> Adjuntar archivos</li>
+                  <li><i class="fas fa-check"></i> Revisar y actualizar estados</li>
+                  <li><i class="fas fa-check"></i> Autorizar y rechazar tickets</li>
+                  <li><i class="fas fa-check"></i> Visualizar todos los tickets</li>
                 </ul>
               </div>
               <div class="card-action">
-                <span class="action-text">Comenzar</span>
-                <i class="fas fa-arrow-right"></i>
-              </div>
-            </div>
-
-            <!-- Resolver Tickets -->
-            <div
-              class="option-card resolve-card"
-              onclick="navigateTo('resolver')"
-            >
-              <div class="card-icon">
-                <i class="fas fa-tools"></i>
-              </div>
-              <div class="card-content">
-                <h3>Resolver Tickets</h3>
-                <p>
-                  Gestiona y resuelve tickets existentes, actualiza estados y
-                  proporciona soluciones.
-                </p>
-                <ul class="feature-list">
-                  <li><i class="fas fa-check"></i> Ver tickets asignados</li>
-                  <li><i class="fas fa-check"></i> Actualizar estados</li>
-                  <li>
-                    <i class="fas fa-check"></i> Comunicar avances y
-                    resoluciones
-                  </li>
-                </ul>
-              </div>
-              <div class="card-action">
-                <span class="action-text">Gestionar</span>
-                <i class="fas fa-arrow-right"></i>
-              </div>
-            </div>
-
-            <!-- Gestionar Tickets -->
-            <div
-              class="option-card manage-card"
-              onclick="navigateTo('gestionar')"
-            >
-              <div class="card-icon">
-                <i class="fas fa-tasks"></i>
-              </div>
-              <div class="card-content">
-                <h3>Gestionar Tickets</h3>
-                <p>
-                  Autoriza, rechaza y visualiza tickets para un mejor control y
-                  seguimiento.
-                </p>
-                <ul class="feature-list">
-                  <li><i class="fas fa-check"></i> Autorizar tickets</li>
-                  <li><i class="fas fa-check"></i> Rechazar tickets</li>
-                  <li>
-                    <i class="fas fa-check"></i> Visualizar todos los tickets
-                  </li>
-                </ul>
-              </div>
-              <div class="card-action">
-                <span class="action-text">Gestionar</span>
+                <span class="action-text">Ir a Tickets</span>
                 <i class="fas fa-arrow-right"></i>
               </div>
             </div>
@@ -129,6 +76,7 @@
             <div
               class="option-card maintainer-card"
               onclick="navigateTo('mantenedor')"
+              style="cursor:pointer;"
             >
               <div class="card-icon">
                 <i class="fas fa-cogs"></i>
@@ -136,10 +84,11 @@
               <div class="card-content">
                 <h3>Mantenedor</h3>
                 <p>
-                  Administra estados, tipos de atención, áreas y otros
+                  Administra usuarios, estados, tipos de atención, áreas y otros
                   parámetros del sistema.
                 </p>
                 <ul class="feature-list">
+                  <li><i class="fas fa-check"></i> Administrar usuarios</li>
                   <li><i class="fas fa-check"></i> Editar estados</li>
                   <li>
                     <i class="fas fa-check"></i> Modificar tipos de atención

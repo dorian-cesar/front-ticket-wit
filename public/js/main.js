@@ -181,8 +181,6 @@ loginForm.addEventListener("submit", async function (e) {
     } else if (rolLower === "jefatura") {
       window.location.href = "/views/dashboard-jefatura.html";
     } else if (rolLower === "superuser") {
-      window.location.href = "/views/dashboard-admin.html";
-    } else {
       window.location.href = "/views/options.html";
     }
   } catch (error) {

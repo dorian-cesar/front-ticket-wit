@@ -27,15 +27,10 @@ function initializePage() {
 // Navegación principal
 function navigateTo(option) {
   switch (option) {
-    case "crear":
-      window.location.href = "dashboard-crear.html";
+    case "tickets":
+      window.location.href = "dashboard-admin.html";
       break;
-    case "resolver":
-      window.location.href = "dashboard-resolver.html";
-      break;
-    case "gestionar":
-      window.location.href = "dashboard-jefatura.html";
-      break;
+
     case "mantenedor":
       if (token) {
         const mantenedorWindow = window.open(
