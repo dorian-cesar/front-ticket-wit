@@ -166,7 +166,7 @@ function renderPagination(totalPages) {
     } else if (active) {
       btn.classList.add("btn-primary");
     } else {
-      btn.classList.add("btn-outline-primary");
+      btn.classList.add("btn-outline-secondary");
       btn.addEventListener("click", () => {
         currentPage = page;
         applyFilters();
