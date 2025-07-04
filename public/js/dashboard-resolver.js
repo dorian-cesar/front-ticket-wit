@@ -685,10 +685,18 @@ function formatFinalCard(ticket) {
   const yaEvaluado =
     ticket.aprobacion_solucion === "si" || ticket.aprobacion_solucion === "no";
   const esAprobado = ticket.aprobacion_solucion === "si";
-  const esDesaprobado = ticket.aprobacion_solucion === "no";
+  const esObservado = ticket.aprobacion_solucion === "no";
 
   const puedeEvaluar =
     userId && String(ticket?.id_solicitante) === String(userId);
+
+  const borderClass = esObservado ? "border-warning" : "border-success";
+  const textClass = esObservado ? "text-warning" : "text-success";
+  const titulo = esObservado
+    ? "Aprobado con Observación"
+    : esAprobado
+    ? "✅ Ticket Aprobado"
+    : "Ticket Cerrado";
 
   let accionesHtml = "";
   if (!yaEvaluado && puedeEvaluar) {
@@ -697,41 +705,35 @@ function formatFinalCard(ticket) {
         <button id="btn-aprobar-${ticket.id}" class="btn btn-primary btn-sm" onclick="aprobarTicket('${ticket.id}')">
           ✅ Aprobado
         </button>
-        <button id="btn-desaprobar-${ticket.id}" class="btn btn-outline-danger btn-sm" onclick="mostrarCampoDesaprobado('${ticket.id}')">
-          Desaprobado
+        <button id="btn-desaprobar-${ticket.id}" class="btn btn-primary btn-sm" onclick="mostrarCampoDesaprobado('${ticket.id}')">
+          Aprobado con Observación
         </button>
       </div>
       <div class="mt-2" id="desaprobado-section-${ticket.id}" style="display: none;">
-        <textarea id="desaprobado-textarea-${ticket.id}" class="form-control mt-2" rows="3" placeholder="Describe el motivo de desaprobación..."></textarea>
-        <button class="btn btn-danger btn-sm mt-2" onclick="desaprobarTicket(event, '${ticket.id}')">
-          Confirmar Desaprobación
+        <textarea id="desaprobado-textarea-${ticket.id}" class="form-control mt-2" rows="3" placeholder="Describe la observación..."></textarea>
+        <button class="btn btn-primary btn-sm mt-2" onclick="desaprobarTicket(event, '${ticket.id}')">
+          Confirmar Observación
         </button>
       </div>
     `;
   }
 
   const observacionHtml =
-    esDesaprobado && ticket.solucion_observacion
-      ? `<p><strong>Motivo de Desaprobación:</strong> ${ticket.solucion_observacion}</p>`
+    esObservado && ticket.solucion_observacion
+      ? `<p><strong>Observación:</strong> ${ticket.solucion_observacion}</p>`
       : "";
+
+  const mensajeFinal = esObservado
+    ? `<div class="mt-3 small fw-semibold fst-italic">
+          Ticket aprobado con observaciones. Por favor genere un nuevo ticket con el problema.
+        </div>`
+    : "";
 
   return `
     <div id="ticket-card-${
       ticket.id
-    }" class="ticket-history-entry final-card border ${
-    esDesaprobado ? "border-danger" : "border-success"
-  } p-3 rounded mt-4 bg-light shadow">
-      <h5 class="fw-bold ${
-        esDesaprobado ? "text-danger" : "text-success"
-      } mb-3">
-        ${
-          esDesaprobado
-            ? "❌ Ticket Desaprobado"
-            : esAprobado
-            ? "✅ Ticket Aprobado"
-            : "Ticket Cerrado"
-        }
-      </h5>
+    }" class="ticket-history-entry final-card border ${borderClass} p-3 rounded mt-4 bg-light shadow">
+      <h5 class="fw-bold ${textClass} mb-3">${titulo}</h5>
       <p><strong>Fecha y Hora de Cierre:</strong> ${fechaFinal}</p>
       <p><strong>Modalidad de Atención:</strong> ${
         capitalize(ticket.tipo_atencion_cierre) || "-"
@@ -751,11 +753,7 @@ function formatFinalCard(ticket) {
           : ""
       }
       ${accionesHtml}
-      ${
-        esDesaprobado
-          ? `<div class="mt-3 small fw-semibold fst-italic">Por favor genere un nuevo ticket con el problema.</div>`
-          : ""
-      }
+      ${mensajeFinal}
     </div>
   `;
 }
@@ -894,7 +892,7 @@ async function desaprobarTicket(event, ticketId) {
   const textarea = document.getElementById(`desaprobado-textarea-${ticketId}`);
   const descripcion = textarea?.value.trim();
   if (!descripcion) {
-    showAlert("Por favor ingresa una descripción para desaprobar.", "warning");
+    showAlert("Por favor ingresa una observación.", "warning");
     return;
   }
   const btnDesaprobar = event.target;
@@ -902,9 +900,7 @@ async function desaprobarTicket(event, ticketId) {
   const originalHTML = btnDesaprobar.innerHTML;
   btnDesaprobar.disabled = true;
   btnDesaprobar.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Confirmando...`;
-  if (btnAprobar) {
-    btnAprobar.disabled = true;
-  }
+  if (btnAprobar) btnAprobar.disabled = true;
   try {
     const response = await fetch(
       `https://tickets.dev-wit.com/api/tickets/aprobar-solucion/${ticketId}`,
@@ -920,32 +916,32 @@ async function desaprobarTicket(event, ticketId) {
         }),
       }
     );
-    if (!response.ok) throw new Error("Error al desaprobar el ticket");
+    if (!response.ok) throw new Error("Error al enviar la observación");
     getUserIdWhenReady((userId) => loadTickets(userId));
-    ocultarAccionesFinales(ticketId, false);
-    mostrarMensajeDesaprobacion(ticketId);
+    ocultarAccionesFinales(ticketId, false, true);
+    mostrarMensajeDesaprobacion(ticketId, true);
   } catch (error) {
     console.error("Error al desaprobar:", error);
-    showAlert("Hubo un problema al desaprobar el ticket.", "error");
+    showAlert("Hubo un problema al enviar la observación.", "error");
   } finally {
     btnDesaprobar.disabled = false;
     btnDesaprobar.innerHTML = originalHTML;
-    if (btnAprobar) {
-      btnAprobar.disabled = false;
-    }
+    if (btnAprobar) btnAprobar.disabled = false;
   }
 }
 
-function mostrarMensajeDesaprobacion(ticketId) {
+function mostrarMensajeDesaprobacion(ticketId, observado = false) {
   const card = document.getElementById(`ticket-card-${ticketId}`);
   if (!card) return;
   const mensaje = document.createElement("div");
   mensaje.className = "mt-3 small fw-semibold fst-italic";
-  mensaje.textContent = "Por favor genere un nuevo ticket con el problema.";
+  mensaje.textContent = observado
+    ? "Ticket aprobado con observaciones. Por favor genere un nuevo ticket con el problema"
+    : "Por favor genere un nuevo ticket con el problema.";
   card.appendChild(mensaje);
 }
 
-function ocultarAccionesFinales(ticketId, aprobado) {
+function ocultarAccionesFinales(ticketId, aprobado, observado = false) {
   const btnAprobar = document.getElementById(`btn-aprobar-${ticketId}`);
   const btnDesaprobar = document.getElementById(`btn-desaprobar-${ticketId}`);
   const seccionDesaprobado = document.getElementById(
@@ -954,15 +950,20 @@ function ocultarAccionesFinales(ticketId, aprobado) {
   if (btnAprobar) btnAprobar.style.display = "none";
   if (btnDesaprobar) btnDesaprobar.style.display = "none";
   if (seccionDesaprobado) seccionDesaprobado.style.display = "none";
+
   const card = document.getElementById(`ticket-card-${ticketId}`);
   if (card) {
     const title = card.querySelector("h5");
     if (title && title.textContent.includes("Ticket")) {
-      title.textContent = aprobado
-        ? "✅ Ticket Aprobado"
-        : "❌ Ticket Desaprobado";
-      title.classList.remove("text-success", "text-danger");
-      title.classList.add(aprobado ? "text-success" : "text-danger");
+      if (aprobado) {
+        title.textContent = "✅ Ticket Aprobado";
+        title.classList.remove("text-danger", "text-warning");
+        title.classList.add("text-success");
+      } else if (observado) {
+        title.textContent = "Aprobado con Observación";
+        title.classList.remove("text-success", "text-danger");
+        title.classList.add("text-warning");
+      }
     }
   }
 }
