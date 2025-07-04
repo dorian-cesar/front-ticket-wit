@@ -219,6 +219,19 @@ body {
   border-color: var(--accent-color);
 }
 
+.btn-outline-gold {
+  color: #e2ac23;
+  border-color: #e2ac23;
+}
+
+.btn-outline-gold:hover,
+.btn-outline-gold:focus,
+.btn-outline-gold:active {
+  background-color: #e2ac23;
+  color: white;
+  border-color: #e2ac23;
+}
+
 /* Floating Action Button - Mobile First */
 .floating-btn {
   position: fixed;

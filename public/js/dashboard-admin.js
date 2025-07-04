@@ -790,6 +790,15 @@ function formatFinalCard(ticket) {
         </div>`
     : "";
 
+  const botonCertificado =
+    esAprobado || esObservado
+      ? `<div class="mt-3">
+        <button class="btn btn-outline-gold btn-sm" onclick="generarCertificadoPDF('${ticket.id}')">
+          <i class="bi bi-award me-1"></i> Descargar Certificado
+        </button>
+      </div>`
+      : "";
+
   return `
     <div id="ticket-card-${
       ticket.id
@@ -809,11 +818,12 @@ function formatFinalCard(ticket) {
       ${
         archivoUrl
           ? `<div class="mt-2"><a class="btn btn-outline-success btn-sm" href="${archivoUrl}" target="_blank" rel="noopener">
-              <i class="bi bi-file-earmark-pdf"></i> Ver archivo
+              <i class="bi bi-file-earmark-pdf"></i> Ver archivo adjunto
             </a></div>`
           : ""
       }
       ${accionesHtml}
+      ${botonCertificado}
       ${mensajeFinal}
     </div>
   `;
@@ -1460,5 +1470,278 @@ function populateStatusFilterUpdate(estados, estadoActual) {
         selectEdit.appendChild(option);
       }
     });
+  }
+}
+
+// Genera el certificado en pdf
+async function generarCertificadoPDF(ticketId) {
+  const url = `https://tickets.dev-wit.com/api/tickets/detalle/${ticketId}`;
+  try {
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!res.ok) throw new Error("No se pudo obtener el detalle del ticket.");
+    const t = await res.json();
+
+    const nuevaVentana = window.open("", "_blank");
+    if (!nuevaVentana) {
+      alert("No se pudo abrir la pestaña. Desbloquea los pop-ups.");
+      return;
+    }
+
+    const historialHTML = t.historial?.length
+      ? t.historial
+          .map(
+            (h) => `
+        <tr>
+          <td>${new Date(h.fecha).toLocaleString()}</td>
+          <td>${h.estado_anterior}</td>
+          <td>${h.nuevo_estado}</td>
+          <td>${h.usuario_cambio}</td>
+          <td>${h.observacion || "-"}</td>
+        </tr>
+      `
+          )
+          .join("")
+      : '<tr><td colspan="5">Sin historial registrado.</td></tr>';
+
+    const contenidoHTML = `
+      <!DOCTYPE html>
+      <html lang="es">
+      <head>
+        <meta charset="UTF-8">
+        <title>Certificado Ticket #${t.id}</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+        <style>
+          body {
+            margin: 0;
+            background: #ccc;
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            color: #333;
+          }
+            .card {
+              page-break-inside: avoid;
+              break-inside: avoid;
+            }
+
+            table, tr, td, th {
+              page-break-inside: avoid !important;
+              break-inside: avoid;
+            }
+
+          #pdf-wrapper {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 40px 0;
+          }
+
+          #plantilla-pdf {      
+            padding: 40px; /* 40px padding interno ≈ 1.05cm */
+            box-sizing: border-box; /* clave para que padding no sume al ancho */
+            background: white;
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            color: #333;
+          }
+
+          .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+          }
+          .header img {
+            height: 60px;
+          }
+          .header h1 {
+            font-size: 20px;
+            margin: 0;
+          }
+          .card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+          }
+          .card-header {
+            font-weight: bold;
+            background: #f0f0f0;
+            padding: 6px 10px;
+            margin: -15px -15px 10px -15px;
+            border-bottom: 1px solid #ddd;
+            border-radius: 6px 6px 0 0;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+          }
+          th, td {
+            border: 1px solid #999;
+            padding: 6px;
+            text-align: left;
+            vertical-align: top;
+            font-size: 12px;
+          }
+          th {
+            background-color: #f9f9f9;
+          }
+          #boton-descargar {
+            position: fixed;
+            top: 40px;
+            right: 300px;
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            font-size: 14px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            cursor: pointer;
+            z-index: 9999;
+          }
+          #boton-descargar:hover {
+            background: #0056b3;
+          }
+        </style>
+      </head>
+      <body>
+        <div id="pdf-wrapper">
+          <div id="plantilla-pdf">
+            <div class="header">
+              <img src="../img/logo.png" alt="Logo Institucional" />
+              <h1>Certificado de Ticket #${t.id}</h1>
+            </div>
+
+            <div class="card">
+              <h4>${t.tipo_atencion}</h4>
+              <p><strong>Área:</strong> ${t.area}</p>
+              <p><strong>Fecha de creación:</strong> ${new Date(
+                t.fecha_creacion
+              ).toLocaleString()}</p>
+              <p><strong>Modo de atención:</strong> ${
+                t.modo_atencion ?? "—"
+              }</p>
+              <p><strong>¿Requiere despacho?:</strong> ${
+                t.necesita_despacho
+              }</p>
+              ${
+                t.detalles_despacho
+                  ? `<p><strong>Detalles del despacho:</strong> ${t.detalles_despacho}</p>`
+                  : ""
+              }
+            </div>
+
+           <div style="display: flex; gap: 15px;">
+              <div class="card" style="flex: 1;">
+                <div class="card-header">Solicitante</div>
+                <p><strong>Nombre:</strong> ${t.solicitante ?? "—"}</p>
+                <p><strong>Correo:</strong> ${t.correo_solicitante ?? "—"}</p>
+              </div>
+
+              <div class="card" style="flex: 1;">
+                <div class="card-header">Ejecutor</div>
+                <p><strong>Nombre:</strong> ${t.ejecutor ?? "—"}</p>
+                <p><strong>Correo:</strong> ${t.correo_ejecutor ?? "—"}</p>
+              </div>
+
+              <div class="card" style="flex: 1;">
+                <div class="card-header">Jefatura</div>
+                <p><strong>Nombre:</strong> ${t.jefatura ?? "—"}</p>
+                <p><strong>Correo:</strong> ${t.correo_jefatura ?? "—"}</p>
+              </div>
+            </div>
+
+
+            <div class="card">
+              <div class="card-header">Detalle del Ticket</div>
+              <p><strong>Observaciones:</strong></p>
+              <p>${t.observaciones ?? "—"}</p>
+              ${
+                t.detalle_solucion
+                  ? `
+                <hr>
+                <p><strong>Detalle de la solución:</strong></p>
+                <p>${t.detalle_solucion}</p>
+              `
+                  : ""
+              }
+
+              <p><strong>Aprobación de la solución:</strong> ${
+                t.aprobacion_solucion ?? "—"
+              }</p>
+              <p><strong>Observación de la solución:</strong> ${
+                t.solucion_observacion ?? "—"
+              }</p>
+
+            </div>
+
+            <div class="card">
+              <div class="card-header">Historial de Estados</div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Estado anterior</th>
+                    <th>Nuevo estado</th>
+                    <th>Usuario</th>
+                    <th>Observación</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${historialHTML}
+                </tbody>
+              </table>
+            </div>
+
+            <div style="text-align: center;">              
+              <img src="../img/firma.png" alt="Firma" style="max-width: 150px; width: 100%; height: auto; margin-top: 10px;" />
+              <p style="font-size: 10px; margin-top: 30px; color: #555;">
+                WIT – Manuel Obispo Umaña #633, Estación Central, Santiago, Chile. Contactos: +56 9 9073 7619 / soporte@wit.la
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+        <button id="boton-descargar" onclick="descargarPDF()">Descargar PDF</button>
+
+        <script>
+          function descargarPDF() {
+          const element = document.getElementById('plantilla-pdf');
+
+          html2pdf().set({
+            margin: 0,
+            filename: 'ticket_${t.id}.pdf',
+            html2canvas: {
+              scale: 2,
+              useCORS: true,
+              scrollY: 0
+            },
+            jsPDF: {
+              unit: 'mm',
+              format: 'a4',
+              orientation: 'portrait'
+            }
+          }).from(element).save();
+        }
+
+        </script>
+
+      </body>
+      </html>
+          `;
+
+    nuevaVentana.document.open();
+    nuevaVentana.document.write(contenidoHTML);
+    nuevaVentana.document.close();
+  } catch (err) {
+    alert("Error al generar el certificado: " + err.message);
+    console.error(err);
   }
 }
