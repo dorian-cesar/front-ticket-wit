@@ -974,3 +974,28 @@ body {
 .card.card-status i {
   font-size: 1.6rem !important;
 }
+
+/* Estilos para el loader */
+#loadingSpinner {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-30%);
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.table-responsive {
+  min-height: 200px;
+}
+
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+  border-width: 0.25em;
+}
+
+#loadingSpinner {
+  transition: opacity 0.3s ease;
+}

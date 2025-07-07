@@ -51,11 +51,17 @@ document.addEventListener("DOMContentLoaded", () => {
   clearAttachmentBtn.addEventListener("click", () => {
     attachmentInput.value = "";
   });
+
+  // Iniciar carga de tickets
+  initTicketLoading();
 });
 
 // Recargar los tickets
 document.getElementById("refreshTicketsBtn").addEventListener("click", () => {
-  window.location.reload();
+  getUserIdWhenReady((userId) => {
+    renderTickets(null);
+    loadTickets(userId)
+  });
 });
 
 // Configurar los listeners de eventos
@@ -85,16 +91,24 @@ function setupEventListeners() {
 
 // Renderizar la tabla de tickets
 function renderTickets(ticketsToRender = tickets) {
+  const loadingSpinner = document.getElementById("loadingSpinner");
+  const noTicketsRow = `
+    <tr class="no-tickets-row">
+      <td colspan="7" class="text-center text-muted py-4">
+        <i class="bi bi-inbox display-4 d-block mb-2"></i>
+        No se encontraron tickets
+      </td>
+    </tr>
+  `;
+  if (loadingSpinner) {
+    loadingSpinner.style.display = ticketsToRender === null ? "block" : "none";
+  }
   ticketsTableBody.innerHTML = "";
-
+  if (ticketsToRender === null) {
+    return;
+  }
   if (!Array.isArray(ticketsToRender) || ticketsToRender.length === 0) {
-    ticketsTableBody.innerHTML = `
-      <tr class="no-tickets-row">
-        <td colspan="7" class="text-center text-muted py-4">
-          <i class="bi bi-inbox display-4 d-block mb-2"></i>
-          No se encontraron tickets
-        </td>
-      </tr>`;
+    ticketsTableBody.innerHTML = noTicketsRow;
     renderPagination(0);
     return;
   }
@@ -929,6 +943,8 @@ function getUserIdWhenReady(callback) {
 
 // Llamada tickets con la id del usuario
 getUserIdWhenReady((userId) => {
+  renderTickets(null);
+
   fetch(`https://tickets.dev-wit.com/api/tickets/${userId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -964,49 +980,58 @@ getUserIdWhenReady((userId) => {
     .catch((err) => {
       console.error("Error cargando tickets:", err);
       showAlert("No se pudieron cargar los tickets.", "warning");
+      renderTickets([]);
     });
 });
 
 // Llamada para recargar tabla de tickets después de createTicket
 async function loadTickets(userId) {
-  try {
-    const response = await fetch(
-      `https://tickets.dev-wit.com/api/tickets/${userId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    const data = await response.json();
-    tickets = data.map((t) => ({
-      id: t.id,
-      title: t.area,
-      status_id: t.id_estado,
-      assignee: t.ejecutor,
-      category: t.tipo_atencion,
-      description: t.observaciones,
-      date: luxon.DateTime.fromISO(t.fecha_creacion)
-        .setZone("America/Santiago")
-        .toFormat("yyyy-MM-dd"),
-      historial: t.historial || [],
-      archivo_pdf: t.archivo_pdf,
-      detalle_solucion: t.detalle_solucion || "",
-      tipo_atencion_cierre: t.modo_atencion || "",
-      necesita_despacho: t.necesita_despacho || "",
-      detalles_despacho: t.detalles_despacho || "",
-      archivo_solucion: t.archivo_solucion || "",
-      id_actividad: t.id_actividad || null,
-      aprobacion_solucion: t.aprobacion_solucion,
-      solucion_observacion: t.solucion_observacion,
-    }));
+  renderTickets(null);
 
-    renderTickets(tickets);
-    updateStats();
-  } catch (err) {
-    console.error("Error recargando tickets:", err);
-    showAlert("No se pudieron recargar los tickets.", "warning");
-  }
+  return fetch(`https://tickets.dev-wit.com/api/tickets/${userId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      tickets = data.map((t) => ({
+        id: t.id,
+        title: t.area,
+        status_id: t.id_estado,
+        assignee: t.ejecutor,
+        category: t.tipo_atencion,
+        description: t.observaciones,
+        date: luxon.DateTime.fromISO(t.fecha_creacion)
+          .setZone("America/Santiago")
+          .toFormat("yyyy-MM-dd"),
+        historial: t.historial || [],
+        archivo_pdf: t.archivo_pdf,
+        detalle_solucion: t.detalle_solucion || "",
+        tipo_atencion_cierre: t.modo_atencion || "",
+        necesita_despacho: t.necesita_despacho || "",
+        detalles_despacho: t.detalles_despacho || "",
+        archivo_solucion: t.archivo_solucion || "",
+        id_actividad: t.id_actividad || null,
+        aprobacion_solucion: t.aprobacion_solucion,
+        solucion_observacion: t.solucion_observacion,
+      }));
+
+      renderTickets(tickets);
+      updateStats();
+      return tickets;
+    })
+    .catch((error) => {
+      console.error("Error cargando tickets:", error);
+      showAlert("No se pudieron cargar los tickets.", "warning");
+      renderTickets([]);
+      return [];
+    });
 }
 
 async function fetchEstados() {
@@ -1049,11 +1074,19 @@ async function loadActivities() {
   }
 }
 
-async function init() {
-  await loadActivities();
-  getUserIdWhenReady((userId) => loadTickets(userId));
+function initTicketLoading() {
+  getUserIdWhenReady((userId) => {
+    renderTickets(null);
+    loadActivities()
+      .then(() => {
+        return loadTickets(userId);
+      })
+      .catch((error) => {
+        console.error("Error en inicialización:", error);
+        renderTickets([]);
+      });
+  });
 }
-init();
 
 function populateStatusFilter(estados) {
   const select = document.getElementById("statusFilter");

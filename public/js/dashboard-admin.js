@@ -44,11 +44,16 @@ document.addEventListener("DOMContentLoaded", () => {
   tooltipTriggerList.map(
     (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
   );
+  // Iniciar carga de tickets
+  initTicketLoading();
 });
 
 // Recargar los tickets
 document.getElementById("refreshTicketsBtn").addEventListener("click", () => {
-  window.location.reload();
+  getUserIdWhenReady((userId) => {
+    renderTickets(null);
+    loadTickets(userId);
+  });
 });
 
 // Configurar los listeners de eventos
@@ -142,17 +147,24 @@ function setupEventListeners() {
 
 // Renderizar la tabla de tickets
 function renderTickets(ticketsToRender = tickets) {
+  const loadingSpinner = document.getElementById("loadingSpinner");
+  const noTicketsRow = `
+    <tr class="no-tickets-row">
+      <td colspan="7" class="text-center text-muted py-4">
+        <i class="bi bi-inbox display-4 d-block mb-2"></i>
+        No se encontraron tickets
+      </td>
+    </tr>
+  `;
+  if (loadingSpinner) {
+    loadingSpinner.style.display = ticketsToRender === null ? "block" : "none";
+  }
   ticketsTableBody.innerHTML = "";
-
+  if (ticketsToRender === null) {
+    return;
+  }
   if (!Array.isArray(ticketsToRender) || ticketsToRender.length === 0) {
-    ticketsTableBody.innerHTML = `
-      <tr class="no-tickets-row">
-        <td colspan="8" class="text-center text-muted py-4">
-          <i class="bi bi-inbox display-4 d-block mb-2"></i>
-          No se encontraron tickets
-        </td>
-      </tr>
-    `;
+    ticketsTableBody.innerHTML = noTicketsRow;
     renderPagination(0);
     return;
   }
@@ -1255,6 +1267,8 @@ function getUserIdWhenReady(callback) {
 
 // Llamada tickets con la id del usuario
 getUserIdWhenReady((userId) => {
+  renderTickets(null);
+
   const endpoint = `https://tickets.dev-wit.com/api/tickets/`;
   fetch(endpoint, {
     headers: {
@@ -1313,6 +1327,8 @@ getUserIdWhenReady((userId) => {
 
 // Llamada para recargar tabla de tickets
 async function loadTickets(userId) {
+  renderTickets(null);
+
   const endpoint = `https://tickets.dev-wit.com/api/tickets/`;
   try {
     const response = await fetch(endpoint, {
@@ -1347,9 +1363,12 @@ async function loadTickets(userId) {
     }));
     renderTickets(tickets);
     updateStats();
+    return tickets;
   } catch (err) {
     console.error("Error recargando tickets:", err);
     showAlert("No se pudieron recargar los tickets.", "warning");
+    renderTickets([]);
+    return [];
   }
 }
 
@@ -1413,11 +1432,19 @@ async function loadActivities() {
   }
 }
 
-async function init() {
-  await loadActivities();
-  getUserIdWhenReady((userId) => loadTickets(userId));
+function initTicketLoading() {
+  getUserIdWhenReady((userId) => {
+    renderTickets(null);
+    loadActivities()
+      .then(() => {
+        return loadTickets(userId);
+      })
+      .catch((error) => {
+        console.error("Error en inicialización:", error);
+        renderTickets([]);
+      });
+  });
 }
-init();
 
 function populateStatusFilter(estados) {
   const select = document.getElementById("statusFilter");
