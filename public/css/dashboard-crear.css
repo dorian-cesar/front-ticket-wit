@@ -990,12 +990,6 @@ body {
   min-height: 200px;
 }
 
-.spinner-border {
-  width: 3rem;
-  height: 3rem;
-  border-width: 0.25em;
-}
-
 #loadingSpinner {
   transition: opacity 0.3s ease;
 }

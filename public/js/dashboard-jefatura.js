@@ -362,8 +362,8 @@ async function createTicket() {
   if (attachmentInput.files.length > 0) {
     const file = attachmentInput.files[0];
 
-    if (file.size > 10 * 1024 * 1024) {
-      showAlert("El archivo adjunto no debe superar los 10MB", "warning");
+    if (file.size > 5 * 1024 * 1024) {
+      showAlert("El archivo adjunto no debe superar los 5MB", "warning");
       btnSpinner.classList.add("d-none");
       btnIcon.classList.remove("d-none");
       btnText.textContent = "Crear Ticket";
@@ -371,8 +371,18 @@ async function createTicket() {
       return;
     }
 
-    if (file.type !== "application/pdf") {
-      showAlert("Solo se permiten archivos en formato PDF", "warning");
+    const allowedTypes = [
+      "application/pdf",
+      "image/jpeg",
+      "image/png",
+      "image/webp"
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      showAlert(
+        "Solo se permiten archivos PDF o imágenes (JPG, PNG, WEBP)",
+        "warning"
+      );
       btnSpinner.classList.add("d-none");
       btnIcon.classList.remove("d-none");
       btnText.textContent = "Crear Ticket";
@@ -790,7 +800,7 @@ function viewTicket(id) {
         <p><strong>Archivo Adjunto:</strong></p>
         <div style="margin-bottom: 1rem;">
           <a href="${archivoUrl}" target="_blank" rel="noopener noreferrer" class="btn-pdf">
-            <i class="bi bi-file-earmark-pdf" style="margin-right: 0.4rem;"></i> Ver PDF
+            <i class="bi bi-file-earmark" style="margin-right: 0.4rem;"></i> Ver archivo
           </a>
         </div>`
         : ""
