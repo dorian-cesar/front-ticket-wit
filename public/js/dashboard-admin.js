@@ -840,7 +840,7 @@ function formatFinalCard(ticket) {
       ${
         archivoUrl
           ? `<div class="mt-2"><a class="btn btn-outline-success btn-sm" href="${archivoUrl}" target="_blank" rel="noopener">
-              <i class="bi bi-file-earmark-pdf"></i> Ver archivo adjunto
+              <i class="bi bi-file-earmark"></i> Ver archivo adjunto
             </a></div>`
           : ""
       }

@@ -780,7 +780,7 @@ function formatFinalCard(ticket) {
       ${
         archivoUrl
           ? `<div class="mt-2"><a class="btn btn-outline-success btn-sm" href="${archivoUrl}" target="_blank" rel="noopener">
-              <i class="bi bi-file-earmark-pdf"></i> Ver archivo adjunto
+              <i class="bi bi-file-earmark"></i> Ver archivo adjunto
             </a></div>`
           : ""
       }
@@ -1227,7 +1227,8 @@ getUserIdWhenReady((userId) => {
   })
     .then((res) => res.json())
     .then((data) => {
-      // console.log("tickets", data);
+      console.log("tickets", data);
+      console.log("userId", userId);
       tickets = data.map((t) => {
         let ultimoEstado = t.id_estado;
         let fechaTicket = t.fecha_creacion;
