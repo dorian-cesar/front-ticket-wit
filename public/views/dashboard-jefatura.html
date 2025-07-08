@@ -470,6 +470,106 @@
       </div>
     </div>
 
+    <!-- Modal para Editar Nuevo Ticket -->
+    <div class="modal fade" id="editNewTicketModal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              <i class="bi bi-pencil-square me-2"></i>
+              Editar Ticket
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="editNewTicketForm">
+              <div class="row"></div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="editNewTicketCategory" class="form-label"
+                    >Área Solicitante *</label
+                  >
+                  <select class="form-select" id="editNewTicketCategory">
+                    <!-- Opciones cargadas por JS igual que en crear -->
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="editNewTicketAssignee" class="form-label"
+                    >Tipo de Atención *</label
+                  >
+                  <select class="form-select" id="editNewTicketAssignee">
+                    <option value="">Sin asignar</option>
+                    <!-- Opciones cargadas por JS igual que en crear -->
+                  </select>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="editNewTicketDescription" class="form-label"
+                  >Descripción *</label
+                >
+                <textarea
+                  class="form-control"
+                  placeholder="Describe la solicitud del ticket..."
+                  id="editNewTicketDescription"
+                  rows="4"
+                  required
+                ></textarea>
+              </div>
+              <!-- <div class="mb-3">
+                <label for="editNewTicketAttachment" class="form-label">
+                  Adjuntar archivo (PDF o imagen, máx. 5MB)
+                </label>
+                <div class="d-flex align-items-center gap-2">
+                  <input
+                    type="file"
+                    class="form-control"
+                    id="editNewTicketAttachment"
+                    accept="application/pdf,image/jpeg,image/png,image/webp"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-outline-danger"
+                    id="editNewClearAttachmentBtn"
+                    title="Borrar archivo adjunto"
+                  >
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </div>
+              </div> -->
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              id="updateNewTicketBtn"
+            >
+              <i class="bi bi-check-lg me-2" id="updateNewBtnIcon"></i>
+              <span id="updateNewBtnText">Guardar Cambios</span>
+              <span
+                class="spinner-border spinner-border-sm ms-2 d-none"
+                role="status"
+                aria-hidden="true"
+                id="updateNewBtnSpinner"
+              ></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Botón de Acción Flotante -->
     <button
       class="btn btn-primary floating-btn"

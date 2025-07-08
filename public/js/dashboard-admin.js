@@ -20,6 +20,7 @@ const searchInput = document.getElementById("searchInput");
 const createTicketForm = document.getElementById("createTicketForm");
 const saveTicketBtn = document.getElementById("saveTicketBtn");
 const updateTicketBtn = document.getElementById("updateTicketBtn");
+const saveEditButton = document.getElementById("updateNewTicketBtn");
 const total = tickets.length;
 document.getElementById("totalCount").textContent = total;
 const token =
@@ -133,7 +134,7 @@ function setupEventListeners() {
   // Crear ticket
   saveTicketBtn.addEventListener("click", createTicket);
 
-  // Validación del formulario
+  // Validación formularios
   document
     .getElementById("ticketDescription")
     .addEventListener("input", validateForm);
@@ -143,6 +144,21 @@ function setupEventListeners() {
   document
     .getElementById("ticketCategory")
     .addEventListener("change", validateForm);
+
+  document
+    .getElementById("editNewTicketDescription")
+    .addEventListener("input", validateEditNewForm);
+  document
+    .getElementById("editNewTicketAssignee")
+    .addEventListener("change", validateEditNewForm);
+  document
+    .getElementById("editNewTicketCategory")
+    .addEventListener("change", validateEditNewForm);
+
+  // Editar el nuevo ticket en estado pendiente pa
+  document
+    .getElementById("updateNewTicketBtn")
+    .addEventListener("click", updateEditTicket);
 }
 
 // Renderizar la tabla de tickets
@@ -173,6 +189,7 @@ function renderTickets(ticketsToRender = tickets) {
   const end = start + rowsPerPage;
   const paginatedTickets = ticketsToRender.slice(start, end);
   paginatedTickets.forEach((ticket) => {
+    const statusId = ticket.status_id;
     const row = document.createElement("tr");
     row.className = "new-ticket";
     const statusClass = statusClassMap[ticket.status_id];
@@ -184,6 +201,14 @@ function renderTickets(ticketsToRender = tickets) {
           <i class="bi bi-forward-fill text-success"></i>
         </button>`
       : "";
+
+    // Botón editar solo si estado es Pendiente PA (id 1) y el solicitante es el usuario logeado
+    const editButton =
+      statusId === 1 && ticket.id_solicitante === Number(userId)
+        ? `<button class="btn btn-outline-primary btn-action" onclick="handleOpenEditNewTicketModal(${ticket.id})" title="Editar ticket">
+         <i class="bi bi-pencil-square"></i>
+       </button>`
+        : "";
 
     row.innerHTML = `
       <td data-label="ID"><strong>#${ticket.id}</strong></td>
@@ -218,6 +243,7 @@ function renderTickets(ticketsToRender = tickets) {
       <td data-label="Acciones">
         <div class="btn-group" role="group">
           ${avanzarBtn}
+          ${editButton}
           <button class="btn btn-outline-info btn-action" onclick="viewTicket(${
             ticket.id
           })" title="Ver detalles">
@@ -510,6 +536,118 @@ async function createTicket() {
     btnText.textContent = "Crear Ticket";
     saveBtn.disabled = false;
   }
+}
+
+// Editar el ticket en estado pendiente pa
+async function updateEditTicket() {
+  const saveBtn = document.getElementById("updateNewTicketBtn");
+  const btnSpinner = document.getElementById("updateNewBtnSpinner");
+  const btnIcon = document.getElementById("updateNewBtnIcon");
+  const btnText = document.getElementById("updateNewBtnText");
+
+  btnSpinner.classList.remove("d-none");
+  btnIcon.classList.add("d-none");
+  btnText.textContent = "Guardando...";
+  saveBtn.disabled = true;
+
+  const areaSolicitante = parseInt(
+    document.getElementById("editNewTicketAssignee").value,
+    10
+  );
+  const tipoAtencion = parseInt(
+    document.getElementById("editNewTicketCategory").value,
+    10
+  );
+  const description = document
+    .getElementById("editNewTicketDescription")
+    .value.trim();
+
+  if (!description || !tipoAtencion || !areaSolicitante) {
+    showAlert("Por favor, completa todos los campos obligatorios.", "warning");
+    resetButton();
+    return;
+  }
+
+  const payload = {
+    solicitante_id: userId,
+    area_id: tipoAtencion,
+    tipo_atencion_id: areaSolicitante,
+    observaciones: description,
+  };
+
+  try {
+    const response = await fetch(
+      `https://tickets.dev-wit.com/api/tickets/editar/${window.ticketIdEnEdicion}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(
+        errorData.message || "Error al editar el ticket, intente más tarde"
+      );
+    }
+
+    const modal = bootstrap.Modal.getInstance(
+      document.getElementById("editNewTicketModal")
+    );
+    modal.hide();
+
+    getUserIdWhenReady((userId) => loadTickets(userId));
+
+    showAlert("Ticket editado exitosamente!", "success");
+  } catch (error) {
+    console.error("Error al editar ticket:", error);
+    showAlert("No se pudo editar el ticket. " + error.message, "error");
+  } finally {
+    resetButton();
+  }
+
+  function resetButton() {
+    btnSpinner.classList.add("d-none");
+    btnIcon.classList.remove("d-none");
+    btnText.textContent = "Guardar Cambios";
+    saveBtn.disabled = false;
+  }
+}
+
+function handleOpenEditNewTicketModal(id) {
+  const ticket = tickets.find((t) => t.id === id);
+  if (!ticket) {
+    showAlert("No se encontró el ticket para editar.", "error");
+    return;
+  }
+  if (getStatusText(ticket.status_id) !== "Pendiente PA") {
+    showAlert(
+      "Solo se pueden editar tickets en estado Pendiente PA.",
+      "warning"
+    );
+    return;
+  }
+  openEditNewTicketModal(ticket);
+}
+
+function openEditNewTicketModal(ticket) {
+  // document.getElementById("editNewTicketCategory").value = ticket.title;
+  // document.getElementById("editNewTicketAssignee").value =
+  //   ticket.category;
+  document.getElementById("editNewTicketDescription").value =
+    ticket.description || "";
+
+  window.ticketIdEnEdicion = ticket.id;
+
+  const modal = new bootstrap.Modal(
+    document.getElementById("editNewTicketModal")
+  );
+  modal.show();
+  validateEditNewForm();
 }
 
 // Actualizar ticket aprobado/rechazado
@@ -1071,6 +1209,19 @@ function validateForm() {
   saveTicketBtn.disabled = !isValid;
 }
 
+function validateEditNewForm() {
+  const description = document
+    .getElementById("editNewTicketDescription")
+    .value.trim();
+  const tipoAtencion = document.getElementById("editNewTicketAssignee").value;
+  const areaSolicitante = document.getElementById(
+    "editNewTicketCategory"
+  ).value;
+
+  const isValid = description && tipoAtencion && areaSolicitante;
+  saveEditButton.disabled = !isValid;
+}
+
 // Funciones auxiliares / utilitarias
 const customIcons = {
   1: '<i class="bi bi-shield-check"></i>',
@@ -1139,6 +1290,7 @@ if (userName && userDisplay) {
 
 // Llamadas API (areas y tipos)
 const categorySelect = document.getElementById("ticketCategory");
+const categoryEditSelect = document.getElementById("editNewTicketCategory");
 
 fetch("https://tickets.dev-wit.com/api/areas", {
   method: "GET",
@@ -1155,14 +1307,19 @@ fetch("https://tickets.dev-wit.com/api/areas", {
   })
   .then((data) => {
     areas = data;
-    categorySelect.innerHTML =
-      '<option value="">Seleccionar categoría</option>';
+    categorySelect.innerHTML = '<option value="">Sin asignar</option>';
+    categoryEditSelect.innerHTML = '<option value="">Sin asignar</option>';
 
     data.forEach((area) => {
       const option = document.createElement("option");
       option.value = area.id;
       option.textContent = area.nombre;
       categorySelect.appendChild(option);
+
+      const option2 = document.createElement("option");
+      option2.value = area.id;
+      option2.textContent = area.nombre;
+      categoryEditSelect.appendChild(option2);
     });
     // console.log("tiposAreas", areas);
   })
@@ -1172,6 +1329,7 @@ fetch("https://tickets.dev-wit.com/api/areas", {
 
 const tipoSelect = document.getElementById("ticketAssignee");
 const tipoAtencionFilterSelect = document.getElementById("tipoAtencionFilter");
+const tipoEditSelect = document.getElementById("editNewTicketAssignee");
 
 fetch("https://tickets.dev-wit.com/api/tipos", {
   method: "GET",
@@ -1192,6 +1350,7 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
     tipoSelect.innerHTML = '<option value="">Sin asignar</option>';
     tipoAtencionFilterSelect.innerHTML =
       '<option value="">Todos los tipos de atención</option>';
+    tipoEditSelect.innerHTML = '<option value="">Sin asignar</option>';
 
     const categorias = {};
     data.forEach((tipo) => {
@@ -1208,6 +1367,9 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
       const optgroup2 = document.createElement("optgroup");
       optgroup2.label = categoria;
 
+      const optgroup3 = document.createElement("optgroup");
+      optgroup3.label = categoria;
+
       categorias[categoria].forEach((tipo) => {
         const option1 = document.createElement("option");
         option1.value = tipo.id;
@@ -1218,9 +1380,15 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
         option2.value = tipo.nombre;
         option2.textContent = tipo.nombre;
         optgroup2.appendChild(option2);
+
+        const option3 = document.createElement("option");
+        option3.value = tipo.id;
+        option3.textContent = tipo.nombre;
+        optgroup3.appendChild(option3);
       });
       tipoSelect.appendChild(optgroup1);
       tipoAtencionFilterSelect.appendChild(optgroup2);
+      tipoEditSelect.appendChild(optgroup3);
     }
   })
   .catch((error) => {
