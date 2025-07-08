@@ -1681,9 +1681,10 @@ function populateStatusFilterUpdate(estados, estadoActual) {
 // Genera el certificado en pdf
 async function generarCertificadoPDF(ticketId) {
   const url = `https://tickets.dev-wit.com/api/tickets/detalle/${ticketId}`;
+
   try {
     const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${token}` }
     });
 
     if (!res.ok) throw new Error("No se pudo obtener el detalle del ticket.");
@@ -1696,19 +1697,15 @@ async function generarCertificadoPDF(ticketId) {
     }
 
     const historialHTML = t.historial?.length
-      ? t.historial
-          .map(
-            (h) => `
+      ? t.historial.map(h => `
         <tr>
           <td>${new Date(h.fecha).toLocaleString()}</td>
           <td>${h.estado_anterior}</td>
           <td>${h.nuevo_estado}</td>
           <td>${h.usuario_cambio}</td>
-          <td>${h.observacion || "-"}</td>
+          <td>${h.observacion || '-'}</td>
         </tr>
-      `
-          )
-          .join("")
+      `).join('')
       : '<tr><td colspan="5">Sin historial registrado.</td></tr>';
 
     const contenidoHTML = `
@@ -1726,15 +1723,11 @@ async function generarCertificadoPDF(ticketId) {
             font-size: 13px;
             color: #333;
           }
-            .card {
-              page-break-inside: avoid;
-              break-inside: avoid;
-            }
 
-            table, tr, td, th {
-              page-break-inside: avoid !important;
-              break-inside: avoid;
-            }
+          .no-break {
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
 
           #pdf-wrapper {
             width: 100%;
@@ -1745,9 +1738,10 @@ async function generarCertificadoPDF(ticketId) {
             padding: 40px 0;
           }
 
-          #plantilla-pdf {      
-            padding: 40px; /* 40px padding interno ≈ 1.05cm */
-            box-sizing: border-box; /* clave para que padding no sume al ancho */
+          #plantilla-pdf {
+            padding: 40px;
+            padding-top: 60px;
+            box-sizing: border-box;
             background: white;
             font-family: Arial, sans-serif;
             font-size: 13px;
@@ -1760,19 +1754,24 @@ async function generarCertificadoPDF(ticketId) {
             align-items: center;
             margin-bottom: 30px;
           }
+
           .header img {
-            height: 60px;
+            height: 35px;
+            width: 100px;
           }
+
           .header h1 {
             font-size: 20px;
             margin: 0;
           }
+
           .card {
             border: 1px solid #ddd;
             padding: 15px;
             border-radius: 6px;
             margin-bottom: 15px;
           }
+
           .card-header {
             font-weight: bold;
             background: #f0f0f0;
@@ -1781,11 +1780,13 @@ async function generarCertificadoPDF(ticketId) {
             border-bottom: 1px solid #ddd;
             border-radius: 6px 6px 0 0;
           }
+
           table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
           }
+
           th, td {
             border: 1px solid #999;
             padding: 6px;
@@ -1793,9 +1794,11 @@ async function generarCertificadoPDF(ticketId) {
             vertical-align: top;
             font-size: 12px;
           }
+
           th {
             background-color: #f9f9f9;
           }
+
           #boton-descargar {
             position: fixed;
             top: 40px;
@@ -1810,83 +1813,113 @@ async function generarCertificadoPDF(ticketId) {
             cursor: pointer;
             z-index: 9999;
           }
+
           #boton-descargar:hover {
             background: #0056b3;
+          }                 
+
+          // .page-margin-top:first-of-type {
+          //   height: 0;
+          // }
+
+          @page {
+            margin-top: 20mm; /* Margen superior para todas las páginas */
           }
+
+          body:first-of-type {
+            margin-top: 0;
+          }
+
+
+          .page-break {
+            display: block;
+            height: 0;
+            break-before: page;
+            margin-top: 20mm; /* Margen superior para páginas nuevas */
+          }
+
+          .card.historial {
+            margin-top: 20px !important;
+          }
+
+          @media print {
+            .card, .header, .firma-footer {
+              margin-top: 20px !important;
+            }
+
+            body > *:first-child {
+              margin-top: 20px !important;
+            }
+
+            .card:first-child,
+            .header:first-child {
+              margin-top: 0 !important;
+            }
+
+            tr {
+              page-break-inside: avoid !important;
+            }
+
+            .card, .header, .firma-footer {
+              break-before: auto;
+            }
+          }
+
+        }
         </style>
       </head>
       <body>
         <div id="pdf-wrapper">
-          <div id="plantilla-pdf">
-            <div class="header">
-              <img src="../img/logo.png" alt="Logo Institucional" />
+          <div id="plantilla-pdf" style="display: flex; flex-direction: column; min-height: 100%;">
+
+            <div class="header no-break">
               <h1>Certificado de Ticket #${t.id}</h1>
+              <img src="../img/logo.png" alt="Logo Institucional" />
             </div>
 
-            <div class="card">
+            <div class="card no-break">
               <h4>${t.tipo_atencion}</h4>
               <p><strong>Área:</strong> ${t.area}</p>
-              <p><strong>Fecha de creación:</strong> ${new Date(
-                t.fecha_creacion
-              ).toLocaleString()}</p>
-              <p><strong>Modo de atención:</strong> ${
-                t.modo_atencion ?? "—"
-              }</p>
-              <p><strong>¿Requiere despacho?:</strong> ${
-                t.necesita_despacho
-              }</p>
-              ${
-                t.detalles_despacho
-                  ? `<p><strong>Detalles del despacho:</strong> ${t.detalles_despacho}</p>`
-                  : ""
-              }
+              <p><strong>Fecha de creación:</strong> ${new Date(t.fecha_creacion).toLocaleString()}</p>
+              <p><strong>Modo de atención:</strong> ${t.modo_atencion ?? '—'}</p>
+              <p><strong>¿Requiere despacho?:</strong> ${t.necesita_despacho}</p>
+              ${t.detalles_despacho ? `<p><strong>Detalles del despacho:</strong> ${t.detalles_despacho}</p>` : ""}
             </div>
 
-           <div style="display: flex; gap: 15px;">
+            <div style="display: flex; gap: 15px;" class="no-break">
               <div class="card" style="flex: 1;">
                 <div class="card-header">Solicitante</div>
-                <p><strong>Nombre:</strong> ${t.solicitante ?? "—"}</p>
-                <p><strong>Correo:</strong> ${t.correo_solicitante ?? "—"}</p>
+                <p><strong>Nombre:</strong> ${t.solicitante ?? '—'}</p>
+                <p><strong>Correo:</strong> ${t.correo_solicitante ?? '—'}</p>
               </div>
 
               <div class="card" style="flex: 1;">
                 <div class="card-header">Ejecutor</div>
-                <p><strong>Nombre:</strong> ${t.ejecutor ?? "—"}</p>
-                <p><strong>Correo:</strong> ${t.correo_ejecutor ?? "—"}</p>
+                <p><strong>Nombre:</strong> ${t.ejecutor ?? '—'}</p>
+                <p><strong>Correo:</strong> ${t.correo_ejecutor ?? '—'}</p>
               </div>
 
               <div class="card" style="flex: 1;">
                 <div class="card-header">Jefatura</div>
-                <p><strong>Nombre:</strong> ${t.jefatura ?? "—"}</p>
-                <p><strong>Correo:</strong> ${t.correo_jefatura ?? "—"}</p>
+                <p><strong>Nombre:</strong> ${t.jefatura ?? '—'}</p>
+                <p><strong>Correo:</strong> ${t.correo_jefatura ?? '—'}</p>
               </div>
             </div>
 
-
-            <div class="card">
+            <div class="card no-break">
               <div class="card-header">Detalle del Ticket</div>
               <p><strong>Observaciones:</strong></p>
-              <p>${t.observaciones ?? "—"}</p>
-              ${
-                t.detalle_solucion
-                  ? `
+              <p>${t.observaciones ?? '—'}</p>
+              ${t.detalle_solucion ? `
                 <hr>
                 <p><strong>Detalle de la solución:</strong></p>
                 <p>${t.detalle_solucion}</p>
-              `
-                  : ""
-              }
-
-              <p><strong>Aprobación de la solución:</strong> ${
-                t.aprobacion_solucion ?? "—"
-              }</p>
-              <p><strong>Observación de la solución:</strong> ${
-                t.solucion_observacion ?? "—"
-              }</p>
-
+              ` : ""}
+              <p><strong>Aprobación de la solución:</strong> ${t.aprobacion_solucion ?? "—"}</p>
+              <p><strong>Observación de la solución:</strong> ${t.solucion_observacion ?? "—"}</p>
             </div>
-
-            <div class="card">
+            
+            <div class="card historial">
               <div class="card-header">Historial de Estados</div>
               <table>
                 <thead>
@@ -1904,8 +1937,8 @@ async function generarCertificadoPDF(ticketId) {
               </table>
             </div>
 
-            <div style="text-align: center;">              
-              <img src="../img/firma.png" alt="Firma" style="max-width: 150px; width: 100%; height: auto; margin-top: 10px;" />
+            <div class="firma-footer no-break" style="text-align: center; margin-top: auto; padding-top: 40px;">
+              <img src="../img/firma.png" alt="Firma" style="width: 100px; height: 80px;" />
               <p style="font-size: 10px; margin-top: 30px; color: #555;">
                 WIT – Manuel Obispo Umaña #633, Estación Central, Santiago, Chile. Contactos: +56 9 9073 7619 / soporte@wit.la
               </p>
@@ -1918,33 +1951,37 @@ async function generarCertificadoPDF(ticketId) {
 
         <script>
           function descargarPDF() {
-          const element = document.getElementById('plantilla-pdf');
+            const element = document.getElementById('plantilla-pdf');
 
-          html2pdf().set({
-            margin: 0,
-            filename: 'ticket_${t.id}.pdf',
-            html2canvas: {
-              scale: 2,
-              useCORS: true,
-              scrollY: 0
-            },
-            jsPDF: {
-              unit: 'mm',
-              format: 'a4',
-              orientation: 'portrait'
-            }
-          }).from(element).save();
-        }
-
+            html2pdf().set({
+              margin: [1, 0, 20, 0], // [top, left, bottom, right] en mm
+              filename: 'ticket_${t.id}.pdf',
+              html2canvas: {
+                scale: 2,
+                useCORS: true,
+                scrollY: 0
+              },
+              jsPDF: {
+                unit: 'mm',
+                format: 'a4',
+                orientation: 'portrait'
+              },
+              pagebreak: {
+                mode: 'css', // Usa el modo CSS para saltos de página
+                avoid: ['.no-break', '.header', '.card', '.firma-footer'],
+                before: '.page-break' // Elemento que fuerza el salto de página
+              }
+            }).from(element).save();
+          }
         </script>
-
       </body>
       </html>
-          `;
+    `;
 
     nuevaVentana.document.open();
     nuevaVentana.document.write(contenidoHTML);
     nuevaVentana.document.close();
+
   } catch (err) {
     alert("Error al generar el certificado: " + err.message);
     console.error(err);
