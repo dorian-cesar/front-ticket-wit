@@ -710,7 +710,7 @@ function formatFinalCard(ticket) {
 
   const mensajeFinal = esObservado
     ? `<div class="mt-3 small fw-semibold fst-italic">
-          Ticket aprobado con observaciones. Por favor genere un nuevo ticket con el problema.
+          Ticket aprobado con observaciones. Por favor genere un nuevo ticket con su solicitud.
         </div>`
     : "";
 
@@ -881,8 +881,8 @@ function mostrarMensajeDesaprobacion(ticketId, observado = false) {
   const mensaje = document.createElement("div");
   mensaje.className = "mt-3 small fw-semibold fst-italic";
   mensaje.textContent = observado
-    ? "Ticket aprobado con observaciones. Por favor genere un nuevo ticket con el problema"
-    : "Por favor genere un nuevo ticket con el problema.";
+    ? "Ticket aprobado con observaciones. Por favor genere un nuevo ticket con su solicitud."
+    : "Por favor genere un nuevo ticket con su solicitud.";
   card.appendChild(mensaje);
 }
 
