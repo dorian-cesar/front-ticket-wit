@@ -158,8 +158,21 @@ function renderTickets(ticketsToRender = tickets) {
         ticket.category
       }</small></td>
       <td data-label="Estado">
-        <span class="badge status-${statusClass} badge-status">
+        <span class="badge status-${statusClass} badge-status position-relative">
           ${getStatusIcon(statusId)} ${getStatusText(statusId)}
+
+          ${
+            statusId === 6 && ticket.aprobacion_solucion === "si"
+              ? `<i class="bi bi-award-fill badge-corner-icon text-warning" title="Ticket aprobado"></i>`
+              : statusId === 6 && ticket.aprobacion_solucion === "no"
+              ? `<i class="bi bi-eye-fill badge-corner-icon text-warning" title="Aprobado con observación"></i>`
+              : statusId === 6 &&
+                ticket.aprobacion_solucion === null &&
+                (ticket.tipo_atencion_cierre === "remota" ||
+                  ticket.tipo_atencion_cierre === "presencial")
+              ? `<i class="bi bi-question-circle badge-corner-icon text-primary-color" title="Aprobación pendiente"></i>`
+              : ""
+          }
         </span>
       </td>
       <td data-label="Asignado">
@@ -1283,7 +1296,7 @@ async function generarCertificadoPDF(ticketId) {
 
   try {
     const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     if (!res.ok) throw new Error("No se pudo obtener el detalle del ticket.");
@@ -1296,15 +1309,19 @@ async function generarCertificadoPDF(ticketId) {
     }
 
     const historialHTML = t.historial?.length
-      ? t.historial.map(h => `
+      ? t.historial
+          .map(
+            (h) => `
         <tr>
           <td>${new Date(h.fecha).toLocaleString()}</td>
           <td>${h.estado_anterior}</td>
           <td>${h.nuevo_estado}</td>
           <td>${h.usuario_cambio}</td>
-          <td>${h.observacion || '-'}</td>
+          <td>${h.observacion || "-"}</td>
         </tr>
-      `).join('')
+      `
+          )
+          .join("")
       : '<tr><td colspan="5">Sin historial registrado.</td></tr>';
 
     const contenidoHTML = `
@@ -1479,43 +1496,61 @@ async function generarCertificadoPDF(ticketId) {
             <div class="card no-break">
               <h4>${t.tipo_atencion}</h4>
               <p><strong>Área:</strong> ${t.area}</p>
-              <p><strong>Fecha de creación:</strong> ${new Date(t.fecha_creacion).toLocaleString()}</p>
-              <p><strong>Modo de atención:</strong> ${t.modo_atencion ?? '—'}</p>
-              <p><strong>¿Requiere despacho?:</strong> ${t.necesita_despacho}</p>
-              ${t.detalles_despacho ? `<p><strong>Detalles del despacho:</strong> ${t.detalles_despacho}</p>` : ""}
+              <p><strong>Fecha de creación:</strong> ${new Date(
+                t.fecha_creacion
+              ).toLocaleString()}</p>
+              <p><strong>Modo de atención:</strong> ${
+                t.modo_atencion ?? "—"
+              }</p>
+              <p><strong>¿Requiere despacho?:</strong> ${
+                t.necesita_despacho
+              }</p>
+              ${
+                t.detalles_despacho
+                  ? `<p><strong>Detalles del despacho:</strong> ${t.detalles_despacho}</p>`
+                  : ""
+              }
             </div>
 
             <div style="display: flex; gap: 15px;" class="no-break">
               <div class="card" style="flex: 1;">
                 <div class="card-header">Solicitante</div>
-                <p><strong>Nombre:</strong> ${t.solicitante ?? '—'}</p>
-                <p><strong>Correo:</strong> ${t.correo_solicitante ?? '—'}</p>
+                <p><strong>Nombre:</strong> ${t.solicitante ?? "—"}</p>
+                <p><strong>Correo:</strong> ${t.correo_solicitante ?? "—"}</p>
               </div>
 
               <div class="card" style="flex: 1;">
                 <div class="card-header">Ejecutor</div>
-                <p><strong>Nombre:</strong> ${t.ejecutor ?? '—'}</p>
-                <p><strong>Correo:</strong> ${t.correo_ejecutor ?? '—'}</p>
+                <p><strong>Nombre:</strong> ${t.ejecutor ?? "—"}</p>
+                <p><strong>Correo:</strong> ${t.correo_ejecutor ?? "—"}</p>
               </div>
 
               <div class="card" style="flex: 1;">
                 <div class="card-header">Jefatura</div>
-                <p><strong>Nombre:</strong> ${t.jefatura ?? '—'}</p>
-                <p><strong>Correo:</strong> ${t.correo_jefatura ?? '—'}</p>
+                <p><strong>Nombre:</strong> ${t.jefatura ?? "—"}</p>
+                <p><strong>Correo:</strong> ${t.correo_jefatura ?? "—"}</p>
               </div>
             </div>
 
             <div class="card no-break">
               <div class="card-header">Detalle del Ticket</div>
               <p><strong>Observaciones:</strong></p>
-              <p>${t.observaciones ?? '—'}</p>
-              ${t.detalle_solucion ? `
+              <p>${t.observaciones ?? "—"}</p>
+              ${
+                t.detalle_solucion
+                  ? `
                 <hr>
                 <p><strong>Detalle de la solución:</strong></p>
                 <p>${t.detalle_solucion}</p>
-              ` : ""}
-              <p><strong>Aprobación de la solución:</strong> ${t.aprobacion_solucion ?? "—"}</p>
-              <p><strong>Observación de la solución:</strong> ${t.solucion_observacion ?? "—"}</p>
+              `
+                  : ""
+              }
+              <p><strong>Aprobación de la solución:</strong> ${
+                t.aprobacion_solucion ?? "—"
+              }</p>
+              <p><strong>Observación de la solución:</strong> ${
+                t.solucion_observacion ?? "—"
+              }</p>
             </div>
             
             <div class="card historial">
@@ -1580,7 +1615,6 @@ async function generarCertificadoPDF(ticketId) {
     nuevaVentana.document.open();
     nuevaVentana.document.write(contenidoHTML);
     nuevaVentana.document.close();
-
   } catch (err) {
     alert("Error al generar el certificado: " + err.message);
     console.error(err);
