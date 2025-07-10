@@ -431,7 +431,7 @@ async function createTicket() {
     showAlert("Ticket creado exitosamente!", "success");
   } catch (error) {
     console.error("Error al crear ticket:", error);
-    showAlert("No se pudo crear el ticket. " + error.message, "error");
+    showAlert("No se pudo crear el ticket. Intente más tarde", "error");
   } finally {
     btnSpinner.classList.add("d-none");
     btnIcon.classList.remove("d-none");
