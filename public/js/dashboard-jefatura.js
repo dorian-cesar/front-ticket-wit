@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
 document.getElementById("refreshTicketsBtn").addEventListener("click", () => {
   getUserIdWhenReady((userId) => {
     renderTickets(null);
-    loadTickets(userId);
+    location.reload();
   });
 });
 
