@@ -189,7 +189,7 @@ function renderTickets(ticketsToRender = tickets) {
 
   paginatedTickets.forEach((ticket) => {
     const statusId = ticket.status_id;
-    console.log("ticket:", ticket);
+    // console.log("ticket:", ticket);
     const row = document.createElement("tr");
     row.className = "new-ticket";
 

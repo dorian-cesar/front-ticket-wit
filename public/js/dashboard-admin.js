@@ -166,7 +166,7 @@ function renderTickets(ticketsToRender = tickets) {
   const loadingSpinner = document.getElementById("loadingSpinner");
   const noTicketsRow = `
     <tr class="no-tickets-row">
-      <td colspan="7" class="text-center text-muted py-4">
+      <td colspan="8" class="text-center text-muted py-4">
         <i class="bi bi-inbox display-4 d-block mb-2"></i>
         No se encontraron tickets
       </td>
