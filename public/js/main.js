@@ -146,7 +146,7 @@ loginForm.addEventListener("submit", async function (e) {
   try {
     // Llamada a API
     const result = await Login(emailInput.value, passwordInput.value);
-    console.log(result);
+    // console.log(result);
     const token = result.token;
     const nombre = result.user.nombre;
     const mail = result.user.mail;
