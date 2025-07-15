@@ -378,7 +378,7 @@ async function createTicket() {
     return;
   }
 
-  const solicitante = usersData.find((u) => u.email == userMail);
+  const solicitante = usersData.find((u) => u.email.toLowerCase() === userMail.toLowerCase());
   if (!solicitante) {
     showAlert(
       "No se encontró el usuario logueado en los datos de usuarios.",
@@ -1219,7 +1219,7 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
 function getUserIdWhenReady(callback) {
   const interval = setInterval(() => {
     if (Array.isArray(usersData) && usersData.length > 0) {
-      const user = usersData.find((u) => u.email == userMail);
+      const user = usersData.find((u) => u.email.toLowerCase() === userMail.toLowerCase());
       if (user) {
         clearInterval(interval);
         callback(user.id);
