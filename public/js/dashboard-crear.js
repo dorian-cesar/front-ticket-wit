@@ -343,7 +343,9 @@ async function createTicket() {
     return;
   }
 
-  const solicitante = usersData.find((u) => u.email.toLowerCase() === userMail.toLowerCase());
+  const solicitante = usersData.find(
+    (u) => u.email.toLowerCase() === userMail.toLowerCase()
+  );
   if (!solicitante) {
     showAlert(
       "No se encontró el usuario logueado en los datos de usuarios.",
@@ -896,7 +898,7 @@ function viewTicket(id) {
   <p><strong>Estado:</strong> ${getStatusIcon(
     ticket.status_id
   )} ${getStatusText(ticket.status_id)}</p>
-  <p><strong>Asignado a:</strong> <i class="bi bi-person-circle me-2"></i>${
+  <p><strong>Ejecutor:</strong> <i class="bi bi-person-circle me-2"></i>${
     ticket.assignee || ticket.ejecutor || "Sin asignar"
   }</p>
   <p><strong>Tipo de Atención:</strong> ${
@@ -1084,6 +1086,110 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
     console.error("Error cargando tipos de atención:", error);
   });
 
+// const tipoSelect = document.getElementById("ticketAssignee");
+// const tipoAtencionFilterSelect = document.getElementById("tipoAtencionFilter");
+// const tipoEditSelect = document.getElementById("editNewTicketAssignee");
+// const categoriaFilterSelect = document.getElementById("categoriaFilter");
+
+// const categorias = {};
+
+// fetch("https://tickets.dev-wit.com/api/tipos", {
+//   method: "GET",
+//   headers: {
+//     Authorization: `Bearer ${token}`,
+//     "Content-Type": "application/json",
+//   },
+// })
+//   .then((response) => {
+//     if (!response.ok) {
+//       throw new Error("Error al obtener tipos de atención");
+//     }
+//     return response.json();
+//   })
+//   .then((data) => {
+//     tiposAtencion = data;
+
+//     // Limpiar selects
+//     tipoSelect.innerHTML = '<option value="">Sin asignar</option>';
+//     tipoAtencionFilterSelect.innerHTML =
+//       '<option value="">Todos los tipos de atención</option>';
+//     tipoEditSelect.innerHTML = '<option value="">Sin asignar</option>';
+//     categoriaFilterSelect.innerHTML =
+//       '<option value="">Todas las categorías</option>';
+
+//     // Agrupar por categoría
+//     data.forEach((tipo) => {
+//       if (!categorias[tipo.categoria]) {
+//         categorias[tipo.categoria] = [];
+//         // Agregar categoría al select
+//         const categoriaOption = document.createElement("option");
+//         categoriaOption.value = tipo.categoria;
+//         categoriaOption.textContent = tipo.categoria;
+//         categoriaFilterSelect.appendChild(categoriaOption);
+//       }
+//       categorias[tipo.categoria].push(tipo);
+//     });
+
+//     // Llenar los otros selects con optgroups
+//     for (const categoria in categorias) {
+//       const optgroup1 = document.createElement("optgroup");
+//       optgroup1.label = categoria;
+
+//       const optgroup2 = document.createElement("optgroup");
+//       optgroup2.label = categoria;
+
+//       const optgroup3 = document.createElement("optgroup");
+//       optgroup3.label = categoria;
+
+//       categorias[categoria].forEach((tipo) => {
+//         const option1 = document.createElement("option");
+//         option1.value = tipo.id;
+//         option1.textContent = tipo.nombre;
+//         optgroup1.appendChild(option1);
+
+//         const option2 = document.createElement("option");
+//         option2.value = tipo.nombre;
+//         option2.textContent = tipo.nombre;
+//         optgroup2.appendChild(option2);
+
+//         const option3 = document.createElement("option");
+//         option3.value = tipo.id;
+//         option3.textContent = tipo.nombre;
+//         optgroup3.appendChild(option3);
+//       });
+
+//       tipoSelect.appendChild(optgroup1);
+//       tipoAtencionFilterSelect.appendChild(optgroup2);
+//       tipoEditSelect.appendChild(optgroup3);
+//     }
+//   })
+//   .catch((error) => {
+//     console.error("Error cargando tipos de atención:", error);
+//   });
+
+// // Función para filtrar tipoAtencionFilter según la categoría seleccionada
+// function renderTipoAtencionOptionsByCategoria(categoriaSeleccionada) {
+//   tipoAtencionFilterSelect.innerHTML =
+//     '<option value="">Todos los tipos de atención</option>';
+
+//   const tipos = categoriaSeleccionada
+//     ? categorias[categoriaSeleccionada] || []
+//     : tiposAtencion;
+
+//   tipos.forEach((tipo) => {
+//     const option = document.createElement("option");
+//     option.value = tipo.nombre;
+//     option.textContent = tipo.nombre;
+//     tipoAtencionFilterSelect.appendChild(option);
+//   });
+// }
+
+// // Escucha cambios en el select de categoría
+// categoriaFilterSelect.addEventListener("change", (e) => {
+//   const selectedCategoria = e.target.value;
+//   renderTipoAtencionOptionsByCategoria(selectedCategoria);
+// });
+
 (async function getUsers() {
   try {
     const response = await fetch("https://tickets.dev-wit.com/api/users", {
@@ -1120,7 +1226,9 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
 function getUserIdWhenReady(callback) {
   const interval = setInterval(() => {
     if (Array.isArray(usersData) && usersData.length > 0) {
-      const user = usersData.find((u) => u.email.toLowerCase() === userMail.toLowerCase());
+      const user = usersData.find(
+        (u) => u.email.toLowerCase() === userMail.toLowerCase()
+      );
       if (user) {
         clearInterval(interval);
         callback(user.id);

@@ -1007,7 +1007,7 @@ function viewTicket(id) {
       ticket.status_id
     )} ${getStatusText(ticket.status_id)}</p>
     <p><strong>Solicitado por:</strong> <i class="bi bi-person-circle me-2"></i>${
-      ticket.assignee || ticket.ejecutor || "Sin asignar"
+      ticket.assignee || "Sin asignar"
     }</p>
     <p><strong>Tipo de Atención:</strong> ${
       ticket.category || ticket.tipo_atencion
