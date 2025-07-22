@@ -57,6 +57,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Iniciar carga de tickets
   initTicketLoading();
+
+  // Categorías en crear ticket
+  ticketCategoriaFilter.addEventListener("change", function () {
+    const selectedCategoria = this.value;
+    tipoSelect.innerHTML = '<option value="">Sin asignar</option>';
+    const categoriasFiltradas = selectedCategoria
+      ? { [selectedCategoria]: categorias[selectedCategoria] }
+      : categorias;
+    for (const cat in categoriasFiltradas) {
+      const optgroup = document.createElement("optgroup");
+      optgroup.label = cat;
+      categoriasFiltradas[cat].forEach((tipo) => {
+        const option = document.createElement("option");
+        option.value = tipo.id;
+        option.textContent = tipo.nombre;
+        optgroup.appendChild(option);
+      });
+      tipoSelect.appendChild(optgroup);
+    }
+  });
 });
 
 // Recargar los tickets
@@ -1022,6 +1042,7 @@ const tipoSelect = document.getElementById("ticketAssignee");
 const tipoAtencionFilterSelect = document.getElementById("tipoAtencionFilter");
 const tipoEditSelect = document.getElementById("editNewTicketAssignee");
 const categoriaFilterSelect = document.getElementById("categoriaFilter");
+const ticketCategoriaFilter = document.getElementById("ticketCategoriaFilter");
 
 const categorias = {};
 
@@ -1048,6 +1069,8 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
     tipoEditSelect.innerHTML = '<option value="">Sin asignar</option>';
     categoriaFilterSelect.innerHTML =
       '<option value="">Todas las categorías</option>';
+    ticketCategoriaFilter.innerHTML =
+      '<option value="">Todas las categorías</option>';
 
     // Agrupar por categoría
     data.forEach((tipo) => {
@@ -1058,6 +1081,7 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
         categoriaOption.value = tipo.categoria;
         categoriaOption.textContent = tipo.categoria;
         categoriaFilterSelect.appendChild(categoriaOption);
+        ticketCategoriaFilter.appendChild(categoriaOption.cloneNode(true));
       }
       categorias[tipo.categoria].push(tipo);
     });
@@ -1103,17 +1127,20 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
 function renderTipoAtencionOptionsByCategoria(categoriaSeleccionada) {
   tipoAtencionFilterSelect.innerHTML =
     '<option value="">Tipos de atención en categoría</option>';
-
-  const tipos = categoriaSeleccionada
-    ? categorias[categoriaSeleccionada] || []
-    : tiposAtencion;
-
-  tipos.forEach((tipo) => {
-    const option = document.createElement("option");
-    option.value = tipo.nombre;
-    option.textContent = tipo.nombre;
-    tipoAtencionFilterSelect.appendChild(option);
-  });
+  const categoriasFiltradas = categoriaSeleccionada
+    ? { [categoriaSeleccionada]: categorias[categoriaSeleccionada] }
+    : categorias;
+  for (const cat in categoriasFiltradas) {
+    const optgroup = document.createElement("optgroup");
+    optgroup.label = cat;
+    categoriasFiltradas[cat].forEach((tipo) => {
+      const option = document.createElement("option");
+      option.value = tipo.nombre;
+      option.textContent = tipo.nombre;
+      optgroup.appendChild(option);
+    });
+    tipoAtencionFilterSelect.appendChild(optgroup);
+  }
 }
 
 // Escucha cambios en el select de categoría

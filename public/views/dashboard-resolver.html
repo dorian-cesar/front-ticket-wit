@@ -345,21 +345,26 @@
               <div class="row"></div>
 
               <div class="row">
-                <div class="col-md-6 mb-3">
+                <div class="col-md-4 mb-3">
                   <label for="ticketCategory" class="form-label"
                     >Área Solicitante *</label
                   >
-                  <select class="form-select" id="ticketCategory">
-                    <!-- Se agrega con javascript -->
+                  <select class="form-select" id="ticketCategory"></select>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label for="ticketCategoriaFilter" class="form-label"
+                    >Búsqueda por Categoría</label
+                  >
+                  <select class="form-select" id="ticketCategoriaFilter">
+                    <option value="">Todas las categorías</option>
                   </select>
                 </div>
-                <div class="col-md-6 mb-3">
+                <div class="col-md-4 mb-3">
                   <label for="ticketAssignee" class="form-label"
                     >Tipo de Atención *</label
                   >
                   <select class="form-select" id="ticketAssignee">
                     <option value="">Sin asignar</option>
-                    <!-- Las opciones se reemplazarán con JavaScript -->
                   </select>
                 </div>
               </div>
