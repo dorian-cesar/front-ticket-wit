@@ -457,7 +457,9 @@ async function createTicket() {
     return;
   }
 
-  const solicitante = usersData.find((u) => u.email.toLowerCase() === userMail.toLowerCase());
+  const solicitante = usersData.find(
+    (u) => u.email.toLowerCase() === userMail.toLowerCase()
+  );
   if (!solicitante) {
     showAlert(
       "No se encontró el usuario logueado en los datos de usuarios.",
@@ -1284,6 +1286,9 @@ fetch("https://tickets.dev-wit.com/api/areas", {
 const tipoSelect = document.getElementById("ticketAssignee");
 const tipoAtencionFilterSelect = document.getElementById("tipoAtencionFilter");
 const tipoEditSelect = document.getElementById("editNewTicketAssignee");
+const categoriaFilterSelect = document.getElementById("categoriaFilter");
+
+const categorias = {};
 
 fetch("https://tickets.dev-wit.com/api/tipos", {
   method: "GET",
@@ -1300,20 +1305,29 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
   })
   .then((data) => {
     tiposAtencion = data;
-    // console.log("tipos de atención:", tiposAtencion)
+
+    // Limpiar selects
     tipoSelect.innerHTML = '<option value="">Sin asignar</option>';
     tipoAtencionFilterSelect.innerHTML =
-      '<option value="">Todos los tipos de atención</option>';
+      '<option value="">Tipos de atención en categoría</option>';
     tipoEditSelect.innerHTML = '<option value="">Sin asignar</option>';
+    categoriaFilterSelect.innerHTML =
+      '<option value="">Todas las categorías</option>';
 
-    const categorias = {};
+    // Agrupar por categoría
     data.forEach((tipo) => {
       if (!categorias[tipo.categoria]) {
         categorias[tipo.categoria] = [];
+        // Agregar categoría al select
+        const categoriaOption = document.createElement("option");
+        categoriaOption.value = tipo.categoria;
+        categoriaOption.textContent = tipo.categoria;
+        categoriaFilterSelect.appendChild(categoriaOption);
       }
       categorias[tipo.categoria].push(tipo);
     });
 
+    // Llenar los otros selects con optgroups
     for (const categoria in categorias) {
       const optgroup1 = document.createElement("optgroup");
       optgroup1.label = categoria;
@@ -1340,6 +1354,7 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
         option3.textContent = tipo.nombre;
         optgroup3.appendChild(option3);
       });
+
       tipoSelect.appendChild(optgroup1);
       tipoAtencionFilterSelect.appendChild(optgroup2);
       tipoEditSelect.appendChild(optgroup3);
@@ -1348,6 +1363,29 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
   .catch((error) => {
     console.error("Error cargando tipos de atención:", error);
   });
+
+// Función para filtrar tipoAtencionFilter según la categoría seleccionada
+function renderTipoAtencionOptionsByCategoria(categoriaSeleccionada) {
+  tipoAtencionFilterSelect.innerHTML =
+    '<option value="">Tipos de atención en categoría</option>';
+
+  const tipos = categoriaSeleccionada
+    ? categorias[categoriaSeleccionada] || []
+    : tiposAtencion;
+
+  tipos.forEach((tipo) => {
+    const option = document.createElement("option");
+    option.value = tipo.nombre;
+    option.textContent = tipo.nombre;
+    tipoAtencionFilterSelect.appendChild(option);
+  });
+}
+
+// Escucha cambios en el select de categoría
+categoriaFilterSelect.addEventListener("change", (e) => {
+  const selectedCategoria = e.target.value;
+  renderTipoAtencionOptionsByCategoria(selectedCategoria);
+});
 
 (async function getUsers() {
   try {
@@ -1385,7 +1423,9 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
 function getUserIdWhenReady(callback) {
   const interval = setInterval(() => {
     if (Array.isArray(usersData) && usersData.length > 0) {
-      const user = usersData.find((u) => u.email.toLowerCase() === userMail.toLowerCase());
+      const user = usersData.find(
+        (u) => u.email.toLowerCase() === userMail.toLowerCase()
+      );
       if (user) {
         clearInterval(interval);
         callback(user.id);
