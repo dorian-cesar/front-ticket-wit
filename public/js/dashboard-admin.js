@@ -67,6 +67,26 @@ document.addEventListener("DOMContentLoaded", () => {
       tipoSelect.appendChild(optgroup);
     }
   });
+
+  // Categorías en editar new ticket
+  editCategoriaFilter.addEventListener("change", function () {
+    const selectedCategoria = this.value;
+    tipoEditSelect.innerHTML = '<option value="">Sin asignar</option>';
+    const categoriasFiltradas = selectedCategoria
+      ? { [selectedCategoria]: categorias[selectedCategoria] }
+      : categorias;
+    for (const cat in categoriasFiltradas) {
+      const optgroup = document.createElement("optgroup");
+      optgroup.label = cat;
+      categoriasFiltradas[cat].forEach((tipo) => {
+        const option = document.createElement("option");
+        option.value = tipo.id;
+        option.textContent = tipo.nombre;
+        optgroup.appendChild(option);
+      });
+      tipoEditSelect.appendChild(optgroup);
+    }
+  });
 });
 
 // Recargar los tickets
@@ -1370,6 +1390,9 @@ const tipoAtencionFilterSelect = document.getElementById("tipoAtencionFilter");
 const tipoEditSelect = document.getElementById("editNewTicketAssignee");
 const categoriaFilterSelect = document.getElementById("categoriaFilter");
 const ticketCategoriaFilter = document.getElementById("ticketCategoriaFilter");
+const editCategoriaFilter = document.getElementById(
+  "editNewTicketCategoriaFilter"
+);
 
 const categorias = {};
 
@@ -1398,6 +1421,8 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
       '<option value="">Todas las categorías</option>';
     ticketCategoriaFilter.innerHTML =
       '<option value="">Todas las categorías</option>';
+    editCategoriaFilter.innerHTML =
+      '<option value="">Todas las categorías</option>';
 
     // Agrupar por categoría
     data.forEach((tipo) => {
@@ -1409,6 +1434,7 @@ fetch("https://tickets.dev-wit.com/api/tipos", {
         categoriaOption.textContent = tipo.categoria;
         categoriaFilterSelect.appendChild(categoriaOption);
         ticketCategoriaFilter.appendChild(categoriaOption.cloneNode(true));
+        editCategoriaFilter.appendChild(categoriaOption.cloneNode(true));
       }
       categorias[tipo.categoria].push(tipo);
     });
