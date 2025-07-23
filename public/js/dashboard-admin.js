@@ -391,7 +391,7 @@ async function handleEstadoChange(estadoId, atencionId) {
   toggleVisibility("modalidadGroup", isListo);
   toggleVisibility("requiereDespachoGroup", isListo);
   toggleVisibility("adjuntoGroup", isListo);
-    if (isListo) await loadActividadesPorTipoAtencion(atencionId);
+  if (isListo) await loadActividadesPorTipoAtencion(atencionId);
   toggleVisibility("detalleDespachoGroup", false);
 }
 
