@@ -11,6 +11,7 @@ let statusMap = {};
 let iconMap = {};
 let currentPage = 1;
 const rowsPerPage = 10;
+let selectedTicket = null;
 
 // Elementos del DOM
 const ticketsTableBody = document.getElementById("ticketsTableBody");
@@ -135,7 +136,7 @@ function setupEventListeners() {
     .getElementById("editTicketStatus")
     .addEventListener("change", (e) => {
       const selectedEstadoId = parseInt(e.target.value);
-      handleEstadoChange(selectedEstadoId);
+      handleEstadoChange(selectedEstadoId, selectedTicket?.tipo_atencion_id);
     });
   // Validación del formulario
   document
@@ -369,24 +370,28 @@ function renderPagination(totalPages) {
 function openAdvanceModal(id) {
   const ticket = tickets.find((t) => t.id === id);
   if (!ticket) return;
+  selectedTicket = ticket;
   const estadoActual = estadoMap[ticket.status_id]?.toLowerCase() || "";
   document.getElementById("editTicketId").value = ticket.id;
   document.getElementById("editTicketDescription").value = "";
   populateStatusFilterUpdate(estadosAll, estadoActual);
-  handleEstadoChange(document.getElementById("editTicketStatus").value);
+  handleEstadoChange(
+    document.getElementById("editTicketStatus").value,
+    selectedTicket.tipo_atencion_id
+  );
   const modal = new bootstrap.Modal(document.getElementById("editTicketModal"));
   modal.show();
   validateAdvanceForm();
 }
 
-function handleEstadoChange(estadoId) {
+async function handleEstadoChange(estadoId, atencionId) {
   const estadoNombre = estadoMap[estadoId] || "";
   const isListo = estadoNombre === "listo";
   toggleVisibility("actividadGroup", isListo);
   toggleVisibility("modalidadGroup", isListo);
   toggleVisibility("requiereDespachoGroup", isListo);
   toggleVisibility("adjuntoGroup", isListo);
-  if (isListo) loadActivities();
+    if (isListo) await loadActividadesPorTipoAtencion(atencionId);
   toggleVisibility("detalleDespachoGroup", false);
 }
 
@@ -1601,6 +1606,7 @@ getUserIdWhenReady((userId) => {
           id_actividad: t.id_actividad || null,
           aprobacion_solucion: t.aprobacion_solucion,
           solucion_observacion: t.solucion_observacion,
+          tipo_atencion_id: t.tipo_atencion_id,
         };
       });
       renderTickets(tickets);
@@ -1647,6 +1653,7 @@ async function loadTickets(userId) {
       id_actividad: t.id_actividad || null,
       aprobacion_solucion: t.aprobacion_solucion,
       solucion_observacion: t.solucion_observacion,
+      tipo_atencion_id: t.tipo_atencion_id,
     }));
     renderTickets(tickets);
     updateStats();
@@ -1696,18 +1703,28 @@ function capitalize(texto) {
     .join(" ");
 }
 
-async function loadActivities() {
+async function loadActividadesPorTipoAtencion(idTipoAtencion) {
+  const actividadSelect = document.getElementById("actividadSelect");
+  actividadSelect.innerHTML =
+    '<option value="">Cargando actividades...</option>';
+
   try {
-    const res = await fetch("https://tickets.dev-wit.com/api/actividades", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-    actividades = await res.json();
-    const actividadSelect = document.getElementById("actividadSelect");
+    const res = await fetch(
+      `https://tickets.dev-wit.com/api/actividades/tipo/${idTipoAtencion}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!res.ok) throw new Error("No se pudieron cargar actividades");
+
+    const actividades = await res.json();
     actividadSelect.innerHTML =
       '<option value="">Seleccione una actividad</option>';
+
     actividades.forEach((actividad) => {
       const option = document.createElement("option");
       option.value = actividad.id;
@@ -1716,20 +1733,17 @@ async function loadActivities() {
     });
   } catch (err) {
     console.error("Error al cargar actividades:", err);
+    actividadSelect.innerHTML = '<option value="">Error al cargar</option>';
   }
 }
 
 function initTicketLoading() {
   getUserIdWhenReady((userId) => {
     renderTickets(null);
-    loadActivities()
-      .then(() => {
-        return loadTickets(userId);
-      })
-      .catch((error) => {
-        console.error("Error en inicialización:", error);
-        renderTickets([]);
-      });
+    loadTickets(userId).catch((error) => {
+      console.error("Error en inicialización:", error);
+      renderTickets([]);
+    });
   });
 }
 
