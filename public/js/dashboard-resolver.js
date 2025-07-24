@@ -39,12 +39,15 @@ document.addEventListener("DOMContentLoaded", () => {
   setupEventListeners();
   // Traer estados de tickets
   loadStatus();
+
   const tooltipTriggerList = [].slice.call(
     document.querySelectorAll("[title]")
   );
-  tooltipTriggerList.map(
-    (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
-  );
+  tooltipTriggerList.forEach((tooltipTriggerEl) => {
+    if (!tooltipTriggerEl.classList.contains("dropdown-toggle")) {
+      bootstrap.Tooltip.getOrCreateInstance(tooltipTriggerEl);
+    }
+  });
 
   // Iniciar carga de tickets
   initTicketLoading();
@@ -186,6 +189,9 @@ function setupEventListeners() {
     .addEventListener("change", validateForm);
   document
     .getElementById("ticketCategory")
+    .addEventListener("change", validateForm);
+  document
+    .getElementById("ticketDireccion")
     .addEventListener("change", validateForm);
 
   document
@@ -491,6 +497,10 @@ async function createTicket() {
     document.getElementById("ticketAssignee").value,
     10
   );
+  const direccionId = parseInt(
+    document.getElementById("ticketDireccion").value,
+    10
+  );
   const tipoAtencion = parseInt(
     document.getElementById("ticketCategory").value,
     10
@@ -498,7 +508,7 @@ async function createTicket() {
   const description = document.getElementById("ticketDescription").value.trim();
   const attachmentInput = document.getElementById("ticketAttachment");
 
-  if (!description || !tipoAtencion || !areaSolicitante) {
+  if (!description || !tipoAtencion || !areaSolicitante || !direccionId) {
     showAlert("Por favor, completa todos los campos obligatorios.", "warning");
     btnSpinner.classList.add("d-none");
     btnIcon.classList.remove("d-none");
@@ -525,6 +535,7 @@ async function createTicket() {
   const formData = new FormData();
   formData.append("solicitante_id", solicitante.id);
   formData.append("area_id", tipoAtencion);
+  formData.append("direcciones_id", direccionId);
   formData.append("tipo_atencion_id", areaSolicitante);
   formData.append("observaciones", description);
 
@@ -1223,8 +1234,8 @@ function validateForm() {
   const description = document.getElementById("ticketDescription").value.trim();
   const tipoAtencion = document.getElementById("ticketAssignee").value;
   const areaSolicitante = document.getElementById("ticketCategory").value;
-
-  const isValid = description && tipoAtencion && areaSolicitante;
+  const direccionId = document.getElementById("ticketDireccion").value;
+  const isValid = description && tipoAtencion && areaSolicitante && direccionId;
   saveTicketBtn.disabled = !isValid;
 }
 
@@ -1331,6 +1342,35 @@ fetch("https://tickets.dev-wit.com/api/areas", {
   })
   .catch((error) => {
     console.error("Error cargando áreas:", error);
+  });
+
+const direccionSelect = document.getElementById("ticketDireccion");
+
+fetch("https://tickets.dev-wit.com/api/direcciones", {
+  method: "GET",
+  headers: {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
+  },
+})
+  .then((response) => {
+    if (!response.ok) {
+      throw new Error("Error al obtener direcciones");
+    }
+    return response.json();
+  })
+  .then((data) => {
+    direccionSelect.innerHTML = '<option value="">Sin asignar</option>';
+    data.forEach((direccion) => {
+      const option = document.createElement("option");
+      option.value = direccion.id;
+      option.textContent = `${direccion.ubicacion}`;
+      direccionSelect.appendChild(option);
+    });
+    $(".selectpicker").selectpicker("refresh");
+  })
+  .catch((error) => {
+    console.error("Error cargando direcciones:", error);
   });
 
 const tipoSelect = document.getElementById("ticketAssignee");

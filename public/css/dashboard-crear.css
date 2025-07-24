@@ -1056,3 +1056,57 @@ body {
 #loadingSpinner {
   transition: opacity 0.3s ease;
 }
+
+.bootstrap-select .dropdown-toggle {
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.90rem;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  background-color: white;
+  height: auto;
+  line-height: 1.2;
+}
+
+.bootstrap-select .dropdown-toggle:focus,
+.bootstrap-select.show .dropdown-toggle {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+  outline: none;
+}
+
+.bootstrap-select .dropdown-menu {
+  max-height: 250px;
+  overflow-y: auto;
+  font-size: 0.9rem;
+  padding: 0;
+}
+
+.bootstrap-select .dropdown-menu li a {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.bootstrap-select .dropdown-menu.inner {
+  font-size: 0.85rem;
+  padding: 0;
+}
+
+.bootstrap-select .bs-searchbox input.form-control {
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.bootstrap-select .bs-searchbox input.form-control:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+.bootstrap-select .dropdown-toggle .filter-option-inner-inner {
+  color: var(--bs-body-color);
+}
