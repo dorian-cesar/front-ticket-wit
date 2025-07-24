@@ -988,6 +988,7 @@ function viewTicket(id) {
     <p><strong>Solicitado por:</strong> <i class="bi bi-person-circle me-2"></i>${
       ticket.solicitante || "Sin asignar"
     }</p>
+    <p><strong>Dirección:</strong> ${ticket.direccion_ubicacion || "–"}</p>
     <p><strong>Tipo de Atención:</strong> ${
       ticket.category || ticket.tipo_atencion
     }</p>
@@ -1412,6 +1413,9 @@ getUserIdWhenReady((userId) => {
           id_actividad: t.id_actividad || null,
           aprobacion_solucion: t.aprobacion_solucion,
           solucion_observacion: t.solucion_observacion,
+          direcciones_id: t.direcciones_id,
+          direccion_nombre: t.direccion_nombre,
+          direccion_ubicacion: t.direccion_ubicacion,
         };
       });
       renderTickets(tickets);
@@ -1457,6 +1461,9 @@ async function loadTickets(userId) {
       id_actividad: t.id_actividad || null,
       aprobacion_solucion: t.aprobacion_solucion,
       solucion_observacion: t.solucion_observacion,
+      direcciones_id: t.direcciones_id,
+      direccion_nombre: t.direccion_nombre,
+      direccion_ubicacion: t.direccion_ubicacion,
     }));
     renderTickets(tickets);
     updateStats();

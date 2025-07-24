@@ -42,6 +42,10 @@ body {
   padding: 0;
 }
 
+p {
+  margin-bottom: 10px;
+}
+
 /* Navbar personalizada */
 .navbar-dark {
   background-color: var(--primary-color) !important;
