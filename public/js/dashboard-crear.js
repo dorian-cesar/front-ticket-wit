@@ -1277,7 +1277,7 @@ getUserIdWhenReady((userId) => {
   })
     .then((res) => res.json())
     .then((data) => {
-      console.log("tickets", data);
+      // console.log("tickets", data);
       tickets = data.map((t) => ({
         id: t.id,
         title: t.area,
