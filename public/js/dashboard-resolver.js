@@ -1707,6 +1707,7 @@ async function loadActividadesPorTipoAtencion(idTipoAtencion, tipoAtencion) {
     );
     if (!res.ok) throw new Error("No se pudieron cargar actividades");
     const actividades = await res.json();
+    console.log("actividades:", actividades);
     actividadSelect.innerHTML =
       '<option value="">Seleccione una actividad</option>';
     const optgroup = document.createElement("optgroup");
@@ -1725,13 +1726,32 @@ async function loadActividadesPorTipoAtencion(idTipoAtencion, tipoAtencion) {
   }
 }
 
+async function loadActivities() {
+  try {
+    const res = await fetch("https://tickets.dev-wit.com/api/actividades", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    actividades = await res.json();
+    // console.log("actividades", actividades)
+  } catch (err) {
+    console.error("Error al cargar actividades:", err);
+  }
+}
+
 function initTicketLoading() {
   getUserIdWhenReady((userId) => {
     renderTickets(null);
-    loadTickets(userId).catch((error) => {
-      console.error("Error en inicialización:", error);
-      renderTickets([]);
-    });
+    loadActivities()
+      .then(() => {
+        return loadTickets(userId);
+      })
+      .catch((error) => {
+        console.error("Error en inicialización:", error);
+        renderTickets([]);
+      });
   });
 }
 
