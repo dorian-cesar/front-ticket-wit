@@ -232,7 +232,7 @@ function renderTickets(ticketsToRender = tickets) {
             : '<span class="text-muted">Sin asignar</span>'
         }
       </td>
-      <td data-label="Fecha"><small>${formatDate(ticket.date)}</small></td>
+      <td data-label="Fecha y Hora"><small>${formatDateTime(ticket.date)}</small></td>
       <td data-label="Acciones">
         <div class="btn-group" role="group">
          ${editButton}
@@ -930,17 +930,16 @@ function capitalize(texto) {
     .join(" ");
 }
 
-function formatDate(dateString) {
+function formatDateTime(dateString) {
   return luxon.DateTime.fromISO(dateString, { zone: "America/Santiago" })
     .setLocale("es")
-    .toFormat("d LLL yyyy");
+    .toFormat("d LLL yyyy - HH:mm");
 }
 
 // Ver detalles del ticket
 function viewTicket(id) {
   const ticket = tickets.find((t) => t.id === id);
   if (!ticket) return showAlert("Ticket no encontrado", "warning");
-
   const historialHtml = formatHistorial(ticket.historial, ticket);
 
   const historialSection = historialHtml.includes("Sin historial disponible")
@@ -965,7 +964,7 @@ function viewTicket(id) {
   <p><strong>Tipo de Atención:</strong> ${
     ticket.category || ticket.tipo_atencion
   }</p>
-  <p><strong>Fecha:</strong> ${formatDate(
+  <p><strong>Fecha y Hora:</strong> ${formatDateTime(
     ticket.date || ticket.fecha_creacion
   )}</p>
   <p><strong>Descripción:</strong> ${
@@ -1294,9 +1293,7 @@ getUserIdWhenReady((userId) => {
         assignee: t.ejecutor,
         category: t.tipo_atencion,
         description: t.observaciones,
-        date: luxon.DateTime.fromISO(t.fecha_creacion)
-          .setZone("America/Santiago")
-          .toFormat("yyyy-MM-dd"),
+        date: t.fecha_creacion,
         historial: t.historial || [],
         archivo_pdf: t.archivo_pdf,
         detalle_solucion: t.detalle_solucion || "",
@@ -1345,9 +1342,7 @@ async function loadTickets(userId) {
         assignee: t.ejecutor,
         category: t.tipo_atencion,
         description: t.observaciones,
-        date: luxon.DateTime.fromISO(t.fecha_creacion)
-          .setZone("America/Santiago")
-          .toFormat("yyyy-MM-dd"),
+        date: t.fecha_creacion,
         historial: t.historial || [],
         archivo_pdf: t.archivo_pdf,
         detalle_solucion: t.detalle_solucion || "",
