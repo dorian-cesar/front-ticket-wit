@@ -232,7 +232,9 @@ function renderTickets(ticketsToRender = tickets) {
             : '<span class="text-muted">Sin asignar</span>'
         }
       </td>
-      <td data-label="Fecha y Hora"><small>${formatDateTime(ticket.date)}</small></td>
+      <td data-label="Fecha y Hora"><small>${formatDateTime(
+        ticket.date
+      )}</small></td>
       <td data-label="Acciones">
         <div class="btn-group" role="group">
          ${editButton}
@@ -337,25 +339,39 @@ function onFilterChange() {
 function applyFilters() {
   const statusValue = statusFilter.value;
   const tipoAtencionValue = tipoAtencionFilter.value;
-  const searchValue = searchInput.value.toLowerCase();
+  const searchValue = removeDiacritics(searchInput.value.toLowerCase().trim());
   const idSearchValue = document.getElementById("idSearchInput").value.trim();
 
   const filteredTickets = tickets.filter((ticket) => {
     const matchesStatus = !statusValue || ticket.status_id == statusValue;
     const matchesTipoAtencion =
       !tipoAtencionValue || ticket.category === tipoAtencionValue;
-    const matchesSearch =
-      !searchValue ||
-      ticket.title.toLowerCase().includes(searchValue) ||
-      ticket.description.toLowerCase().includes(searchValue) ||
-      ticket.assignee.toLowerCase().includes(searchValue);
     const matchesId =
       !idSearchValue || String(ticket.id).includes(idSearchValue);
-
-    return matchesStatus && matchesTipoAtencion && matchesSearch && matchesId;
+    const title = removeDiacritics(ticket.title?.toLowerCase() || "");
+    const category = removeDiacritics(ticket.category?.toLowerCase() || "");
+    const assignee = removeDiacritics(ticket.assignee?.toLowerCase() || "");
+    const ticketDateTimeFormatted = luxon.DateTime.fromISO(ticket.date, {
+      zone: "America/Santiago",
+    })
+      .setLocale("es")
+      .toFormat("d LLL yyyy - HH:mm")
+      .toLowerCase();
+    const dateFormatted = removeDiacritics(ticketDateTimeFormatted);
+    const matchesSearch =
+      !searchValue ||
+      title.includes(searchValue) ||
+      category.includes(searchValue) ||
+      assignee.includes(searchValue) ||
+      dateFormatted.includes(searchValue);
+    return matchesStatus && matchesTipoAtencion && matchesId && matchesSearch;
   });
-
   renderTickets(filteredTickets);
+}
+
+// Función auxiliar para eliminar tildes/acentos
+function removeDiacritics(str) {
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
 // Crear nuevo ticket
