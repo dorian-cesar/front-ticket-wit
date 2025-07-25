@@ -10,6 +10,7 @@ let statusMap = {};
 let iconMap = {};
 let currentPage = 1;
 const rowsPerPage = 10;
+let selectedTicketPDF = null;
 
 // Elementos del DOM
 const ticketsTableBody = document.getElementById("ticketsTableBody");
@@ -608,7 +609,7 @@ function openEditNewTicketModal(ticket) {
 // Card para ticket cerrado
 function formatFinalCard(ticket) {
   if (ticket.status_id !== 6) return "";
-
+  selectedTicketPDF = ticket;
   const fechaFinal = luxon.DateTime.fromISO(
     ticket.historial?.at(-1)?.fecha || ticket.fecha_creacion,
     { zone: "America/Santiago" }
@@ -1488,7 +1489,6 @@ async function generarCertificadoPDF(ticketId) {
 
           #pdf-wrapper {
             width: 100%;
-            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: flex-start;
@@ -1637,6 +1637,9 @@ async function generarCertificadoPDF(ticketId) {
             <div class="card no-break">
               <h4>${t.tipo_atencion}</h4>
               <p><strong>Área:</strong> ${t.area}</p>
+              <p><strong>Dirección:</strong> ${
+                selectedTicketPDF.direccion_ubicacion || "–"
+              }</p>
               <p><strong>Fecha de creación:</strong> ${new Date(
                 t.fecha_creacion
               ).toLocaleString()}</p>
@@ -1728,8 +1731,21 @@ async function generarCertificadoPDF(ticketId) {
           function descargarPDF() {
             const element = document.getElementById('plantilla-pdf');
 
+            const clone = element.cloneNode(true);
+            clone.style.position = 'absolute';
+            clone.style.visibility = 'hidden';
+            clone.style.height = 'auto';
+            clone.style.width = '210mm';
+            document.body.appendChild(clone);
+
+            const heightPx = clone.offsetHeight;
+            document.body.removeChild(clone);
+
+            const pxPerMm = 96 / 25.4; // 1 mm ≈ 3.78 px (a 96dpi)
+            const heightMm = heightPx / pxPerMm;
+
             html2pdf().set({
-              margin: [1, 0, 20, 0], // [top, left, bottom, right] en mm
+              margin: 0,
               filename: 'ticket_${t.id}.pdf',
               html2canvas: {
                 scale: 2,
@@ -1738,13 +1754,8 @@ async function generarCertificadoPDF(ticketId) {
               },
               jsPDF: {
                 unit: 'mm',
-                format: 'a4',
+                format: [210, heightMm], // ← usa altura real
                 orientation: 'portrait'
-              },
-              pagebreak: {
-                mode: 'css', // Usa el modo CSS para saltos de página
-                avoid: ['.no-break', '.header', '.card', '.firma-footer'],
-                before: '.page-break' // Elemento que fuerza el salto de página
               }
             }).from(element).save();
           }
