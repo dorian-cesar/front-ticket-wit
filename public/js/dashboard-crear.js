@@ -610,6 +610,7 @@ function openEditNewTicketModal(ticket) {
 function formatFinalCard(ticket) {
   if (ticket.status_id !== 6) return "";
   selectedTicketPDF = ticket;
+  // console.log("ticket final card", ticket);
   const fechaFinal = luxon.DateTime.fromISO(
     ticket.historial?.at(-1)?.fecha || ticket.fecha_creacion,
     { zone: "America/Santiago" }
@@ -711,6 +712,13 @@ function formatFinalCard(ticket) {
       ${accionesHtml}
       ${botonCertificado}
       ${mensajeFinal}
+      ${
+        ticket.solucion_observacion === "aprobado por sistema"
+          ? `<div class="mt-2 small fst-italic" style="color: var(--dark-gray);">
+              Aprobado automáticamente por el sistema.
+            </div>`
+          : ""
+      }
     </div>
   `;
 }

@@ -1061,6 +1061,13 @@ function formatFinalCard(ticket) {
       ${accionesHtml}
       ${botonCertificado}
       ${mensajeFinal}
+      ${
+        ticket.solucion_observacion === "aprobado por sistema"
+          ? `<div class="mt-2 small fst-italic" style="color: var(--dark-gray);">
+              Aprobado automáticamente por el sistema.
+            </div>`
+          : ""
+      }
     </div>
   `;
 }
