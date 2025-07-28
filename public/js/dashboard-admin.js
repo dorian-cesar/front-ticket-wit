@@ -205,6 +205,9 @@ function setupEventListeners() {
   document
     .getElementById("editNewTicketCategory")
     .addEventListener("change", validateEditNewForm);
+  document
+    .getElementById("editNewTicketDireccion")
+    .addEventListener("change", validateEditNewForm);
 
   // Editar el nuevo ticket en estado pendiente pa
   document
@@ -646,6 +649,10 @@ async function updateEditTicket() {
     document.getElementById("editNewTicketAssignee").value,
     10
   );
+  const direccionId = parseInt(
+    document.getElementById("editNewTicketDireccion").value,
+    10
+  );
   const tipoAtencion = parseInt(
     document.getElementById("editNewTicketCategory").value,
     10
@@ -664,6 +671,7 @@ async function updateEditTicket() {
     solicitante_id: userId,
     area_id: tipoAtencion,
     tipo_atencion_id: areaSolicitante,
+    direcciones_id: direccionId,
     observaciones: description,
   };
 
@@ -727,14 +735,34 @@ function handleOpenEditNewTicketModal(id) {
 }
 
 function openEditNewTicketModal(ticket) {
-  // document.getElementById("editNewTicketCategory").value = ticket.title;
-  // document.getElementById("editNewTicketAssignee").value =
-  //   ticket.category;
   document.getElementById("editNewTicketDescription").value =
     ticket.description || "";
-
   window.ticketIdEnEdicion = ticket.id;
-
+  const direccionSelectEditNewTicket = document.getElementById(
+    "editNewTicketDireccion"
+  );
+  fetch("https://tickets.dev-wit.com/api/direcciones", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      direccionSelectEditNewTicket.innerHTML =
+        '<option value="">Sin asignar</option>';
+      data.forEach((direccion) => {
+        const option = document.createElement("option");
+        option.value = direccion.id;
+        option.textContent = `${direccion.ubicacion}`;
+        direccionSelectEditNewTicket.appendChild(option);
+      });
+      $(direccionSelectEditNewTicket).selectpicker("refresh");
+      $(direccionSelectEditNewTicket).selectpicker(
+        "val",
+        ticket.direccion_id || ""
+      );
+    });
   const modal = new bootstrap.Modal(
     document.getElementById("editNewTicketModal")
   );
@@ -1320,8 +1348,9 @@ function validateEditNewForm() {
   const areaSolicitante = document.getElementById(
     "editNewTicketCategory"
   ).value;
+  const direccion = document.getElementById("editNewTicketDireccion").value;
 
-  const isValid = description && tipoAtencion && areaSolicitante;
+  const isValid = description && tipoAtencion && areaSolicitante && direccion;
   saveEditButton.disabled = !isValid;
 }
 
